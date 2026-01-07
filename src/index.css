@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+/* Earth-tone theme colors */
+:root {
+  /* Primary earth tones */
+  --color-sand: #E8DCC4;
+  --color-terracotta: #C17F59;
+  --color-clay: #A0522D;
+  --color-earth: #8B4513;
+  --color-amber: #D4A574;
+
+  /* Text colors */
+  --color-text-primary: #3D2914;
+  --color-text-secondary: #6B5344;
+
+  /* Supporting colors */
+  --color-success: #6B8E23;
+  --color-error: #CD5C5C;
+  --color-info: #7B9EA8;
+
+  /* Background */
+  --color-bg: #F5EFE6;
+  --color-bg-card: #FFFFFF;
+}
+
+/* Tailwind v4 theme extension */
+@theme {
+  --color-sand: #E8DCC4;
+  --color-terracotta: #C17F59;
+  --color-clay: #A0522D;
+  --color-earth: #8B4513;
+  --color-amber: #D4A574;
+  --color-text-primary: #3D2914;
+  --color-text-secondary: #6B5344;
+  --color-success: #6B8E23;
+  --color-error: #CD5C5C;
+  --color-info: #7B9EA8;
+  --color-bg: #F5EFE6;
+  --color-bg-card: #FFFFFF;
+}
+
+/* Base styles */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  min-height: 100dvh;
+}
+
+/* RTL support */
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* Mobile-first typography */
+html {
+  font-size: 16px;
+}
+
+/* PWA safe area padding */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}

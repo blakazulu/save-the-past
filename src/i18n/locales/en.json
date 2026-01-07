@@ -1,0 +1,52 @@
+{
+  "app": {
+    "name": "Save The Past",
+    "tagline": "Digital Archaeology Reconstruction"
+  },
+  "nav": {
+    "home": "Home",
+    "capture": "Capture",
+    "gallery": "Gallery",
+    "settings": "Settings"
+  },
+  "home": {
+    "title": "Save The Past",
+    "subtitle": "Transform archaeological artifacts into 3D models",
+    "description": "Capture photos of artifacts from multiple angles and use AI to generate 3D reconstructions and detailed information cards.",
+    "cta": "Start Capturing"
+  },
+  "capture": {
+    "title": "Capture Artifact",
+    "camera": "Use Camera",
+    "upload": "Upload Photos",
+    "instructions": "Take photos from multiple angles for best results"
+  },
+  "gallery": {
+    "title": "Gallery",
+    "empty": "No artifacts yet",
+    "emptyDescription": "Start by capturing your first artifact"
+  },
+  "artifact": {
+    "title": "Artifact Details",
+    "tabs": {
+      "model": "3D Model",
+      "photos": "Photos",
+      "info": "Info Card"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "english": "English",
+    "hebrew": "Hebrew"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  }
+}
