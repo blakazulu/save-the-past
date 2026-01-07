@@ -52,7 +52,8 @@ async function reconstructWithTrellis(
   imageBlob: Blob,
   removeBackground: boolean
 ): Promise<{ modelBlob: Blob; method: 'trellis' }> {
-  const client = await Client.connect(TRELLIS_SPACE);
+  const hfToken = process.env.HF_TOKEN;
+  const client = await Client.connect(TRELLIS_SPACE, hfToken ? { hf_token: hfToken } : undefined);
 
   // TRELLIS expects: image, seed, randomize_seed, ss_guidance_strength, ss_sampling_steps, slat_guidance_strength, slat_sampling_steps, mesh_simplify, texture_size
   const result = await client.predict('/image_to_3d', {
@@ -108,7 +109,8 @@ async function reconstructWithTripoSR(
   imageBlob: Blob,
   removeBackground: boolean
 ): Promise<{ modelBlob: Blob; method: 'triposr' }> {
-  const client = await Client.connect(TRIPOSR_SPACE);
+  const hfToken = process.env.HF_TOKEN;
+  const client = await Client.connect(TRIPOSR_SPACE, hfToken ? { hf_token: hfToken } : undefined);
 
   // TripoSR expects: image, do_remove_background, foreground_ratio, mc_resolution
   const result = await client.predict('/run', {
