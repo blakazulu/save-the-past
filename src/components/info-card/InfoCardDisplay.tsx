@@ -61,9 +61,8 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
           <div className="flex items-center gap-2">
             <p className="text-earth">{infoCard.estimatedAge.range}</p>
             <span
-              className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                confidenceColor[infoCard.estimatedAge.confidence]
-              }`}
+              className={`px-2 py-0.5 rounded-full text-md font-medium ${confidenceColor[infoCard.estimatedAge.confidence]
+                }`}
             >
               {t(`infoCard.confidence.${infoCard.estimatedAge.confidence}`)}
             </span>
@@ -126,11 +125,11 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
             <p className="text-sm text-info font-medium mb-1">
               {t('infoCard.aiDisclaimer')}
             </p>
-            <p className="text-xs text-text-secondary">
+            <p className="text-md text-text-secondary">
               {infoCard.disclaimer}
             </p>
             {infoCard.isHumanEdited && (
-              <p className="text-xs text-success mt-1">
+              <p className="text-md text-success mt-1">
                 ✓ {t('infoCard.humanEdited')}
               </p>
             )}

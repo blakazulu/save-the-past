@@ -71,7 +71,7 @@ export function InstallPrompt() {
             <h3 className="font-display font-semibold text-earth text-sm">
               {t('pwa.installTitle', 'Install Save The Past')}
             </h3>
-            <p className="text-xs text-text-secondary mt-0.5 font-manuscript italic">
+            <p className="text-md text-text-secondary mt-0.5 font-manuscript italic">
               {t('pwa.installDescription', 'Add to home screen for the best experience')}
             </p>
           </div>

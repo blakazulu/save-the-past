@@ -53,7 +53,7 @@ export function GalleryEmpty({ variant, searchQuery, onClearSearch }: GalleryEmp
       </h2>
 
       <div className="divider-ornate my-4 max-w-[200px]">
-        <span className="text-xs">✦</span>
+        <span className="text-md">✦</span>
       </div>
 
       <p className="text-text-secondary font-manuscript italic mb-8 max-w-xs">

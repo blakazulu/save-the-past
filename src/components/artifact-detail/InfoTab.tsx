@@ -198,7 +198,7 @@ export function InfoTab({ artifact }: InfoTabProps) {
                 {artifact.metadata.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-2 py-0.5 bg-sand text-earth text-xs rounded-full"
+                    className="px-2 py-0.5 bg-sand text-earth text-md rounded-full"
                   >
                     {tag}
                   </span>

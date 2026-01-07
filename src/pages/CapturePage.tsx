@@ -201,7 +201,7 @@ export default function CapturePage() {
 
           {/* Decorative footer */}
           <div className="mt-10 text-center animate-fade-in stagger-3">
-            <p className="text-xs text-text-muted font-manuscript">
+            <p className="text-md text-text-muted font-manuscript">
               {t('capture.hint', 'Multiple angles help create better 3D reconstructions')}
             </p>
           </div>

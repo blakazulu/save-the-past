@@ -89,7 +89,7 @@ export default function SettingsPage() {
               <img src="/logo-64.png" alt="" className="w-12 h-12 mx-auto opacity-60" />
             </div>
             <p className="font-display text-sm text-earth">{t('app.name')}</p>
-            <p className="text-xs text-text-muted mt-1">v1.0.0</p>
+            <p className="text-md text-text-muted mt-1">v1.0.0</p>
             <p className="font-manuscript text-sm text-text-secondary italic mt-2">
               {t('app.tagline')}
             </p>
@@ -97,7 +97,7 @@ export default function SettingsPage() {
             {/* Decorative footer */}
             <div className="mt-6 flex items-center justify-center gap-2 text-text-muted">
               <span className="w-12 h-px bg-gradient-to-r from-transparent to-sepia/30" />
-              <span className="text-xs opacity-50">✦</span>
+              <span className="text-md opacity-50">✦</span>
               <span className="w-12 h-px bg-gradient-to-l from-transparent to-sepia/30" />
             </div>
           </div>
@@ -130,11 +130,10 @@ function LanguageOption({ label, value, selected, onChange }: LanguageOptionProp
   return (
     <button
       onClick={() => onChange(value)}
-      className={`w-full p-3 rounded-lg flex items-center justify-between transition-all duration-200 ${
-        selected
+      className={`w-full p-3 rounded-lg flex items-center justify-between transition-all duration-200 ${selected
           ? 'bg-terracotta/10 text-earth border border-terracotta/30'
           : 'hover:bg-sand/50 text-text-secondary border border-transparent'
-      }`}
+        }`}
     >
       <span className={`font-medium ${selected ? 'font-semibold' : ''}`}>{label}</span>
       {selected && (
@@ -160,11 +159,10 @@ function DataButton({ icon, label, onClick, disabled, count, danger }: DataButto
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`w-full p-3 rounded-lg flex items-center gap-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-        danger
+      className={`w-full p-3 rounded-lg flex items-center gap-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${danger
           ? 'text-error hover:bg-error/10'
           : 'text-text-primary hover:bg-sand/50'
-      }`}
+        }`}
     >
       <span className={danger ? '' : 'text-terracotta'}>{icon}</span>
       <span className="font-medium flex-1 text-left">{label}</span>

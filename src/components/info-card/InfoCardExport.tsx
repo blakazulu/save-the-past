@@ -155,11 +155,10 @@ ${infoCard.isHumanEdited ? '✓ Human verified' : ''}
               <button
                 key={format.id}
                 onClick={() => setSelectedFormat(format.id)}
-                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                  selectedFormat === format.id
+                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${selectedFormat === format.id
                     ? 'bg-terracotta text-white'
                     : 'bg-sand text-earth hover:bg-clay hover:text-white'
-                }`}
+                  }`}
               >
                 {format.label}
               </button>
@@ -172,7 +171,7 @@ ${infoCard.isHumanEdited ? '✓ Human verified' : ''}
           <p className="text-sm text-text-secondary mb-2">
             {t('infoCard.preview')}
           </p>
-          <pre className="bg-sand p-3 rounded-lg text-xs text-text-primary overflow-x-auto max-h-40 overflow-y-auto">
+          <pre className="bg-sand p-3 rounded-lg text-md text-text-primary overflow-x-auto max-h-40 overflow-y-auto">
             {generateExport(selectedFormat).slice(0, 500)}
             {generateExport(selectedFormat).length > 500 && '...'}
           </pre>

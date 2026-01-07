@@ -115,7 +115,7 @@ export function ModelViewer({ modelUrl, onDownload, className = '' }: ModelViewe
       </div>
 
       {/* Touch hint */}
-      <div className="absolute bottom-4 left-4 text-xs text-text-secondary bg-black/40 text-white px-2 py-1 rounded">
+      <div className="absolute bottom-4 left-4 text-md text-text-secondary bg-black/40 text-white px-2 py-1 rounded">
         {t('viewer.hint')}
       </div>
     </div>

@@ -37,30 +37,27 @@ export function MethodSelector({
               key={method.id}
               onClick={() => !isDisabled && onMethodChange(method.id)}
               disabled={isDisabled}
-              className={`p-4 rounded-xl border-2 text-left transition-colors ${
-                isSelected
+              className={`p-4 rounded-xl border-2 text-left transition-colors ${isSelected
                   ? 'border-terracotta bg-terracotta/10'
                   : isDisabled
                     ? 'border-sand bg-sand/50 opacity-50 cursor-not-allowed'
                     : 'border-sand hover:border-clay bg-white'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3 mb-2">
                 <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    isSelected
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected
                       ? 'border-terracotta bg-terracotta'
                       : 'border-clay'
-                  }`}
+                    }`}
                 >
                   {isSelected && (
                     <div className="w-2 h-2 rounded-full bg-white" />
                   )}
                 </div>
                 <span
-                  className={`font-semibold ${
-                    isSelected ? 'text-terracotta' : 'text-earth'
-                  }`}
+                  className={`font-semibold ${isSelected ? 'text-terracotta' : 'text-earth'
+                    }`}
                 >
                   {t(`reconstruction.method.${method.id}.title`)}
                 </span>
@@ -69,7 +66,7 @@ export function MethodSelector({
                 {t(`reconstruction.method.${method.id}.description`)}
               </p>
               {method.minImages > 1 && (
-                <p className="text-xs text-text-secondary ml-8 mt-1">
+                <p className="text-md text-text-secondary ml-8 mt-1">
                   {t('reconstruction.minImages', { count: method.minImages })}
                 </p>
               )}

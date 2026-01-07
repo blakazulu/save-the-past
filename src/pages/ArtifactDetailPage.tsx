@@ -132,11 +132,10 @@ function JournalTab({ children, active, onClick, icon, badge }: JournalTabProps)
   return (
     <button
       onClick={onClick}
-      className={`flex-1 py-3.5 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 relative ${
-        active
+      className={`flex-1 py-3.5 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 relative ${active
           ? 'text-terracotta'
           : 'text-text-muted hover:text-earth'
-      }`}
+        }`}
     >
       {/* Active indicator */}
       {active && (
@@ -156,11 +155,10 @@ function JournalTab({ children, active, onClick, icon, badge }: JournalTabProps)
       {/* Badge */}
       {badge !== undefined && (
         <span
-          className={`text-xs px-1.5 py-0.5 rounded ${
-            active
+          className={`text-md px-1.5 py-0.5 rounded ${active
               ? 'bg-terracotta/15 text-terracotta'
               : 'bg-sand text-text-muted'
-          }`}
+            }`}
         >
           {badge}
         </span>

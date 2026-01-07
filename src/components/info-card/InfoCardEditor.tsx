@@ -148,7 +148,7 @@ export function InfoCardEditor({
       <div>
         <label className="block text-sm font-medium text-text-secondary mb-1">
           {t('infoCard.fields.similarArtifacts')}
-          <span className="font-normal text-xs ml-1">
+          <span className="font-normal text-md ml-1">
             ({t('infoCard.onePerLine')})
           </span>
         </label>

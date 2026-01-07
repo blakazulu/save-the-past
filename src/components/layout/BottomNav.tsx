@@ -59,11 +59,10 @@ function NavTab({ to, icon, label, active }: NavTabProps) {
   return (
     <Link
       to={to}
-      className={`relative flex flex-col items-center justify-center gap-1 px-4 py-2 transition-all duration-200 ${
-        active
+      className={`relative flex flex-col items-center justify-center gap-1 px-4 py-2 transition-all duration-200 ${active
           ? 'text-terracotta'
           : 'text-text-muted hover:text-earth'
-      }`}
+        }`}
       aria-label={label}
       aria-current={active ? 'page' : undefined}
     >
@@ -74,9 +73,8 @@ function NavTab({ to, icon, label, active }: NavTabProps) {
 
       {/* Icon container with subtle background when active */}
       <span
-        className={`relative p-1.5 rounded-lg transition-all duration-200 ${
-          active ? 'bg-terracotta/10' : ''
-        }`}
+        className={`relative p-1.5 rounded-lg transition-all duration-200 ${active ? 'bg-terracotta/10' : ''
+          }`}
         aria-hidden="true"
       >
         <span className={`block w-5 h-5 ${active ? 'scale-110' : ''} transition-transform`}>
@@ -85,9 +83,8 @@ function NavTab({ to, icon, label, active }: NavTabProps) {
       </span>
 
       {/* Label */}
-      <span className={`text-xs font-medium tracking-wide ${
-        active ? 'font-semibold' : ''
-      }`}>
+      <span className={`text-md font-medium tracking-wide ${active ? 'font-semibold' : ''
+        }`}>
         {label}
       </span>
     </Link>
