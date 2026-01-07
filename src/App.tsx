@@ -4,7 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { getDirection } from '@/i18n';
 import { queryClient } from '@/lib/query';
-import { InstallPrompt, ErrorBoundary, LoadingSpinner, OfflineIndicator } from '@/components/ui';
+import { InstallPrompt, ErrorBoundary, LoadingSpinner, OfflineIndicator, ScribbleBackground } from '@/components/ui';
 
 // Eager load lightweight pages
 import HomePage from '@/pages/HomePage';
@@ -32,6 +32,7 @@ export default function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
+          <ScribbleBackground />
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<HomePage />} />

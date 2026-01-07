@@ -445,6 +445,74 @@ body {
   }
 }
 
+/* Scribble drawing animation - draws stroke then fades */
+@keyframes scribble-draw {
+  0% {
+    stroke-dashoffset: 1000;
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.2;
+  }
+  70% {
+    stroke-dashoffset: 0;
+    opacity: 0.2;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+/* Scribble background container */
+.scribble-background {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Individual scribble elements */
+.scribble-background .scribble-item {
+  position: absolute;
+  color: var(--color-sepia);
+}
+
+.scribble-background .scribble-item path {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: scribble-draw var(--draw-duration, 5s) ease-out forwards;
+}
+
+/* Handwritten text scribbles */
+.scribble-background .scribble-text {
+  position: absolute;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-style: italic;
+  color: var(--color-sepia);
+  white-space: nowrap;
+  animation: scribble-text-appear var(--draw-duration, 4s) ease-out forwards;
+}
+
+@keyframes scribble-text-appear {
+  0% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  10% {
+    opacity: 0.25;
+  }
+  70% {
+    opacity: 0.25;
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 .animate-fade-in-up {
   animation: fade-in-up 0.4s ease-out forwards;
 }
