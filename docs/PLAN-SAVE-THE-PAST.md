@@ -466,12 +466,12 @@ interface UseGenerateInfoCardReturn {
   - Download button
 
 ### Phase 7: Info Card
-- [ ] Create MetadataForm for artifact details
-- [ ] Build InfoCardGeneration trigger UI
-- [ ] Implement useGenerateInfoCard hook
-- [ ] Create InfoCardDisplay with formatted sections
-- [ ] Build InfoCardEditor for manual edits
-- [ ] Add InfoCardExport (PDF, JSON, Markdown)
+- [x] Create MetadataForm for artifact details
+- [x] Build InfoCardGeneration trigger UI
+- [x] Implement useGenerateInfoCard hook
+- [x] Create InfoCardDisplay with formatted sections
+- [x] Build InfoCardEditor for manual edits
+- [x] Add InfoCardExport (PDF, JSON, Markdown)
 
 ### Phase 8: Backend Functions
 - [ ] Implement reconstruct-3d.ts:

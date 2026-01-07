@@ -135,6 +135,60 @@
     "download": "Download model",
     "hint": "Drag to rotate, pinch to zoom"
   },
+  "infoCard": {
+    "title": "AI Analysis",
+    "description": "Generate an AI analysis of your artifact",
+    "generate": "Generate Info Card",
+    "generating": "Analyzing Artifact",
+    "generatingDescription": "AI is analyzing your artifact...",
+    "ready": "Analysis Complete",
+    "readyDescription": "Your artifact analysis is ready",
+    "regenerate": "Regenerate Analysis",
+    "analysisTitle": "Artifact Analysis",
+    "edit": "Edit",
+    "export": "Export",
+    "aiDisclaimer": "AI-Generated Analysis",
+    "humanEdited": "Verified by human",
+    "confidenceLabel": "Confidence",
+    "confidence": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "fields": {
+      "material": "Material",
+      "estimatedAge": "Estimated Age",
+      "ageReasoning": "Age Reasoning",
+      "possibleUse": "Possible Use",
+      "culturalContext": "Cultural Context",
+      "similarArtifacts": "Similar Artifacts",
+      "preservationNotes": "Preservation Notes"
+    },
+    "onePerLine": "one per line",
+    "metadata": {
+      "name": "Artifact Name",
+      "namePlaceholder": "Enter artifact name",
+      "siteName": "Site Name",
+      "siteNamePlaceholder": "Archaeological site name",
+      "location": "Discovery Location",
+      "locationPlaceholder": "Where was it found?",
+      "layer": "Excavation Layer",
+      "layerPlaceholder": "e.g., Layer III, Stratum B",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional observations...",
+      "tags": "Tags",
+      "tagsPlaceholder": "Add a tag",
+      "addTag": "Add"
+    },
+    "exportTitle": "Export Info Card",
+    "selectFormat": "Select format",
+    "preview": "Preview",
+    "copyToClipboard": "Copy",
+    "downloadFile": "Download",
+    "exportFormats": {
+      "text": "Plain Text"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",

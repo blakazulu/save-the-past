@@ -135,6 +135,60 @@
     "download": "הורד מודל",
     "hint": "גרור לסיבוב, צבוט לזום"
   },
+  "infoCard": {
+    "title": "ניתוח AI",
+    "description": "צור ניתוח AI של הממצא שלך",
+    "generate": "צור כרטיס מידע",
+    "generating": "מנתח ממצא",
+    "generatingDescription": "AI מנתח את הממצא שלך...",
+    "ready": "הניתוח הושלם",
+    "readyDescription": "ניתוח הממצא שלך מוכן",
+    "regenerate": "צור ניתוח מחדש",
+    "analysisTitle": "ניתוח ממצא",
+    "edit": "ערוך",
+    "export": "ייצא",
+    "aiDisclaimer": "ניתוח שנוצר על ידי AI",
+    "humanEdited": "אומת על ידי אדם",
+    "confidenceLabel": "רמת ביטחון",
+    "confidence": {
+      "high": "גבוהה",
+      "medium": "בינונית",
+      "low": "נמוכה"
+    },
+    "fields": {
+      "material": "חומר",
+      "estimatedAge": "גיל משוער",
+      "ageReasoning": "נימוק הגיל",
+      "possibleUse": "שימוש אפשרי",
+      "culturalContext": "הקשר תרבותי",
+      "similarArtifacts": "ממצאים דומים",
+      "preservationNotes": "הערות שימור"
+    },
+    "onePerLine": "אחד בכל שורה",
+    "metadata": {
+      "name": "שם הממצא",
+      "namePlaceholder": "הזן שם ממצא",
+      "siteName": "שם האתר",
+      "siteNamePlaceholder": "שם האתר הארכיאולוגי",
+      "location": "מיקום הגילוי",
+      "locationPlaceholder": "איפה הממצא נמצא?",
+      "layer": "שכבת חפירה",
+      "layerPlaceholder": "לדוגמה: שכבה III, רובד ב",
+      "notes": "הערות",
+      "notesPlaceholder": "תצפיות נוספות...",
+      "tags": "תגיות",
+      "tagsPlaceholder": "הוסף תגית",
+      "addTag": "הוסף"
+    },
+    "exportTitle": "ייצוא כרטיס מידע",
+    "selectFormat": "בחר פורמט",
+    "preview": "תצוגה מקדימה",
+    "copyToClipboard": "העתק",
+    "downloadFile": "הורד",
+    "exportFormats": {
+      "text": "טקסט רגיל"
+    }
+  },
   "common": {
     "loading": "טוען...",
     "error": "אירעה שגיאה",
