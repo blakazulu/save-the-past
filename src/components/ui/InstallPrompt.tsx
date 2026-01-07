@@ -68,7 +68,7 @@ export function InstallPrompt() {
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-display font-semibold text-earth text-sm">
+            <h3 className="font-display font-semibold text-earth text-base">
               {t('pwa.installTitle', 'Install Save The Past')}
             </h3>
             <p className="text-md text-text-secondary mt-0.5 font-manuscript italic">
@@ -92,13 +92,13 @@ export function InstallPrompt() {
         <div className="flex gap-2 mt-4">
           <button
             onClick={handleDismiss}
-            className="flex-1 py-2 text-sm text-text-secondary hover:text-earth transition-colors"
+            className="flex-1 py-2 text-base text-text-secondary hover:text-earth transition-colors"
           >
             {t('pwa.notNow', 'Not now')}
           </button>
           <button
             onClick={handleInstall}
-            className="flex-1 py-2 bg-terracotta text-parchment-light rounded text-sm font-display font-medium hover:bg-clay transition-colors"
+            className="flex-1 py-2 bg-terracotta text-parchment-light rounded text-base font-display font-medium hover:bg-clay transition-colors"
           >
             {t('pwa.install', 'Install')}
           </button>

@@ -101,7 +101,7 @@ export function PhotosTab({ artifact }: PhotosTabProps) {
 
       {/* Photo count */}
       <div className="p-4 bg-white border-t border-sand">
-        <p className="text-sm text-text-secondary text-center">
+        <p className="text-base text-text-secondary text-center">
           {t('gallery.photoCount', { count: images.length })}
         </p>
       </div>
@@ -122,7 +122,7 @@ export function PhotosTab({ artifact }: PhotosTabProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <span className="text-sm">
+            <span className="text-base">
               {t(`capture.angles.${selectedImage.angle}`)}
             </span>
             <button
@@ -149,7 +149,7 @@ export function PhotosTab({ artifact }: PhotosTabProps) {
           </div>
 
           {/* Footer */}
-          <div className="p-4 text-white text-sm text-center">
+          <div className="p-4 text-white text-base text-center">
             {selectedImage.width} × {selectedImage.height}
           </div>
         </div>

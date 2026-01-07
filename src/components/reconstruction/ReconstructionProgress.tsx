@@ -26,7 +26,7 @@ export function ReconstructionProgress({
       </div>
 
       {/* Status info */}
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center justify-between text-base">
         <span className="text-text-secondary">{statusMessage}</span>
         <span className="font-medium text-earth">{Math.round(progress)}%</span>
       </div>

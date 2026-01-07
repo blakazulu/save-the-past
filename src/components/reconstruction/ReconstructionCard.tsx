@@ -47,7 +47,7 @@ export function ReconstructionCard({
             <h3 className="font-semibold text-earth">
               {t('reconstruction.processing')}
             </h3>
-            <p className="text-sm text-text-secondary">
+            <p className="text-base text-text-secondary">
               {t('reconstruction.pleaseWait')}
             </p>
           </div>
@@ -74,7 +74,7 @@ export function ReconstructionCard({
             <h3 className="font-semibold text-earth">
               {t('reconstruction.error')}
             </h3>
-            <p className="text-sm text-error">
+            <p className="text-base text-error">
               {errorMessage || t('reconstruction.errorDescription')}
             </p>
           </div>
@@ -116,7 +116,7 @@ export function ReconstructionCard({
             <h3 className="font-semibold text-earth">
               {t('reconstruction.complete')}
             </h3>
-            <p className="text-sm text-text-secondary">
+            <p className="text-base text-text-secondary">
               {t('reconstruction.completeDescription')}
             </p>
           </div>
@@ -145,7 +145,7 @@ export function ReconstructionCard({
           <h3 className="font-semibold text-earth">
             {t('reconstruction.title')}
           </h3>
-          <p className="text-sm text-text-secondary">
+          <p className="text-base text-text-secondary">
             {t('reconstruction.description')}
           </p>
         </div>

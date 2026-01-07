@@ -61,7 +61,7 @@ export function GalleryFilters({
             </h3>
             <button
               onClick={onClearFilters}
-              className="text-terracotta font-medium hover:text-clay transition-colors text-sm"
+              className="text-terracotta font-medium hover:text-clay transition-colors text-base"
             >
               {t('gallery.clearFilters')}
             </button>
@@ -69,7 +69,7 @@ export function GalleryFilters({
 
           {/* Status filter */}
           <div className="mb-6">
-            <h4 className="text-sm font-display font-medium text-text-secondary mb-3 tracking-wide">
+            <h4 className="text-base font-display font-medium text-text-secondary mb-3 tracking-wide">
               {t('gallery.filterByStatus')}
             </h4>
             <div className="flex flex-wrap gap-2">
@@ -77,7 +77,7 @@ export function GalleryFilters({
                 <button
                   key={status}
                   onClick={() => onStatusFilterChange(status)}
-                  className={`px-3 py-2 rounded text-sm transition-all duration-200 ${
+                  className={`px-3 py-2 rounded text-base transition-all duration-200 ${
                     statusFilter === status
                       ? 'bg-terracotta text-parchment-light shadow-md'
                       : 'parchment-card text-earth hover:bg-sand'
@@ -91,7 +91,7 @@ export function GalleryFilters({
 
           {/* Sort by */}
           <div className="mb-6">
-            <h4 className="text-sm font-display font-medium text-text-secondary mb-3 tracking-wide">
+            <h4 className="text-base font-display font-medium text-text-secondary mb-3 tracking-wide">
               {t('gallery.sortBy')}
             </h4>
             <div className="flex flex-wrap gap-2">
@@ -99,7 +99,7 @@ export function GalleryFilters({
                 <button
                   key={option}
                   onClick={() => onSortByChange(option)}
-                  className={`px-3 py-2 rounded text-sm transition-all duration-200 ${
+                  className={`px-3 py-2 rounded text-base transition-all duration-200 ${
                     sortBy === option
                       ? 'bg-terracotta text-parchment-light shadow-md'
                       : 'parchment-card text-earth hover:bg-sand'
@@ -113,13 +113,13 @@ export function GalleryFilters({
 
           {/* Sort order */}
           <div className="mb-6">
-            <h4 className="text-sm font-display font-medium text-text-secondary mb-3 tracking-wide">
+            <h4 className="text-base font-display font-medium text-text-secondary mb-3 tracking-wide">
               {t('gallery.sortOrder')}
             </h4>
             <div className="flex gap-2">
               <button
                 onClick={() => onSortOrderChange('desc')}
-                className={`flex-1 px-3 py-2 rounded text-sm transition-all duration-200 ${
+                className={`flex-1 px-3 py-2 rounded text-base transition-all duration-200 ${
                   sortOrder === 'desc'
                     ? 'bg-terracotta text-parchment-light shadow-md'
                     : 'parchment-card text-earth hover:bg-sand'
@@ -129,7 +129,7 @@ export function GalleryFilters({
               </button>
               <button
                 onClick={() => onSortOrderChange('asc')}
-                className={`flex-1 px-3 py-2 rounded text-sm transition-all duration-200 ${
+                className={`flex-1 px-3 py-2 rounded text-base transition-all duration-200 ${
                   sortOrder === 'asc'
                     ? 'bg-terracotta text-parchment-light shadow-md'
                     : 'parchment-card text-earth hover:bg-sand'
@@ -143,7 +143,7 @@ export function GalleryFilters({
           {/* Apply button */}
           <button
             onClick={onClose}
-            className="btn-seal w-full text-sm"
+            className="btn-seal w-full text-base"
           >
             {t('gallery.applyFilters')}
           </button>

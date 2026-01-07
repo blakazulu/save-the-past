@@ -88,9 +88,9 @@ export default function SettingsPage() {
             <div className="inline-block mb-4">
               <img src="/logo-64.png" alt="" className="w-12 h-12 mx-auto opacity-60" />
             </div>
-            <p className="font-display text-sm text-earth">{t('app.name')}</p>
+            <p className="font-display text-base text-earth">{t('app.name')}</p>
             <p className="text-md text-text-muted mt-1">v1.0.0</p>
-            <p className="font-manuscript text-sm text-text-secondary italic mt-2">
+            <p className="font-manuscript text-base text-text-secondary italic mt-2">
               {t('app.tagline')}
             </p>
 
@@ -167,7 +167,7 @@ function DataButton({ icon, label, onClick, disabled, count, danger }: DataButto
       <span className={danger ? '' : 'text-terracotta'}>{icon}</span>
       <span className="font-medium flex-1 text-left">{label}</span>
       {count !== undefined && count > 0 && (
-        <span className="text-sm text-text-muted">
+        <span className="text-base text-text-muted">
           {count} {count === 1 ? 'item' : 'items'}
         </span>
       )}

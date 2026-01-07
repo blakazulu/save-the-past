@@ -87,7 +87,7 @@ export function Model3DTab({ artifact }: Model3DTabProps) {
           <ModelViewer modelUrl={modelUrl} />
         </div>
         <div className="p-4 bg-white border-t border-sand">
-          <div className="flex items-center justify-between text-sm text-text-secondary">
+          <div className="flex items-center justify-between text-base text-text-secondary">
             <span>
               {t('reconstruction.complete')} - {model.source === '3d-single' ? 'Single Image' : 'Multi Image'}
             </span>

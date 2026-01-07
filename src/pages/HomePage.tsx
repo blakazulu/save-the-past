@@ -46,7 +46,7 @@ export default function HomePage() {
             </h1>
 
             <div className="divider-ornate animate-fade-in stagger-1">
-              <span className="font-manuscript text-sm">✦</span>
+              <span className="font-manuscript text-base">✦</span>
             </div>
 
             <p className="font-manuscript text-xl text-terracotta italic animate-fade-in-up stagger-2">
@@ -81,7 +81,7 @@ export default function HomePage() {
 
           {/* Decorative footer element */}
           <div className="mt-12 animate-fade-in stagger-5">
-            <div className="flex items-center justify-center gap-2 text-text-muted text-sm font-manuscript">
+            <div className="flex items-center justify-center gap-2 text-text-muted text-base font-manuscript">
               <span className="w-8 h-px bg-gradient-to-r from-transparent to-sepia/30" />
               <span className="opacity-50">❧</span>
               <span className="opacity-70">{t('app.tagline')}</span>

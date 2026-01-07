@@ -59,7 +59,7 @@ export function MetadataForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Name */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.metadata.name')}
         </label>
         <input
@@ -74,7 +74,7 @@ export function MetadataForm({
 
       {/* Site Name */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.metadata.siteName')}
         </label>
         <input
@@ -89,7 +89,7 @@ export function MetadataForm({
 
       {/* Discovery Location */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.metadata.location')}
         </label>
         <input
@@ -104,7 +104,7 @@ export function MetadataForm({
 
       {/* Excavation Layer */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.metadata.layer')}
         </label>
         <input
@@ -119,7 +119,7 @@ export function MetadataForm({
 
       {/* Notes */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.metadata.notes')}
         </label>
         <textarea
@@ -134,7 +134,7 @@ export function MetadataForm({
 
       {/* Tags */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.metadata.tags')}
         </label>
         <div className="flex gap-2 mb-2">
@@ -159,7 +159,7 @@ export function MetadataForm({
             {formData.tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-terracotta/10 text-terracotta rounded-full text-sm"
+                className="inline-flex items-center gap-1 px-2 py-1 bg-terracotta/10 text-terracotta rounded-full text-base"
               >
                 {tag}
                 <button

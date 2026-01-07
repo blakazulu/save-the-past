@@ -137,7 +137,7 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
         </p>
 
         {artifacts && (
-          <p className="text-sm text-text-muted font-manuscript italic mb-4">
+          <p className="text-base text-text-muted font-manuscript italic mb-4">
             {t('dataManagement.artifactCount', '{{count}} artifacts will be exported', {
               count: artifacts.length,
             })}
@@ -153,7 +153,7 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-sm text-text-secondary text-center mt-2 font-manuscript">
+            <p className="text-base text-text-secondary text-center mt-2 font-manuscript">
               {Math.round(progress)}%
             </p>
           </div>
@@ -171,7 +171,7 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
           <button
             onClick={handleExport}
             disabled={isExporting || !artifacts || artifacts.length === 0}
-            className="btn-seal flex-1 text-sm disabled:opacity-50"
+            className="btn-seal flex-1 text-base disabled:opacity-50"
           >
             {isExporting
               ? t('dataManagement.exporting', 'Exporting...')

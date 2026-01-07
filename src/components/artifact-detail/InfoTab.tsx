@@ -121,7 +121,7 @@ export function InfoTab({ artifact }: InfoTabProps) {
             </button>
           </div>
 
-          <div className="space-y-2 text-sm">
+          <div className="space-y-2 text-base">
             <InfoRow
               label={t('infoCard.metadata.name')}
               value={artifact.metadata.name}
@@ -159,7 +159,7 @@ export function InfoTab({ artifact }: InfoTabProps) {
         {/* Metadata section */}
         <div className="bg-white rounded-xl p-4 border border-sand">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-earth text-sm uppercase tracking-wider">
+            <h3 className="font-semibold text-earth text-base uppercase tracking-wider">
               {t('infoCard.metadata.name')}
             </h3>
             <button
@@ -170,7 +170,7 @@ export function InfoTab({ artifact }: InfoTabProps) {
             </button>
           </div>
 
-          <div className="space-y-2 text-sm">
+          <div className="space-y-2 text-base">
             <InfoRow
               label={t('infoCard.metadata.name')}
               value={artifact.metadata.name}

@@ -91,7 +91,7 @@ export function CaptureSession({ onComplete, onCancel }: CaptureSessionProps) {
           </button>
           <button
             onClick={handleSkip}
-            className="px-4 py-2 rounded-full bg-black/50 text-white text-sm"
+            className="px-4 py-2 rounded-full bg-black/50 text-white text-base"
           >
             {isLastAngle ? t('capture.finish') : t('capture.skip')}
           </button>

@@ -96,7 +96,7 @@ export function DeleteConfirmDialog({
 
         {/* Warning banner */}
         <div className="mb-6 p-3 bg-error/10 border border-error/20 rounded">
-          <p className="text-sm text-error font-medium">
+          <p className="text-base text-error font-medium">
             {t('dataManagement.deleteWarning', 'This action cannot be undone.')}
           </p>
         </div>
@@ -113,7 +113,7 @@ export function DeleteConfirmDialog({
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="flex-1 py-3 bg-error text-white rounded font-display font-medium text-sm uppercase tracking-wider hover:bg-error/80 transition-colors disabled:opacity-50"
+            className="flex-1 py-3 bg-error text-white rounded font-display font-medium text-base uppercase tracking-wider hover:bg-error/80 transition-colors disabled:opacity-50"
           >
             {isDeleting
               ? t('dataManagement.deleting', 'Deleting...')

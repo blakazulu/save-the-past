@@ -30,10 +30,10 @@ export function CaptureOverlay({
       {/* Top info bar */}
       <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent">
         <div className="flex justify-between items-center text-white">
-          <div className="text-sm">
+          <div className="text-base">
             {t('capture.photoCount', { count: capturedCount, total: totalAngles })}
           </div>
-          <div className="bg-terracotta/90 px-3 py-1 rounded-full text-sm font-medium">
+          <div className="bg-terracotta/90 px-3 py-1 rounded-full text-base font-medium">
             {ANGLE_ICONS[suggestedAngle]} {t(`capture.angles.${suggestedAngle}`)}
           </div>
         </div>
@@ -52,7 +52,7 @@ export function CaptureOverlay({
 
       {/* Bottom hint */}
       <div className="absolute bottom-32 left-0 right-0 text-center">
-        <p className="text-white/80 text-sm bg-black/40 inline-block px-4 py-2 rounded-full">
+        <p className="text-white/80 text-base bg-black/40 inline-block px-4 py-2 rounded-full">
           {t('capture.alignHint')}
         </p>
       </div>

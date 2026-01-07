@@ -86,7 +86,7 @@ export function CapturePreview({
           </h1>
           <button
             onClick={onRetake}
-            className="text-terracotta font-medium hover:text-clay text-sm"
+            className="text-terracotta font-medium hover:text-clay text-base"
           >
             {t('capture.addMore')}
           </button>
@@ -109,7 +109,7 @@ export function CapturePreview({
                 {/* Angle badge */}
                 <button
                   onClick={() => setShowAngleSelector(true)}
-                  className="absolute top-3 right-3 bg-burnt/70 text-parchment-light px-3 py-1.5 rounded text-sm font-medium flex items-center gap-2 backdrop-blur-sm"
+                  className="absolute top-3 right-3 bg-burnt/70 text-parchment-light px-3 py-1.5 rounded text-base font-medium flex items-center gap-2 backdrop-blur-sm"
                 >
                   {t(`capture.angles.${selectedImage.angle}`)}
                   <svg
@@ -141,7 +141,7 @@ export function CapturePreview({
 
           {/* Thumbnail strip */}
           <div className="parchment-card p-3">
-            <p className="text-sm text-text-muted font-manuscript mb-2">
+            <p className="text-base text-text-muted font-manuscript mb-2">
               {t('capture.photosCount', { count: capturedImages.length })}
             </p>
             <div className="flex gap-2 overflow-x-auto pb-1">

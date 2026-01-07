@@ -82,7 +82,7 @@ export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) 
           <h3 className="font-display font-semibold text-earth truncate group-hover:text-terracotta transition-colors">
             {name}
           </h3>
-          <p className="text-sm text-text-muted font-manuscript italic">
+          <p className="text-base text-text-muted font-manuscript italic">
             {t('gallery.photoCount', { count: photoCount })}
           </p>
         </div>
@@ -129,7 +129,7 @@ export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) 
         <h3 className="font-display font-semibold text-earth truncate group-hover:text-terracotta transition-colors">
           {name}
         </h3>
-        <p className="text-sm text-text-muted mt-1 font-manuscript italic">
+        <p className="text-base text-text-muted mt-1 font-manuscript italic">
           {t('gallery.photoCount', { count: photoCount })}
         </p>
       </div>

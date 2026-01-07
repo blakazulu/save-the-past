@@ -28,7 +28,7 @@ export function InfoCardGeneration({
             <h3 className="font-semibold text-earth">
               {t('infoCard.generating')}
             </h3>
-            <p className="text-sm text-text-secondary">
+            <p className="text-base text-text-secondary">
               {t('infoCard.generatingDescription')}
             </p>
           </div>
@@ -42,7 +42,7 @@ export function InfoCardGeneration({
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-sm text-text-secondary text-center">
+          <p className="text-base text-text-secondary text-center">
             {Math.round(progress)}%
           </p>
         </div>
@@ -73,7 +73,7 @@ export function InfoCardGeneration({
             <h3 className="font-semibold text-earth">
               {t('infoCard.ready')}
             </h3>
-            <p className="text-sm text-text-secondary">
+            <p className="text-base text-text-secondary">
               {t('infoCard.readyDescription')}
             </p>
           </div>
@@ -101,7 +101,7 @@ export function InfoCardGeneration({
           <h3 className="font-semibold text-earth">
             {t('infoCard.title')}
           </h3>
-          <p className="text-sm text-text-secondary">
+          <p className="text-base text-text-secondary">
             {t('infoCard.description')}
           </p>
         </div>

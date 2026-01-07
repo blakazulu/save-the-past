@@ -24,7 +24,7 @@ export function MethodSelector({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-text-secondary">
+      <h3 className="text-base font-medium text-text-secondary">
         {t('reconstruction.selectMethod')}
       </h3>
       <div className="grid grid-cols-2 gap-3">
@@ -62,7 +62,7 @@ export function MethodSelector({
                   {t(`reconstruction.method.${method.id}.title`)}
                 </span>
               </div>
-              <p className="text-sm text-text-secondary ml-8">
+              <p className="text-base text-text-secondary ml-8">
                 {t(`reconstruction.method.${method.id}.description`)}
               </p>
               {method.minImages > 1 && (

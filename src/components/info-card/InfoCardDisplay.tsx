@@ -27,7 +27,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
           {onEdit && (
             <button
               onClick={onEdit}
-              className="px-3 py-1.5 text-sm border border-sand text-earth rounded-lg hover:bg-sand transition-colors"
+              className="px-3 py-1.5 text-base border border-sand text-earth rounded-lg hover:bg-sand transition-colors"
             >
               {t('infoCard.edit')}
             </button>
@@ -35,7 +35,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
           {onExport && (
             <button
               onClick={onExport}
-              className="px-3 py-1.5 text-sm bg-terracotta text-white rounded-lg hover:bg-clay transition-colors"
+              className="px-3 py-1.5 text-base bg-terracotta text-white rounded-lg hover:bg-clay transition-colors"
             >
               {t('infoCard.export')}
             </button>
@@ -47,7 +47,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
       <div className="bg-white rounded-xl divide-y divide-sand">
         {/* Material */}
         <div className="p-4">
-          <h4 className="text-sm font-medium text-text-secondary mb-1">
+          <h4 className="text-base font-medium text-text-secondary mb-1">
             {t('infoCard.fields.material')}
           </h4>
           <p className="text-earth">{infoCard.material}</p>
@@ -55,7 +55,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
 
         {/* Estimated Age */}
         <div className="p-4">
-          <h4 className="text-sm font-medium text-text-secondary mb-1">
+          <h4 className="text-base font-medium text-text-secondary mb-1">
             {t('infoCard.fields.estimatedAge')}
           </h4>
           <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
             </span>
           </div>
           {infoCard.estimatedAge.reasoning && (
-            <p className="text-sm text-text-secondary mt-1">
+            <p className="text-base text-text-secondary mt-1">
               {infoCard.estimatedAge.reasoning}
             </p>
           )}
@@ -76,7 +76,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
 
         {/* Possible Use */}
         <div className="p-4">
-          <h4 className="text-sm font-medium text-text-secondary mb-1">
+          <h4 className="text-base font-medium text-text-secondary mb-1">
             {t('infoCard.fields.possibleUse')}
           </h4>
           <p className="text-earth">{infoCard.possibleUse}</p>
@@ -84,7 +84,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
 
         {/* Cultural Context */}
         <div className="p-4">
-          <h4 className="text-sm font-medium text-text-secondary mb-1">
+          <h4 className="text-base font-medium text-text-secondary mb-1">
             {t('infoCard.fields.culturalContext')}
           </h4>
           <p className="text-earth">{infoCard.culturalContext}</p>
@@ -93,12 +93,12 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
         {/* Similar Artifacts */}
         {infoCard.similarArtifacts.length > 0 && (
           <div className="p-4">
-            <h4 className="text-sm font-medium text-text-secondary mb-2">
+            <h4 className="text-base font-medium text-text-secondary mb-2">
               {t('infoCard.fields.similarArtifacts')}
             </h4>
             <ul className="list-disc list-inside space-y-1">
               {infoCard.similarArtifacts.map((artifact, index) => (
-                <li key={index} className="text-earth text-sm">
+                <li key={index} className="text-earth text-base">
                   {artifact}
                 </li>
               ))}
@@ -109,7 +109,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
         {/* Preservation Notes */}
         {infoCard.preservationNotes && (
           <div className="p-4">
-            <h4 className="text-sm font-medium text-text-secondary mb-1">
+            <h4 className="text-base font-medium text-text-secondary mb-1">
               {t('infoCard.fields.preservationNotes')}
             </h4>
             <p className="text-earth">{infoCard.preservationNotes}</p>
@@ -122,7 +122,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
         <div className="flex items-start gap-3">
           <span className="text-lg">ℹ️</span>
           <div>
-            <p className="text-sm text-info font-medium mb-1">
+            <p className="text-base text-info font-medium mb-1">
               {t('infoCard.aiDisclaimer')}
             </p>
             <p className="text-md text-text-secondary">

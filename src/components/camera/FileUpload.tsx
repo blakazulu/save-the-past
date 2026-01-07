@@ -159,7 +159,7 @@ export function FileUpload({ onComplete, onCancel }: FileUploadProps) {
           {/* Preview thumbnails */}
           {capturedImages.length > 0 && (
             <div className="mt-4 parchment-card p-3">
-              <p className="text-sm text-text-muted font-manuscript mb-2">
+              <p className="text-base text-text-muted font-manuscript mb-2">
                 {t('capture.selectedPhotos', { count: capturedImages.length })}
               </p>
               <div className="flex gap-2 overflow-x-auto pb-1">

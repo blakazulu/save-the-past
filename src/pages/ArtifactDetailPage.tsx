@@ -134,7 +134,7 @@ function JournalTab({ children, active, onClick, icon, badge }: JournalTabProps)
   return (
     <button
       onClick={onClick}
-      className={`flex-1 py-3.5 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 relative ${active
+      className={`flex-1 py-3.5 text-base font-medium transition-all duration-200 flex items-center justify-center gap-2 relative ${active
           ? 'text-terracotta'
           : 'text-text-muted hover:text-earth'
         }`}

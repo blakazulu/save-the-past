@@ -166,7 +166,7 @@ export default function CapturePage() {
                   <h3 className="font-display text-lg font-semibold text-earth mb-1">
                     {t('capture.camera')}
                   </h3>
-                  <p className="text-sm text-text-secondary">
+                  <p className="text-base text-text-secondary">
                     {t('capture.cameraDescription', 'Take photos directly with your device camera')}
                   </p>
                 </div>
@@ -175,7 +175,7 @@ export default function CapturePage() {
 
             {/* Decorative divider */}
             <div className="divider-ornate my-6">
-              <span className="font-manuscript text-sm">{t('common.or', 'or')}</span>
+              <span className="font-manuscript text-base">{t('common.or', 'or')}</span>
             </div>
 
             {/* Upload Option */}
@@ -191,7 +191,7 @@ export default function CapturePage() {
                   <h3 className="font-display text-lg font-semibold text-earth mb-1">
                     {t('capture.upload')}
                   </h3>
-                  <p className="text-sm text-text-secondary">
+                  <p className="text-base text-text-secondary">
                     {t('capture.uploadDescription', 'Select existing photos from your gallery')}
                   </p>
                 </div>

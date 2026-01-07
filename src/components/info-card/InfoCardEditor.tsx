@@ -59,7 +59,7 @@ export function InfoCardEditor({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Material */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.fields.material')}
         </label>
         <input
@@ -74,7 +74,7 @@ export function InfoCardEditor({
       {/* Estimated Age */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-text-secondary mb-1">
+          <label className="block text-base font-medium text-text-secondary mb-1">
             {t('infoCard.fields.estimatedAge')}
           </label>
           <input
@@ -86,7 +86,7 @@ export function InfoCardEditor({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-text-secondary mb-1">
+          <label className="block text-base font-medium text-text-secondary mb-1">
             {t('infoCard.confidenceLabel')}
           </label>
           <select
@@ -104,7 +104,7 @@ export function InfoCardEditor({
 
       {/* Age Reasoning */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.fields.ageReasoning')}
         </label>
         <textarea
@@ -118,7 +118,7 @@ export function InfoCardEditor({
 
       {/* Possible Use */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.fields.possibleUse')}
         </label>
         <textarea
@@ -132,7 +132,7 @@ export function InfoCardEditor({
 
       {/* Cultural Context */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.fields.culturalContext')}
         </label>
         <textarea
@@ -146,7 +146,7 @@ export function InfoCardEditor({
 
       {/* Similar Artifacts */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.fields.similarArtifacts')}
           <span className="font-normal text-md ml-1">
             ({t('infoCard.onePerLine')})
@@ -163,7 +163,7 @@ export function InfoCardEditor({
 
       {/* Preservation Notes */}
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1">
+        <label className="block text-base font-medium text-text-secondary mb-1">
           {t('infoCard.fields.preservationNotes')}
         </label>
         <textarea

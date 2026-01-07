@@ -147,7 +147,7 @@ ${infoCard.isHumanEdited ? '✓ Human verified' : ''}
 
         {/* Format selector */}
         <div className="mb-4">
-          <p className="text-sm text-text-secondary mb-2">
+          <p className="text-base text-text-secondary mb-2">
             {t('infoCard.selectFormat')}
           </p>
           <div className="flex gap-2">
@@ -155,7 +155,7 @@ ${infoCard.isHumanEdited ? '✓ Human verified' : ''}
               <button
                 key={format.id}
                 onClick={() => setSelectedFormat(format.id)}
-                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${selectedFormat === format.id
+                className={`flex-1 py-2 px-3 rounded-lg text-base font-medium transition-colors ${selectedFormat === format.id
                     ? 'bg-terracotta text-white'
                     : 'bg-sand text-earth hover:bg-clay hover:text-white'
                   }`}
@@ -168,7 +168,7 @@ ${infoCard.isHumanEdited ? '✓ Human verified' : ''}
 
         {/* Preview */}
         <div className="mb-4">
-          <p className="text-sm text-text-secondary mb-2">
+          <p className="text-base text-text-secondary mb-2">
             {t('infoCard.preview')}
           </p>
           <pre className="bg-sand p-3 rounded-lg text-md text-text-primary overflow-x-auto max-h-40 overflow-y-auto">

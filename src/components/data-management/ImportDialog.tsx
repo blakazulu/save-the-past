@@ -183,7 +183,7 @@ export function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
             }`}
           >
             <UploadIcon className={`w-8 h-8 ${selectedFile ? 'text-terracotta' : 'text-text-muted'}`} />
-            <span className={`text-sm ${selectedFile ? 'text-terracotta font-medium' : 'text-text-muted'}`}>
+            <span className={`text-base ${selectedFile ? 'text-terracotta font-medium' : 'text-text-muted'}`}>
               {selectedFile
                 ? selectedFile.name
                 : t('dataManagement.selectFile', 'Select ZIP file')}
@@ -200,7 +200,7 @@ export function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-sm text-text-secondary text-center mt-2 font-manuscript">
+            <p className="text-base text-text-secondary text-center mt-2 font-manuscript">
               {Math.round(progress)}%
             </p>
           </div>
@@ -218,7 +218,7 @@ export function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
           <button
             onClick={handleImport}
             disabled={isImporting || !selectedFile}
-            className="btn-seal flex-1 text-sm disabled:opacity-50"
+            className="btn-seal flex-1 text-base disabled:opacity-50"
           >
             {isImporting
               ? t('dataManagement.importing', 'Importing...')
