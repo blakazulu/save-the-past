@@ -7,7 +7,11 @@ export function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="safe-area-bottom bg-white border-t border-sand">
+    <nav
+      className="safe-area-bottom bg-white border-t border-sand"
+      role="navigation"
+      aria-label={t('nav.mainNavigation', 'Main navigation')}
+    >
       <div className="flex justify-around items-center h-16">
         <NavLink
           to="/"
@@ -52,8 +56,10 @@ function NavLink({ to, icon, label, active }: NavLinkProps) {
       className={`flex flex-col items-center gap-1 px-4 py-2 transition-colors ${
         active ? 'text-terracotta' : 'text-text-secondary hover:text-clay'
       }`}
+      aria-label={label}
+      aria-current={active ? 'page' : undefined}
     >
-      {icon}
+      <span aria-hidden="true">{icon}</span>
       <span className="text-xs">{label}</span>
     </Link>
   );

@@ -7,7 +7,8 @@
     "home": "Home",
     "capture": "Capture",
     "gallery": "Gallery",
-    "settings": "Settings"
+    "settings": "Settings",
+    "mainNavigation": "Main navigation"
   },
   "home": {
     "title": "Save The Past",

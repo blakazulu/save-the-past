@@ -505,12 +505,12 @@ interface UseGenerateInfoCardReturn {
 - [x] Implement bulk operations in gallery (via Settings page)
 
 ### Phase 12: Polish
-- [ ] Final responsive testing (phone priority, desktop secondary)
-- [ ] Loading states and skeleton screens
-- [ ] Error boundaries and fallback UI
-- [ ] Accessibility audit (ARIA labels, keyboard nav)
-- [ ] Performance optimization (lazy loading, code splitting)
-- [ ] Final RTL/i18n verification for Hebrew
+- [x] Final responsive testing (phone priority, desktop secondary)
+- [x] Loading states and skeleton screens
+- [x] Error boundaries and fallback UI
+- [x] Accessibility audit (ARIA labels, keyboard nav)
+- [x] Performance optimization (lazy loading, code splitting)
+- [x] Final RTL/i18n verification for Hebrew
 
 ## Environment Variables
 
