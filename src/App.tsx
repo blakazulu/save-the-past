@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { getDirection } from '@/i18n';
@@ -16,7 +16,29 @@ const GalleryPage = lazy(() => import('@/pages/GalleryPage'));
 const ArtifactDetailPage = lazy(() => import('@/pages/ArtifactDetailPage'));
 
 function PageLoader() {
-  return <LoadingSpinner fullScreen />;
+  return (
+    <div className="min-h-dvh flex items-center justify-center">
+      <LoadingSpinner />
+    </div>
+  );
+}
+
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <div key={location.pathname} className="page-transition">
+      <Suspense fallback={<PageLoader />}>
+        <Routes location={location}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/capture" element={<CapturePage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/artifact/:id" element={<ArtifactDetailPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
+      </Suspense>
+    </div>
+  );
 }
 
 export default function App() {
@@ -33,15 +55,7 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <ScribbleBackground />
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/capture" element={<CapturePage />} />
-              <Route path="/gallery" element={<GalleryPage />} />
-              <Route path="/artifact/:id" element={<ArtifactDetailPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-            </Routes>
-          </Suspense>
+          <AnimatedRoutes />
           <InstallPrompt />
           <OfflineIndicator />
         </BrowserRouter>

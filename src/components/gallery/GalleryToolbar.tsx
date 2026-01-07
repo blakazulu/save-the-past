@@ -34,7 +34,8 @@ export function GalleryToolbar({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t('gallery.searchPlaceholder')}
-          className="input-manuscript w-full pl-10 pr-4 py-2.5"
+          className="input-manuscript w-full pr-4 py-2.5"
+          style={{ paddingLeft: '2.5rem' }}
         />
       </div>
 
