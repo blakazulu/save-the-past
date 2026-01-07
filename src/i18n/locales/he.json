@@ -54,7 +54,36 @@
   "gallery": {
     "title": "גלריה",
     "empty": "אין ממצאים עדיין",
-    "emptyDescription": "התחל בצילום הממצא הראשון שלך"
+    "emptyDescription": "התחל בצילום הממצא הראשון שלך",
+    "searchPlaceholder": "חפש ממצאים...",
+    "filters": "סינון",
+    "viewGrid": "תצוגת רשת",
+    "viewList": "תצוגת רשימה",
+    "photoCount": "{{count}} תמונות",
+    "noResults": "לא נמצאו תוצאות",
+    "noResultsDescription": "אין ממצאים התואמים ל\"{{query}}\"",
+    "clearSearch": "נקה חיפוש",
+    "clearFilters": "נקה הכל",
+    "filterByStatus": "סנן לפי סטטוס",
+    "sortBy": "מיין לפי",
+    "sortOrder": "סדר מיון",
+    "sortAsc": "ישנים קודם",
+    "sortDesc": "חדשים קודם",
+    "applyFilters": "החל",
+    "status": {
+      "all": "הכל",
+      "draft": "טיוטה",
+      "images-captured": "תמונות מוכנות",
+      "processing-3d": "מעבד תלת-ממד",
+      "processing-info": "יוצר מידע",
+      "complete": "הושלם",
+      "error": "שגיאה"
+    },
+    "sort": {
+      "updatedAt": "עודכן לאחרונה",
+      "createdAt": "תאריך יצירה",
+      "name": "שם"
+    }
   },
   "artifact": {
     "title": "פרטי ממצא",

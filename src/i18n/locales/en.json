@@ -54,7 +54,36 @@
   "gallery": {
     "title": "Gallery",
     "empty": "No artifacts yet",
-    "emptyDescription": "Start by capturing your first artifact"
+    "emptyDescription": "Start by capturing your first artifact",
+    "searchPlaceholder": "Search artifacts...",
+    "filters": "Filters",
+    "viewGrid": "Grid view",
+    "viewList": "List view",
+    "photoCount": "{{count}} photos",
+    "noResults": "No results found",
+    "noResultsDescription": "No artifacts match \"{{query}}\"",
+    "clearSearch": "Clear search",
+    "clearFilters": "Clear all",
+    "filterByStatus": "Filter by status",
+    "sortBy": "Sort by",
+    "sortOrder": "Sort order",
+    "sortAsc": "Oldest first",
+    "sortDesc": "Newest first",
+    "applyFilters": "Apply",
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "images-captured": "Images Ready",
+      "processing-3d": "Processing 3D",
+      "processing-info": "Generating Info",
+      "complete": "Complete",
+      "error": "Error"
+    },
+    "sort": {
+      "updatedAt": "Last updated",
+      "createdAt": "Date created",
+      "name": "Name"
+    }
   },
   "artifact": {
     "title": "Artifact Details",

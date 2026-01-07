@@ -447,12 +447,12 @@ interface UseGenerateInfoCardReturn {
 - [x] Wire up CapturePage with both options
 
 ### Phase 5: Gallery
-- [ ] Build ArtifactCard component
-- [ ] Create GalleryGrid and GalleryList layouts
-- [ ] Implement GalleryToolbar (search, filters, view toggle)
-- [ ] Build GalleryFilters panel
-- [ ] Create useGalleryFilters hook
-- [ ] Add empty states and loading skeletons
+- [x] Build ArtifactCard component
+- [x] Create GalleryGrid and GalleryList layouts
+- [x] Implement GalleryToolbar (search, filters, view toggle)
+- [x] Build GalleryFilters panel
+- [x] Create useGalleryFilters hook
+- [x] Add empty states and loading skeletons
 
 ### Phase 6: 3D Reconstruction
 - [ ] Create MethodSelector component

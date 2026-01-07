@@ -1,35 +1,105 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { PageHeader, BottomNav } from '@/components/layout';
-import { GalleryIcon } from '@/components/icons';
+import {
+  GalleryGrid,
+  GalleryList,
+  GalleryToolbar,
+  GalleryFilters,
+  GallerySkeleton,
+  GalleryEmpty,
+} from '@/components/gallery';
+import { useGalleryFilters } from '@/hooks/useGalleryFilters';
+import { db } from '@/lib/db';
 
 export default function GalleryPage() {
   const { t } = useTranslation();
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Live query for artifacts from IndexedDB
+  const artifacts = useLiveQuery(
+    () => db.artifacts.orderBy('updatedAt').reverse().toArray(),
+    []
+  );
+
+  const isLoading = artifacts === undefined;
+
+  const {
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    viewMode,
+    setViewMode,
+    filteredArtifacts,
+    hasActiveFilters,
+    clearFilters,
+  } = useGalleryFilters(artifacts || []);
+
+  // No artifacts at all
+  if (!isLoading && artifacts?.length === 0) {
+    return (
+      <div className="min-h-dvh bg-bg flex flex-col">
+        <PageHeader title={t('gallery.title')} backTo="/" />
+        <GalleryEmpty variant="no-artifacts" />
+        <BottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-bg flex flex-col">
       <PageHeader title={t('gallery.title')} backTo="/" />
 
-      {/* Main Content - Empty State */}
-      <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-24 h-24 bg-sand rounded-full flex items-center justify-center mb-6">
-          <GalleryIcon className="w-12 h-12 text-clay" />
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col p-4">
+        {/* Toolbar */}
+        <div className="mb-4">
+          <GalleryToolbar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            onFilterClick={() => setShowFilters(true)}
+            hasActiveFilters={hasActiveFilters}
+          />
         </div>
-        <h2 className="text-xl font-semibold text-earth mb-2">
-          {t('gallery.empty')}
-        </h2>
-        <p className="text-text-secondary mb-8">
-          {t('gallery.emptyDescription')}
-        </p>
-        <Link
-          to="/capture"
-          className="bg-terracotta text-white px-6 py-3 rounded-xl font-semibold hover:bg-clay transition-colors"
-        >
-          {t('home.cta')}
-        </Link>
+
+        {/* Content */}
+        {isLoading ? (
+          <GallerySkeleton variant={viewMode} count={6} />
+        ) : filteredArtifacts.length === 0 ? (
+          <GalleryEmpty
+            variant="no-results"
+            searchQuery={searchQuery}
+            onClearSearch={clearFilters}
+          />
+        ) : viewMode === 'grid' ? (
+          <GalleryGrid artifacts={filteredArtifacts} />
+        ) : (
+          <GalleryList artifacts={filteredArtifacts} />
+        )}
       </main>
 
       <BottomNav />
+
+      {/* Filters panel */}
+      <GalleryFilters
+        isOpen={showFilters}
+        onClose={() => setShowFilters(false)}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        sortBy={sortBy}
+        onSortByChange={setSortBy}
+        sortOrder={sortOrder}
+        onSortOrderChange={setSortOrder}
+        onClearFilters={clearFilters}
+      />
     </div>
   );
 }
