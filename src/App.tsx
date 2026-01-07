@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { getDirection } from '@/i18n';
+import { queryClient } from '@/lib/query';
 import HomePage from '@/pages/HomePage';
 import CapturePage from '@/pages/CapturePage';
 import GalleryPage from '@/pages/GalleryPage';
@@ -18,14 +20,16 @@ export default function App() {
   }, [i18n.language]);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/capture" element={<CapturePage />} />
-        <Route path="/gallery" element={<GalleryPage />} />
-        <Route path="/artifact/:id" element={<ArtifactDetailPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-      </Routes>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/capture" element={<CapturePage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/artifact/:id" element={<ArtifactDetailPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }

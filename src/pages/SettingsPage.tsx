@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { PageHeader, BottomNav } from '@/components/layout';
+import { CheckIcon } from '@/components/icons';
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
@@ -8,17 +9,12 @@ export default function SettingsPage() {
     i18n.changeLanguage(lang);
   };
 
+  // Use resolvedLanguage for accurate comparison (handles 'en-US' -> 'en')
+  const currentLang = i18n.resolvedLanguage || i18n.language;
+
   return (
     <div className="min-h-dvh bg-bg flex flex-col">
-      {/* Header */}
-      <header className="safe-area-top bg-terracotta text-white p-4">
-        <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <Link to="/" className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors">
-            <BackIcon />
-          </Link>
-          <h1 className="text-xl font-bold">{t('settings.title')}</h1>
-        </div>
-      </header>
+      <PageHeader title={t('settings.title')} backTo="/" />
 
       {/* Main Content */}
       <main className="flex-1 p-4">
@@ -32,34 +28,33 @@ export default function SettingsPage() {
               <LanguageOption
                 label={t('settings.english')}
                 value="en"
-                selected={i18n.language === 'en'}
+                selected={currentLang === 'en'}
                 onChange={changeLanguage}
               />
               <LanguageOption
                 label={t('settings.hebrew')}
                 value="he"
-                selected={i18n.language === 'he'}
+                selected={currentLang === 'he'}
                 onChange={changeLanguage}
               />
             </div>
           </div>
         </div>
       </main>
+
+      <BottomNav />
     </div>
   );
 }
 
-function LanguageOption({
-  label,
-  value,
-  selected,
-  onChange,
-}: {
+interface LanguageOptionProps {
   label: string;
   value: string;
   selected: boolean;
   onChange: (value: string) => void;
-}) {
+}
+
+function LanguageOption({ label, value, selected, onChange }: LanguageOptionProps) {
   return (
     <button
       onClick={() => onChange(value)}
@@ -70,23 +65,7 @@ function LanguageOption({
       }`}
     >
       <span className="font-medium">{label}</span>
-      {selected && <CheckIcon />}
+      {selected && <CheckIcon className="w-5 h-5 text-terracotta" />}
     </button>
-  );
-}
-
-function BackIcon() {
-  return (
-    <svg className="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg className="w-5 h-5 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-    </svg>
   );
 }

@@ -1,28 +1,44 @@
-import { Link, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { PageHeader } from '@/components/layout';
+
+type TabId = 'model' | 'photos' | 'info';
 
 export default function ArtifactDetailPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
+  const [activeTab, setActiveTab] = useState<TabId>('model');
+
+  if (!id) {
+    return <Navigate to="/gallery" replace />;
+  }
 
   return (
     <div className="min-h-dvh bg-bg flex flex-col">
-      {/* Header */}
-      <header className="safe-area-top bg-terracotta text-white p-4">
-        <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <Link to="/gallery" className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors">
-            <BackIcon />
-          </Link>
-          <h1 className="text-xl font-bold">{t('artifact.title')}</h1>
-        </div>
-      </header>
+      <PageHeader title={t('artifact.title')} backTo="/gallery" />
 
       {/* Tabs */}
       <div className="bg-white border-b border-sand">
         <div className="max-w-4xl mx-auto flex">
-          <TabButton active>{t('artifact.tabs.model')}</TabButton>
-          <TabButton>{t('artifact.tabs.photos')}</TabButton>
-          <TabButton>{t('artifact.tabs.info')}</TabButton>
+          <TabButton
+            active={activeTab === 'model'}
+            onClick={() => setActiveTab('model')}
+          >
+            {t('artifact.tabs.model')}
+          </TabButton>
+          <TabButton
+            active={activeTab === 'photos'}
+            onClick={() => setActiveTab('photos')}
+          >
+            {t('artifact.tabs.photos')}
+          </TabButton>
+          <TabButton
+            active={activeTab === 'info'}
+            onClick={() => setActiveTab('info')}
+          >
+            {t('artifact.tabs.info')}
+          </TabButton>
         </div>
       </div>
 
@@ -35,15 +51,25 @@ export default function ArtifactDetailPage() {
           <p className="text-text-secondary text-sm">
             Artifact ID: {id}
           </p>
+          <p className="text-text-secondary text-sm mt-2">
+            Active tab: {activeTab}
+          </p>
         </div>
       </main>
     </div>
   );
 }
 
-function TabButton({ children, active = false }: { children: React.ReactNode; active?: boolean }) {
+interface TabButtonProps {
+  children: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+}
+
+function TabButton({ children, active, onClick }: TabButtonProps) {
   return (
     <button
+      onClick={onClick}
       className={`flex-1 py-3 text-sm font-medium transition-colors ${
         active
           ? 'text-terracotta border-b-2 border-terracotta'
@@ -52,13 +78,5 @@ function TabButton({ children, active = false }: { children: React.ReactNode; ac
     >
       {children}
     </button>
-  );
-}
-
-function BackIcon() {
-  return (
-    <svg className="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
   );
 }

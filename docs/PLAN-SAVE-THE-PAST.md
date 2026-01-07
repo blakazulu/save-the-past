@@ -424,10 +424,10 @@ interface UseGenerateInfoCardReturn {
 - [x] Configure Netlify deployment (netlify.toml)
 
 ### Phase 2: Core Infrastructure
-- [ ] Implement Dexie database schema
-- [ ] Create Zustand stores (app, settings, capture)
-- [ ] Set up TanStack Query provider
-- [ ] Create API client wrapper (`src/lib/api/client.ts`)
+- [x] Implement Dexie database schema
+- [x] Create Zustand stores (app, settings, capture)
+- [x] Set up TanStack Query provider
+- [x] Create API client wrapper (`src/lib/api/client.ts`)
 - [ ] Build utility functions (image processing, export)
 
 ### Phase 3: Layout & Navigation (Mobile-First)
