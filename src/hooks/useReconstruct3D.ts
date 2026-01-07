@@ -58,7 +58,7 @@ export function useReconstruct3D(options: UseReconstruct3DOptions = {}) {
         setStatus('processing');
         const response = await reconstruct3D({
           imageBase64: base64,
-          method: 'trellis', // Use TRELLIS.2 by default
+          method: 'stable-fast-3d', // Use Stable Fast 3D by default
           removeBackground: true,
         });
 

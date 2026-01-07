@@ -43,7 +43,7 @@ async function apiRequest<T>(
 // 3D Reconstruction API
 export interface ReconstructRequest {
   imageBase64: string;
-  method: 'trellis' | 'triposr';
+  method?: 'stable-fast-3d' | 'instant-mesh';
   removeBackground?: boolean;
 }
 
@@ -51,7 +51,7 @@ export interface ReconstructResponse {
   success: boolean;
   modelBase64?: string;
   format?: 'glb';
-  method?: 'trellis' | 'triposr';
+  method?: 'stable-fast-3d' | 'instant-mesh';
   processingTimeMs?: number;
   error?: string;
   retryCount?: number;

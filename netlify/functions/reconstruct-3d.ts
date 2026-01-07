@@ -3,7 +3,7 @@ import { Client } from '@gradio/client';
 
 interface ReconstructRequest {
   imageBase64: string;
-  method?: 'trellis' | 'triposr';
+  method?: 'stable-fast-3d' | 'instant-mesh';
   removeBackground?: boolean;
 }
 
@@ -11,14 +11,15 @@ interface ReconstructResponse {
   success: boolean;
   modelBase64?: string;
   format?: 'glb';
-  method?: 'trellis' | 'triposr';
+  method?: 'stable-fast-3d' | 'instant-mesh';
   processingTimeMs?: number;
   error?: string;
   retryCount?: number;
 }
 
-const TRELLIS_SPACE = 'trellis-community/TRELLIS';
-const TRIPOSR_SPACE = 'stabilityai/TripoSR';
+// Updated to use working HuggingFace Spaces
+const STABLE_FAST_3D_SPACE = 'stabilityai/stable-fast-3d';
+const INSTANT_MESH_SPACE = 'TencentARC/InstantMesh';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
@@ -48,25 +49,33 @@ async function blobToBase64(blob: Blob): Promise<string> {
   return btoa(binary);
 }
 
-async function reconstructWithTrellis(
+async function reconstructWithStableFast3D(
   imageBlob: Blob,
   removeBackground: boolean
-): Promise<{ modelBlob: Blob; method: 'trellis' }> {
+): Promise<{ modelBlob: Blob; method: 'stable-fast-3d' }> {
   const hfToken = process.env.HF_TOKEN;
-  const client = await Client.connect(TRELLIS_SPACE, hfToken ? { hf_token: hfToken } : undefined);
+  const client = await Client.connect(STABLE_FAST_3D_SPACE, hfToken ? { hf_token: hfToken } : undefined);
 
-  // Use minimal parameters - let TRELLIS use defaults for optional params
-  const result = await client.predict('/image_to_3d', [imageBlob]);
+  // Stable Fast 3D - try with image input
+  const result = await client.predict('/run', [
+    imageBlob,           // input image
+    removeBackground,    // remove background
+    0.85,               // foreground ratio
+    'none',             // remesh option
+    1024,               // texture size
+  ]);
 
-  // TRELLIS returns video preview and GLB file
-  const data = result.data as { url?: string; path?: string }[];
+  const data = result.data as (string | { url?: string; path?: string })[];
 
-  // Find the GLB file in the response (usually last item)
+  // Find the GLB file in the response
   let glbUrl: string | null = null;
   for (const item of data) {
-    if (item && (item.url || item.path)) {
+    if (typeof item === 'string' && item.endsWith('.glb')) {
+      glbUrl = item;
+      break;
+    } else if (item && typeof item === 'object' && (item.url || item.path)) {
       const url = item.url || item.path;
-      if (url && url.endsWith('.glb')) {
+      if (url) {
         glbUrl = url;
         break;
       }
@@ -74,66 +83,59 @@ async function reconstructWithTrellis(
   }
 
   if (!glbUrl) {
-    // Try to extract GLB from the last item which is typically the model
-    const lastItem = data[data.length - 1];
-    if (lastItem && (lastItem.url || lastItem.path)) {
-      glbUrl = lastItem.url || lastItem.path || null;
-    }
+    throw new Error('No GLB model returned from Stable Fast 3D');
   }
 
-  if (!glbUrl) {
-    throw new Error('No GLB model returned from TRELLIS');
-  }
-
-  // Fetch the GLB file
   const glbResponse = await fetch(glbUrl);
   if (!glbResponse.ok) {
-    throw new Error(`Failed to fetch GLB from TRELLIS: ${glbResponse.status}`);
+    throw new Error(`Failed to fetch GLB from Stable Fast 3D: ${glbResponse.status}`);
   }
 
   const modelBlob = await glbResponse.blob();
-  return { modelBlob, method: 'trellis' };
+  return { modelBlob, method: 'stable-fast-3d' };
 }
 
-async function reconstructWithTripoSR(
+async function reconstructWithInstantMesh(
   imageBlob: Blob,
   removeBackground: boolean
-): Promise<{ modelBlob: Blob; method: 'triposr' }> {
+): Promise<{ modelBlob: Blob; method: 'instant-mesh' }> {
   const hfToken = process.env.HF_TOKEN;
-  const client = await Client.connect(TRIPOSR_SPACE, hfToken ? { hf_token: hfToken } : undefined);
+  const client = await Client.connect(INSTANT_MESH_SPACE, hfToken ? { hf_token: hfToken } : undefined);
 
-  // TripoSR expects: image, do_remove_background, foreground_ratio, mc_resolution
-  const result = await client.predict('/run', {
-    image: imageBlob,
-    do_remove_background: removeBackground,
-    foreground_ratio: 0.85,
-    mc_resolution: 256,
-  });
+  // InstantMesh - try with image input
+  const result = await client.predict('/run', [
+    imageBlob,           // input image
+    removeBackground,    // remove background
+  ]);
 
-  // TripoSR returns the GLB file directly
-  const data = result.data as { url?: string; path?: string }[];
+  const data = result.data as (string | { url?: string; path?: string })[];
 
-  // Find the GLB file
-  let glbUrl: string | null = null;
+  // Find the GLB/OBJ file in the response
+  let modelUrl: string | null = null;
   for (const item of data) {
-    if (item && (item.url || item.path)) {
-      glbUrl = item.url || item.path || null;
+    if (typeof item === 'string' && (item.endsWith('.glb') || item.endsWith('.obj'))) {
+      modelUrl = item;
       break;
+    } else if (item && typeof item === 'object' && (item.url || item.path)) {
+      const url = item.url || item.path;
+      if (url) {
+        modelUrl = url;
+        break;
+      }
     }
   }
 
-  if (!glbUrl) {
-    throw new Error('No GLB model returned from TripoSR');
+  if (!modelUrl) {
+    throw new Error('No 3D model returned from InstantMesh');
   }
 
-  // Fetch the GLB file
-  const glbResponse = await fetch(glbUrl);
-  if (!glbResponse.ok) {
-    throw new Error(`Failed to fetch GLB from TripoSR: ${glbResponse.status}`);
+  const modelResponse = await fetch(modelUrl);
+  if (!modelResponse.ok) {
+    throw new Error(`Failed to fetch model from InstantMesh: ${modelResponse.status}`);
   }
 
-  const modelBlob = await glbResponse.blob();
-  return { modelBlob, method: 'triposr' };
+  const modelBlob = await modelResponse.blob();
+  return { modelBlob, method: 'instant-mesh' };
 }
 
 export default async function handler(
@@ -162,22 +164,22 @@ export default async function handler(
     }
 
     const imageBlob = await base64ToBlob(body.imageBase64);
-    const preferredMethod = body.method || 'trellis';
+    const preferredMethod = body.method || 'stable-fast-3d';
     const removeBackground = body.removeBackground ?? true;
 
     let modelBlob: Blob | null = null;
-    let usedMethod: 'trellis' | 'triposr' = preferredMethod;
+    let usedMethod: 'stable-fast-3d' | 'instant-mesh' = preferredMethod;
     let lastError: Error | null = null;
 
     // Try preferred method first with retries
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
-        if (preferredMethod === 'trellis') {
-          const result = await reconstructWithTrellis(imageBlob, removeBackground);
+        if (preferredMethod === 'stable-fast-3d') {
+          const result = await reconstructWithStableFast3D(imageBlob, removeBackground);
           modelBlob = result.modelBlob;
           usedMethod = result.method;
         } else {
-          const result = await reconstructWithTripoSR(imageBlob, removeBackground);
+          const result = await reconstructWithInstantMesh(imageBlob, removeBackground);
           modelBlob = result.modelBlob;
           usedMethod = result.method;
         }
@@ -198,18 +200,18 @@ export default async function handler(
     }
 
     // If primary method failed, try fallback
-    if (!modelBlob && preferredMethod === 'trellis') {
+    if (!modelBlob && preferredMethod === 'stable-fast-3d') {
       try {
-        const result = await reconstructWithTripoSR(imageBlob, removeBackground);
+        const result = await reconstructWithInstantMesh(imageBlob, removeBackground);
         modelBlob = result.modelBlob;
         usedMethod = result.method;
         lastError = null;
       } catch (error) {
         lastError = error as Error;
       }
-    } else if (!modelBlob && preferredMethod === 'triposr') {
+    } else if (!modelBlob && preferredMethod === 'instant-mesh') {
       try {
-        const result = await reconstructWithTrellis(imageBlob, removeBackground);
+        const result = await reconstructWithStableFast3D(imageBlob, removeBackground);
         modelBlob = result.modelBlob;
         usedMethod = result.method;
         lastError = null;
