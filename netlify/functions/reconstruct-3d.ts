@@ -1,5 +1,10 @@
-import type { Context } from '@netlify/functions';
+import type { Context, Config } from '@netlify/functions';
 import { Client } from '@gradio/client';
+
+// Set longer timeout for 3D reconstruction (can take 60+ seconds)
+export const config: Config = {
+  path: '/api/reconstruct-3d',
+};
 
 interface ReconstructRequest {
   imageBase64: string;
