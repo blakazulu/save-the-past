@@ -203,5 +203,29 @@
     "installDescription": "הוסף למסך הבית לחוויה הטובה ביותר",
     "install": "התקן",
     "notNow": "לא עכשיו"
+  },
+  "dataManagement": {
+    "title": "ניהול נתונים",
+    "exportTitle": "ייצוא נתונים",
+    "exportDescription": "ייצא את כל הממצאים, התמונות, המודלים התלת-ממדיים וכרטיסי המידע לקובץ ZIP.",
+    "export": "ייצא",
+    "exporting": "מייצא...",
+    "exportError": "הייצוא נכשל. נסה שוב.",
+    "artifactCount": "{{count}} ממצאים ייוצאו",
+    "importTitle": "ייבוא נתונים",
+    "importDescription": "ייבא ממצאים מקובץ ZIP שיוצא בעבר.",
+    "import": "ייבא",
+    "importing": "מייבא...",
+    "importError": "הייבוא נכשל. בדוק את הקובץ ונסה שוב.",
+    "selectFile": "בחר קובץ ZIP",
+    "deleteTitle": "למחוק ממצא?",
+    "deleteDescription": "פעולה זו תמחק לצמיתות את \"{{name}}\" ואת כל התמונות, המודלים התלת-ממדיים וכרטיסי המידע שלו. לא ניתן לבטל פעולה זו.",
+    "deleteMultipleTitle": "למחוק {{count}} ממצאים?",
+    "deleteMultipleDescription": "פעולה זו תמחק לצמיתות {{count}} ממצאים ואת כל התמונות, המודלים התלת-ממדיים וכרטיסי המידע שלהם. לא ניתן לבטל פעולה זו.",
+    "deleteError": "המחיקה נכשלה. נסה שוב.",
+    "deleting": "מוחק...",
+    "clearAllTitle": "לנקות את כל הנתונים?",
+    "clearAllDescription": "פעולה זו תמחק לצמיתות את כל הממצאים. לא ניתן לבטל פעולה זו.",
+    "clearAll": "נקה את כל הנתונים"
   }
 }

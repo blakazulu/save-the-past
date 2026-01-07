@@ -203,5 +203,29 @@
     "installDescription": "Add to home screen for the best experience",
     "install": "Install",
     "notNow": "Not now"
+  },
+  "dataManagement": {
+    "title": "Data Management",
+    "exportTitle": "Export Data",
+    "exportDescription": "Export all artifacts, photos, 3D models, and info cards to a ZIP file.",
+    "export": "Export",
+    "exporting": "Exporting...",
+    "exportError": "Export failed. Please try again.",
+    "artifactCount": "{{count}} artifacts will be exported",
+    "importTitle": "Import Data",
+    "importDescription": "Import artifacts from a previously exported ZIP file.",
+    "import": "Import",
+    "importing": "Importing...",
+    "importError": "Import failed. Please check the file and try again.",
+    "selectFile": "Select ZIP file",
+    "deleteTitle": "Delete Artifact?",
+    "deleteDescription": "This will permanently delete \"{{name}}\" and all its photos, 3D models, and info cards. This action cannot be undone.",
+    "deleteMultipleTitle": "Delete {{count}} Artifacts?",
+    "deleteMultipleDescription": "This will permanently delete {{count}} artifacts and all their photos, 3D models, and info cards. This action cannot be undone.",
+    "deleteError": "Delete failed. Please try again.",
+    "deleting": "Deleting...",
+    "clearAllTitle": "Clear All Data?",
+    "clearAllDescription": "This will permanently delete all artifacts. This action cannot be undone.",
+    "clearAll": "Clear All Data"
   }
 }

@@ -499,10 +499,10 @@ interface UseGenerateInfoCardReturn {
 - [x] Ensure app looks native on phone home screens
 
 ### Phase 11: Data Management
-- [ ] Build ExportDialog (ZIP with all data)
-- [ ] Create ImportDialog (restore from ZIP)
-- [ ] Add DeleteConfirmDialog
-- [ ] Implement bulk operations in gallery
+- [x] Build ExportDialog (ZIP with all data)
+- [x] Create ImportDialog (restore from ZIP)
+- [x] Add DeleteConfirmDialog
+- [x] Implement bulk operations in gallery (via Settings page)
 
 ### Phase 12: Polish
 - [ ] Final responsive testing (phone priority, desktop secondary)
