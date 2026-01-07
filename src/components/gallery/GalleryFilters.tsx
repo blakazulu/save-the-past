@@ -42,11 +42,11 @@ export function GalleryFilters({
 
   return (
     <div
-      className="fixed inset-0 bg-burnt/60 z-50 flex items-end animate-fade-in"
+      className="fixed inset-0 bg-burnt/60 z-50 flex items-end md:items-center md:justify-center animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="glass-parchment w-full rounded-t-2xl safe-area-bottom max-h-[70vh] overflow-y-auto animate-slide-up"
+        className="glass-parchment w-full md:w-auto md:min-w-[400px] md:max-w-lg md:rounded-2xl rounded-t-2xl safe-area-bottom max-h-[70vh] overflow-y-auto animate-slide-up md:animate-fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Decorative top edge */}

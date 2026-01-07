@@ -112,9 +112,11 @@ export default function ArtifactDetailPage() {
 
       {/* Tab Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        {activeTab === 'model' && <Model3DTab artifact={artifact} />}
-        {activeTab === 'photos' && <PhotosTab artifact={artifact} />}
-        {activeTab === 'info' && <InfoTab artifact={artifact} />}
+        <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col overflow-hidden">
+          {activeTab === 'model' && <Model3DTab artifact={artifact} />}
+          {activeTab === 'photos' && <PhotosTab artifact={artifact} />}
+          {activeTab === 'info' && <InfoTab artifact={artifact} />}
+        </div>
       </main>
     </div>
   );

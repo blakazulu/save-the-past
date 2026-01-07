@@ -74,7 +74,7 @@ export function CapturePreview({
     <div className="fixed inset-0 z-50 flex flex-col safe-area-top safe-area-bottom bg-burnt/95">
       {/* Header */}
       <div className="glass-parchment border-b border-sepia/20">
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="max-w-4xl mx-auto flex items-center justify-between px-4 py-3">
           <button
             onClick={onCancel}
             className="p-2 -ml-2 hover:bg-sand/50 rounded-lg transition-colors"
@@ -95,93 +95,98 @@ export function CapturePreview({
 
       {/* Main content - scrollable */}
       <div className="flex-1 overflow-y-auto p-4">
-        {/* Main preview - constrained height */}
-        {selectedImage && (
-          <div className="parchment-card p-2 mb-4">
-            <div className="relative rounded overflow-hidden bg-burnt/10" style={{ maxHeight: '45vh' }}>
-              <img
-                src={selectedImage.previewUrl}
-                alt={selectedImage.angle}
-                className="w-full h-full object-contain max-h-[45vh]"
-              />
-
-              {/* Angle badge */}
-              <button
-                onClick={() => setShowAngleSelector(true)}
-                className="absolute top-3 right-3 bg-burnt/70 text-parchment-light px-3 py-1.5 rounded text-sm font-medium flex items-center gap-2 backdrop-blur-sm"
-              >
-                {t(`capture.angles.${selectedImage.angle}`)}
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-
-              {/* Delete button */}
-              <button
-                onClick={() => handleRemoveImage(selectedImage.id)}
-                className="absolute top-3 left-3 bg-error/80 text-white p-2 rounded backdrop-blur-sm"
-                aria-label={t('common.delete')}
-              >
-                <TrashIcon className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Thumbnail strip */}
-        <div className="parchment-card p-3">
-          <p className="text-md text-text-muted font-manuscript mb-2">
-            {t('capture.photosCount', { count: capturedImages.length })}
-          </p>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {capturedImages.map((img) => (
-              <button
-                key={img.id}
-                onClick={() => setSelectedImage(img)}
-                className={`w-16 h-16 rounded overflow-hidden flex-shrink-0 border-2 transition-all ${selectedImage?.id === img.id
-                    ? 'border-terracotta shadow-md scale-105'
-                    : 'border-sepia/20 hover:border-terracotta/50'
-                  }`}
-              >
+        <div className="max-w-4xl mx-auto">
+          {/* Main preview - constrained height */}
+          {selectedImage && (
+            <div className="parchment-card p-2 mb-4">
+              <div className="relative rounded overflow-hidden bg-burnt/10 flex items-center justify-center" style={{ maxHeight: '50vh' }}>
                 <img
-                  src={img.previewUrl}
-                  alt={img.angle}
-                  className="w-full h-full object-cover"
+                  src={selectedImage.previewUrl}
+                  alt={selectedImage.angle}
+                  className="max-w-full max-h-[50vh] object-contain"
                 />
-              </button>
-            ))}
+
+                {/* Angle badge */}
+                <button
+                  onClick={() => setShowAngleSelector(true)}
+                  className="absolute top-3 right-3 bg-burnt/70 text-parchment-light px-3 py-1.5 rounded text-sm font-medium flex items-center gap-2 backdrop-blur-sm"
+                >
+                  {t(`capture.angles.${selectedImage.angle}`)}
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {/* Delete button */}
+                <button
+                  onClick={() => handleRemoveImage(selectedImage.id)}
+                  className="absolute top-3 left-3 bg-error/80 text-white p-2 rounded backdrop-blur-sm"
+                  aria-label={t('common.delete')}
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Thumbnail strip */}
+          <div className="parchment-card p-3">
+            <p className="text-sm text-text-muted font-manuscript mb-2">
+              {t('capture.photosCount', { count: capturedImages.length })}
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {capturedImages.map((img) => (
+                <button
+                  key={img.id}
+                  onClick={() => setSelectedImage(img)}
+                  className={`w-16 h-16 md:w-20 md:h-20 rounded overflow-hidden flex-shrink-0 border-2 transition-all ${
+                    selectedImage?.id === img.id
+                      ? 'border-terracotta shadow-md scale-105'
+                      : 'border-sepia/20 hover:border-terracotta/50'
+                  }`}
+                >
+                  <img
+                    src={img.previewUrl}
+                    alt={img.angle}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Bottom actions - fixed */}
       <div className="glass-parchment border-t border-sepia/20 p-4">
-        <button
-          onClick={onConfirm}
-          className="btn-seal w-full"
-        >
-          {t('capture.createArtifact')}
-        </button>
+        <div className="max-w-md mx-auto">
+          <button
+            onClick={onConfirm}
+            className="btn-seal w-full"
+          >
+            {t('capture.createArtifact')}
+          </button>
+        </div>
       </div>
 
       {/* Angle selector modal */}
       {showAngleSelector && (
         <div
-          className="fixed inset-0 bg-burnt/60 z-60 flex items-end animate-fade-in"
+          className="fixed inset-0 bg-burnt/60 z-60 flex items-center md:items-center justify-end md:justify-center animate-fade-in"
           onClick={() => setShowAngleSelector(false)}
         >
           <div
-            className="glass-parchment w-full rounded-t-2xl safe-area-bottom animate-slide-up"
+            className="glass-parchment w-full md:w-auto md:min-w-[400px] md:rounded-2xl rounded-t-2xl safe-area-bottom animate-slide-up md:animate-fade-in-up"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="h-px bg-gradient-to-r from-transparent via-sepia/40 to-transparent" />
@@ -194,10 +199,11 @@ export function CapturePreview({
                   <button
                     key={angle}
                     onClick={() => handleAngleChange(angle)}
-                    className={`p-3 rounded text-left transition-all ${selectedImage?.angle === angle
+                    className={`p-3 rounded text-left transition-all ${
+                      selectedImage?.angle === angle
                         ? 'bg-terracotta text-parchment-light shadow-md'
                         : 'parchment-card text-earth hover:bg-sand'
-                      }`}
+                    }`}
                   >
                     {t(`capture.angles.${angle}`)}
                   </button>

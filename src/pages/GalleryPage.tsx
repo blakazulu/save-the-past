@@ -58,33 +58,35 @@ export default function GalleryPage() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col p-4 pb-20">
-        {/* Toolbar */}
-        <div className="mb-4 animate-fade-in">
-          <GalleryToolbar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            onFilterClick={() => setShowFilters(true)}
-            hasActiveFilters={hasActiveFilters}
-          />
-        </div>
-
-        {/* Content */}
-        <div className="flex-1">
-          {isLoading ? (
-            <GallerySkeleton variant={viewMode} count={6} />
-          ) : filteredArtifacts.length === 0 ? (
-            <GalleryEmpty
-              variant="no-results"
+        <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col">
+          {/* Toolbar */}
+          <div className="mb-4 animate-fade-in">
+            <GalleryToolbar
               searchQuery={searchQuery}
-              onClearSearch={clearFilters}
+              onSearchChange={setSearchQuery}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              onFilterClick={() => setShowFilters(true)}
+              hasActiveFilters={hasActiveFilters}
             />
-          ) : viewMode === 'grid' ? (
-            <GalleryGrid artifacts={filteredArtifacts} />
-          ) : (
-            <GalleryList artifacts={filteredArtifacts} />
-          )}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1">
+            {isLoading ? (
+              <GallerySkeleton variant={viewMode} count={6} />
+            ) : filteredArtifacts.length === 0 ? (
+              <GalleryEmpty
+                variant="no-results"
+                searchQuery={searchQuery}
+                onClearSearch={clearFilters}
+              />
+            ) : viewMode === 'grid' ? (
+              <GalleryGrid artifacts={filteredArtifacts} />
+            ) : (
+              <GalleryList artifacts={filteredArtifacts} />
+            )}
+          </div>
         </div>
       </main>
 

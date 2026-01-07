@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { useCaptureStore } from '@/stores';
-import { UploadIcon } from '@/components/icons';
+import { UploadIcon, BackIcon } from '@/components/icons';
 import type { ImageAngle } from '@/types';
 
 interface FileUploadProps {
@@ -91,101 +91,107 @@ export function FileUpload({ onComplete, onCancel }: FileUploadProps) {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-bg z-50 flex flex-col safe-area-top safe-area-bottom">
+    <div className="fixed inset-0 z-50 flex flex-col safe-area-top safe-area-bottom">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-sand">
-        <button
-          onClick={onCancel}
-          className="text-text-secondary hover:text-earth"
-        >
-          {t('common.cancel')}
-        </button>
-        <h1 className="text-lg font-semibold text-earth">
-          {t('capture.upload')}
-        </h1>
-        <div className="w-16" />
+      <div className="glass-parchment border-b border-sepia/20">
+        <div className="max-w-4xl mx-auto flex items-center justify-between px-4 py-3">
+          <button
+            onClick={onCancel}
+            className="p-2 -ml-2 hover:bg-sand/50 rounded-lg transition-colors"
+          >
+            <BackIcon className="w-5 h-5 text-earth" />
+          </button>
+          <h1 className="font-display text-lg font-semibold text-earth">
+            {t('capture.upload')}
+          </h1>
+          <div className="w-9" />
+        </div>
       </div>
 
       {/* Upload area */}
-      <div className="flex-1 p-6 flex flex-col">
-        <div
-          onClick={handleClick}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          className={`flex-1 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-colors ${
-            isDragging
-              ? 'border-terracotta bg-terracotta/10'
-              : 'border-sand hover:border-clay hover:bg-sand/50'
-          }`}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-
+      <div className="flex-1 p-4 md:p-6 flex flex-col">
+        <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col">
           <div
-            className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 ${
-              isDragging ? 'bg-terracotta/20' : 'bg-sand'
+            onClick={handleClick}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={`flex-1 parchment-card border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all ${
+              isDragging
+                ? 'border-terracotta bg-terracotta/5'
+                : 'border-sepia/30 hover:border-terracotta hover:bg-sand/30'
             }`}
           >
-            <UploadIcon
-              className={`w-10 h-10 ${
-                isDragging ? 'text-terracotta' : 'text-clay'
-              }`}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
             />
-          </div>
 
-          <h2 className="text-xl font-semibold text-earth mb-2">
-            {isDragging ? t('capture.dropHere') : t('capture.dragDrop')}
-          </h2>
-
-          <p className="text-text-secondary text-center max-w-xs">
-            {t('capture.uploadHint')}
-          </p>
-
-          <button className="mt-6 bg-terracotta text-white px-6 py-3 rounded-xl font-semibold hover:bg-clay transition-colors">
-            {t('capture.browseFiles')}
-          </button>
-        </div>
-
-        {/* Preview thumbnails */}
-        {capturedImages.length > 0 && (
-          <div className="mt-4">
-            <p className="text-sm text-text-secondary mb-2">
-              {t('capture.selectedPhotos', { count: capturedImages.length })}
-            </p>
-            <div className="flex gap-2 overflow-x-auto">
-              {capturedImages.map((img) => (
-                <div
-                  key={img.id}
-                  className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-sand"
-                >
-                  <img
-                    src={img.previewUrl}
-                    alt={img.angle}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
+            <div
+              className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 ${
+                isDragging ? 'bg-terracotta/20' : 'bg-sand/50'
+              }`}
+            >
+              <UploadIcon
+                className={`w-10 h-10 ${
+                  isDragging ? 'text-terracotta' : 'text-earth/50'
+                }`}
+              />
             </div>
+
+            <h2 className="font-display text-xl font-semibold text-earth mb-2">
+              {isDragging ? t('capture.dropHere') : t('capture.dragDrop')}
+            </h2>
+
+            <p className="text-text-secondary text-center max-w-xs font-manuscript italic">
+              {t('capture.uploadHint')}
+            </p>
+
+            <button className="btn-seal mt-6">
+              {t('capture.browseFiles')}
+            </button>
           </div>
-        )}
+
+          {/* Preview thumbnails */}
+          {capturedImages.length > 0 && (
+            <div className="mt-4 parchment-card p-3">
+              <p className="text-sm text-text-muted font-manuscript mb-2">
+                {t('capture.selectedPhotos', { count: capturedImages.length })}
+              </p>
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {capturedImages.map((img) => (
+                  <div
+                    key={img.id}
+                    className="w-16 h-16 md:w-20 md:h-20 rounded overflow-hidden flex-shrink-0 border border-sepia/20"
+                  >
+                    <img
+                      src={img.previewUrl}
+                      alt={img.angle}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Continue button */}
       {capturedImages.length > 0 && (
-        <div className="p-4 border-t border-sand">
-          <button
-            onClick={onComplete}
-            className="w-full bg-terracotta text-white py-4 rounded-xl font-semibold hover:bg-clay transition-colors"
-          >
-            {t('capture.continue')}
-          </button>
+        <div className="glass-parchment border-t border-sepia/20 p-4">
+          <div className="max-w-md mx-auto">
+            <button
+              onClick={onComplete}
+              className="btn-seal w-full"
+            >
+              {t('capture.continue')}
+            </button>
+          </div>
         </div>
       )}
     </div>
