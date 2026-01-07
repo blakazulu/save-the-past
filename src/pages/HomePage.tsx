@@ -26,7 +26,7 @@ export default function HomePage() {
       <main className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
         <div className="max-w-sm w-full text-center">
           {/* Logo with vintage frame */}
-          <div className="relative mb-8 animate-fade-in">
+          <div className="relative animate-fade-in">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-44 h-44 rounded-full bg-gradient-to-br from-sand/50 to-parchment-dark/30 blur-xl" />
             </div>
@@ -34,7 +34,7 @@ export default function HomePage() {
               <img
                 src="/logo-full.png"
                 alt={t('app.name')}
-                className="w-48 h-auto mx-auto drop-shadow-lg"
+                className="md:w-64 w-52 h-auto mx-auto drop-shadow-lg"
               />
             </div>
           </div>
