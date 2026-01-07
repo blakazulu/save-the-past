@@ -485,12 +485,12 @@ interface UseGenerateInfoCardReturn {
   - Structured JSON response parsing
 
 ### Phase 9: Artifact Detail Page
-- [ ] Build DetailHeader with back navigation
-- [ ] Create TabNav (3D Model, Photos, Info)
-- [ ] Implement Model3DTab with ModelViewer + ReconstructionCard
-- [ ] Build PhotosTab with image grid
-- [ ] Create InfoTab with InfoCard components
-- [ ] Wire up ArtifactDetailPage with all tabs
+- [x] Build DetailHeader with back navigation
+- [x] Create TabNav (3D Model, Photos, Info)
+- [x] Implement Model3DTab with ModelViewer + ReconstructionCard
+- [x] Build PhotosTab with image grid
+- [x] Create InfoTab with InfoCard components
+- [x] Wire up ArtifactDetailPage with all tabs
 
 ### Phase 10: PWA Installation
 - [ ] Add InstallPrompt for PWA installation on phones
