@@ -15,21 +15,26 @@ interface InfoCardRequest {
   metadata?: Partial<ArtifactMetadata>;
 }
 
+interface LocalizedText {
+  en: string;
+  he: string;
+}
+
 interface InfoCardAnalysis {
-  material: string;
+  material: LocalizedText;
   estimatedAge: {
-    range: string;
+    range: LocalizedText;
     confidence: 'high' | 'medium' | 'low';
-    reasoning?: string;
+    reasoning?: LocalizedText;
   };
-  possibleUse: string;
-  culturalContext: string;
-  similarArtifacts: string[];
-  preservationNotes: string;
+  possibleUse: LocalizedText;
+  culturalContext: LocalizedText;
+  similarArtifacts: LocalizedText[];
+  preservationNotes: LocalizedText;
   aiModel: string;
   aiConfidence: number;
   isHumanEdited: boolean;
-  disclaimer: string;
+  disclaimer: LocalizedText;
 }
 
 interface InfoCardResponse {
@@ -39,34 +44,54 @@ interface InfoCardResponse {
   processingTimeMs?: number;
 }
 
-const ARCHAEOLOGY_ANALYSIS_PROMPT = `You are an expert archaeologist and artifact specialist. Analyze the provided image of an archaeological artifact and provide a detailed analysis.
+const ARCHAEOLOGY_ANALYSIS_PROMPT = `You are an expert archaeologist and artifact specialist. Analyze the provided image of an archaeological artifact and provide a detailed analysis in BOTH English and Hebrew.
 
 Context provided by the discoverer:
 {{METADATA}}
 
-Based on your analysis of the image and any provided context, generate a JSON response with the following structure:
+Based on your analysis of the image and any provided context, generate a JSON response with BILINGUAL content (English and Hebrew). Use this exact structure:
 
 {
-  "material": "Primary material(s) the artifact is made of (e.g., 'Ceramic with traces of red ochre pigment', 'Bronze with copper patina')",
-  "estimatedAge": {
-    "range": "Estimated age range (e.g., '3500-3000 BCE', 'Late Bronze Age', '2nd-3rd century CE')",
-    "confidence": "high" | "medium" | "low",
-    "reasoning": "Brief explanation of how you estimated the age based on style, material, construction techniques, etc."
+  "material": {
+    "en": "Primary material(s) in English (e.g., 'Ceramic with traces of red ochre pigment')",
+    "he": "החומר העיקרי בעברית (לדוגמה: 'קרמיקה עם עקבות פיגמנט אוכרה אדום')"
   },
-  "possibleUse": "Most likely original purpose or function (e.g., 'Ritual vessel for liquid offerings', 'Agricultural tool for grain harvesting')",
-  "culturalContext": "Cultural or historical context (e.g., 'Canaanite period, likely associated with temple worship', 'Roman provincial, common in military settlements')",
-  "similarArtifacts": ["List of 2-4 similar known artifacts or types", "Include museum references if applicable"],
-  "preservationNotes": "Notes on preservation state and recommendations (e.g., 'Good condition with minor surface erosion. Avoid moisture. Handle with cotton gloves.')",
-  "aiConfidence": 0.0-1.0 (overall confidence in the analysis)
+  "estimatedAge": {
+    "range": {
+      "en": "Estimated age range in English (e.g., '3500-3000 BCE', 'Late Bronze Age')",
+      "he": "טווח גיל משוער בעברית (לדוגמה: '3500-3000 לפנה״ס', 'תקופת הברונזה המאוחרת')"
+    },
+    "confidence": "high" | "medium" | "low",
+    "reasoning": {
+      "en": "Brief explanation in English",
+      "he": "הסבר קצר בעברית"
+    }
+  },
+  "possibleUse": {
+    "en": "Most likely original purpose in English",
+    "he": "השימוש המקורי הסביר ביותר בעברית"
+  },
+  "culturalContext": {
+    "en": "Cultural or historical context in English",
+    "he": "הקשר תרבותי או היסטורי בעברית"
+  },
+  "similarArtifacts": [
+    {"en": "Similar artifact 1 in English", "he": "ממצא דומה 1 בעברית"},
+    {"en": "Similar artifact 2 in English", "he": "ממצא דומה 2 בעברית"}
+  ],
+  "preservationNotes": {
+    "en": "Preservation notes in English",
+    "he": "הערות שימור בעברית"
+  },
+  "aiConfidence": 0.0-1.0
 }
 
 Important guidelines:
+- Provide ALL text fields in BOTH English AND Hebrew
+- Hebrew text should be natural, academic Hebrew (not machine translation)
 - Be specific but acknowledge uncertainty where appropriate
-- If the image is unclear or the artifact is damaged, adjust confidence accordingly
-- Consider the provided metadata context when available
-- Focus on observable features rather than speculation
 - Use academic terminology but keep explanations accessible
-- If you cannot determine something with confidence, say so rather than guessing
+- If you cannot determine something with confidence, say so in both languages
 
 Respond ONLY with the JSON object, no additional text.`;
 
@@ -99,6 +124,20 @@ function formatMetadata(metadata?: Partial<ArtifactMetadata>): string {
   return parts.length > 0 ? parts.join('\n') : 'No additional context provided.';
 }
 
+function ensureLocalized(value: unknown, fallbackEn: string, fallbackHe: string): LocalizedText {
+  if (value && typeof value === 'object' && 'en' in value && 'he' in value) {
+    return {
+      en: String((value as Record<string, unknown>).en) || fallbackEn,
+      he: String((value as Record<string, unknown>).he) || fallbackHe,
+    };
+  }
+  // If it's a plain string (old format), use it for English and provide Hebrew fallback
+  if (typeof value === 'string') {
+    return { en: value, he: fallbackHe };
+  }
+  return { en: fallbackEn, he: fallbackHe };
+}
+
 function parseAnalysisResponse(responseText: string): InfoCardAnalysis {
   // Try to extract JSON from the response
   let jsonStr = responseText.trim();
@@ -116,29 +155,56 @@ function parseAnalysisResponse(responseText: string): InfoCardAnalysis {
 
   const parsed = JSON.parse(jsonStr);
 
-  // Validate and normalize the response
+  // Validate and normalize the response with bilingual support
   const analysis: InfoCardAnalysis = {
-    material: parsed.material || 'Unknown material',
+    material: ensureLocalized(parsed.material, 'Unknown material', 'חומר לא ידוע'),
     estimatedAge: {
-      range: parsed.estimatedAge?.range || 'Unknown period',
+      range: ensureLocalized(
+        parsed.estimatedAge?.range,
+        'Unknown period',
+        'תקופה לא ידועה'
+      ),
       confidence: ['high', 'medium', 'low'].includes(parsed.estimatedAge?.confidence)
         ? parsed.estimatedAge.confidence
         : 'low',
-      reasoning: parsed.estimatedAge?.reasoning,
+      reasoning: parsed.estimatedAge?.reasoning
+        ? ensureLocalized(parsed.estimatedAge.reasoning, '', '')
+        : undefined,
     },
-    possibleUse: parsed.possibleUse || 'Unknown function',
-    culturalContext: parsed.culturalContext || 'Cultural context undetermined',
+    possibleUse: ensureLocalized(parsed.possibleUse, 'Unknown function', 'שימוש לא ידוע'),
+    culturalContext: ensureLocalized(
+      parsed.culturalContext,
+      'Cultural context undetermined',
+      'הקשר תרבותי לא נקבע'
+    ),
     similarArtifacts: Array.isArray(parsed.similarArtifacts)
-      ? parsed.similarArtifacts.filter((s: unknown) => typeof s === 'string')
+      ? parsed.similarArtifacts.map((item: unknown) => {
+          if (typeof item === 'string') {
+            return { en: item, he: item };
+          }
+          if (item && typeof item === 'object' && 'en' in item && 'he' in item) {
+            return {
+              en: String((item as Record<string, unknown>).en),
+              he: String((item as Record<string, unknown>).he),
+            };
+          }
+          return { en: 'Unknown artifact', he: 'ממצא לא ידוע' };
+        })
       : [],
-    preservationNotes: parsed.preservationNotes || 'No specific preservation notes',
+    preservationNotes: ensureLocalized(
+      parsed.preservationNotes,
+      'No specific preservation notes',
+      'אין הערות שימור ספציפיות'
+    ),
     aiModel: 'gemini-2.0-flash-exp',
     aiConfidence: typeof parsed.aiConfidence === 'number'
       ? Math.max(0, Math.min(1, parsed.aiConfidence))
       : 0.5,
     isHumanEdited: false,
-    disclaimer:
-      'This analysis was generated by AI and should be verified by a qualified archaeologist. AI analysis may contain errors or misidentifications.',
+    disclaimer: {
+      en: 'This analysis was generated by AI and should be verified by a qualified archaeologist. AI analysis may contain errors or misidentifications.',
+      he: 'ניתוח זה נוצר על ידי בינה מלאכותית ויש לאמתו על ידי ארכיאולוג מוסמך. ניתוח AI עלול להכיל שגיאות או זיהויים שגויים.',
+    },
   };
 
   return analysis;

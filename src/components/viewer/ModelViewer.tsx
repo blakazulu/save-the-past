@@ -2,6 +2,7 @@ import { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment, Center } from '@react-three/drei';
 import { useTranslation } from 'react-i18next';
+import * as THREE from 'three';
 
 interface ModelViewerProps {
   modelUrl: string;
@@ -11,6 +12,28 @@ interface ModelViewerProps {
 
 function Model({ url }: { url: string }) {
   const { scene } = useGLTF(url);
+
+  // Ensure materials render correctly and enable shadows
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+
+        // If the model has no material or is plain white, apply a default clay material
+        if (child.material) {
+          const mat = child.material as THREE.MeshStandardMaterial;
+          // Only apply default if there's no texture and color is white
+          if (!mat.map && mat.color && mat.color.getHex() === 0xffffff) {
+            mat.color.setHex(0xC17F59); // terracotta color
+            mat.roughness = 0.7;
+            mat.metalness = 0.1;
+          }
+          mat.needsUpdate = true;
+        }
+      }
+    });
+  }, [scene]);
 
   return (
     <Center>

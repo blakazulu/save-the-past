@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { InfoCard } from '@/types';
+import type { InfoCard, LocalizedText } from '@/types';
 
 interface InfoCardEditorProps {
   infoCard: InfoCard;
@@ -15,16 +15,33 @@ export function InfoCardEditor({
   onCancel,
   isLoading = false,
 }: InfoCardEditorProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language === 'he' ? 'he' : 'en';
+
+  // Helper to get text from LocalizedText
+  const getText = (text: LocalizedText | string | undefined): string => {
+    if (!text) return '';
+    if (typeof text === 'string') return text;
+    return text[currentLang] || text.en || '';
+  };
+
+  // Helper to create updated LocalizedText
+  const updateLocalizedText = (original: LocalizedText, newValue: string): LocalizedText => {
+    return {
+      ...original,
+      [currentLang]: newValue,
+    };
+  };
+
   const [formData, setFormData] = useState({
-    material: infoCard.material,
-    ageRange: infoCard.estimatedAge.range,
+    material: getText(infoCard.material),
+    ageRange: getText(infoCard.estimatedAge.range),
     ageConfidence: infoCard.estimatedAge.confidence,
-    ageReasoning: infoCard.estimatedAge.reasoning || '',
-    possibleUse: infoCard.possibleUse,
-    culturalContext: infoCard.culturalContext,
-    similarArtifacts: infoCard.similarArtifacts.join('\n'),
-    preservationNotes: infoCard.preservationNotes,
+    ageReasoning: getText(infoCard.estimatedAge.reasoning),
+    possibleUse: getText(infoCard.possibleUse),
+    culturalContext: getText(infoCard.culturalContext),
+    similarArtifacts: infoCard.similarArtifacts.map(a => getText(a)).join('\n'),
+    preservationNotes: getText(infoCard.preservationNotes),
   });
 
   const handleChange = (
@@ -36,20 +53,30 @@ export function InfoCardEditor({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Update the localized text fields with the edited values
+    const updatedSimilarArtifacts = formData.similarArtifacts
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((text, index) => {
+        const original = infoCard.similarArtifacts[index] || { en: '', he: '' };
+        return updateLocalizedText(original, text);
+      });
+
     onSave({
-      material: formData.material,
+      material: updateLocalizedText(infoCard.material, formData.material),
       estimatedAge: {
-        range: formData.ageRange,
+        range: updateLocalizedText(infoCard.estimatedAge.range, formData.ageRange),
         confidence: formData.ageConfidence as 'high' | 'medium' | 'low',
-        reasoning: formData.ageReasoning || undefined,
+        reasoning: formData.ageReasoning
+          ? updateLocalizedText(infoCard.estimatedAge.reasoning || { en: '', he: '' }, formData.ageReasoning)
+          : undefined,
       },
-      possibleUse: formData.possibleUse,
-      culturalContext: formData.culturalContext,
-      similarArtifacts: formData.similarArtifacts
-        .split('\n')
-        .map((s) => s.trim())
-        .filter(Boolean),
-      preservationNotes: formData.preservationNotes,
+      possibleUse: updateLocalizedText(infoCard.possibleUse, formData.possibleUse),
+      culturalContext: updateLocalizedText(infoCard.culturalContext, formData.culturalContext),
+      similarArtifacts: updatedSimilarArtifacts,
+      preservationNotes: updateLocalizedText(infoCard.preservationNotes, formData.preservationNotes),
       isHumanEdited: true,
       updatedAt: new Date(),
     });
@@ -57,6 +84,11 @@ export function InfoCardEditor({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Language indicator */}
+      <div className="text-base text-text-secondary bg-sand/50 px-3 py-2 rounded-lg">
+        {t('infoCard.editingLanguage')}: <span className="font-medium">{currentLang === 'he' ? 'עברית' : 'English'}</span>
+      </div>
+
       {/* Material */}
       <div>
         <label className="block text-base font-medium text-text-secondary mb-1">

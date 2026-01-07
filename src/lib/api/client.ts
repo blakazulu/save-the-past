@@ -79,21 +79,26 @@ export interface InfoCardRequest {
   };
 }
 
+export interface LocalizedText {
+  en: string;
+  he: string;
+}
+
 export interface InfoCardAnalysis {
-  material: string;
+  material: LocalizedText;
   estimatedAge: {
-    range: string;
+    range: LocalizedText;
     confidence: 'high' | 'medium' | 'low';
-    reasoning?: string;
+    reasoning?: LocalizedText;
   };
-  possibleUse: string;
-  culturalContext: string;
-  similarArtifacts: string[];
-  preservationNotes: string;
+  possibleUse: LocalizedText;
+  culturalContext: LocalizedText;
+  similarArtifacts: LocalizedText[];
+  preservationNotes: LocalizedText;
   aiModel: string;
   aiConfidence: number;
   isHumanEdited: boolean;
-  disclaimer: string;
+  disclaimer: LocalizedText;
 }
 
 export interface InfoCardGenerationResponse {

@@ -67,25 +67,30 @@ export interface Model3D {
   };
 }
 
+export interface LocalizedText {
+  en: string;
+  he: string;
+}
+
 export interface InfoCard {
   id: string;
   artifactId: string;
   createdAt: Date;
   updatedAt: Date;
-  material: string;
+  material: LocalizedText;
   estimatedAge: {
-    range: string;
+    range: LocalizedText;
     confidence: 'high' | 'medium' | 'low';
-    reasoning?: string;
+    reasoning?: LocalizedText;
   };
-  possibleUse: string;
-  culturalContext: string;
-  similarArtifacts: string[];
-  preservationNotes: string;
+  possibleUse: LocalizedText;
+  culturalContext: LocalizedText;
+  similarArtifacts: LocalizedText[];
+  preservationNotes: LocalizedText;
   aiModel: string;
   aiConfidence: number;
   isHumanEdited: boolean;
-  disclaimer: string;
+  disclaimer: LocalizedText;
 }
 
 export interface ProcessingStatus {

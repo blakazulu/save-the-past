@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import type { InfoCard } from '@/types';
+import type { InfoCard, LocalizedText } from '@/types';
 
 interface InfoCardDisplayProps {
   infoCard: InfoCard;
@@ -8,7 +8,15 @@ interface InfoCardDisplayProps {
 }
 
 export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // Helper to get localized text based on current language
+  const getLocalizedText = (text: LocalizedText | string | undefined): string => {
+    if (!text) return '';
+    if (typeof text === 'string') return text;
+    const lang = i18n.language === 'he' ? 'he' : 'en';
+    return text[lang] || text.en || '';
+  };
 
   const confidenceColor = {
     high: 'text-success bg-success/10',
@@ -50,7 +58,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
           <h4 className="text-base font-medium text-text-secondary mb-1">
             {t('infoCard.fields.material')}
           </h4>
-          <p className="text-earth">{infoCard.material}</p>
+          <p className="text-earth">{getLocalizedText(infoCard.material)}</p>
         </div>
 
         {/* Estimated Age */}
@@ -59,7 +67,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
             {t('infoCard.fields.estimatedAge')}
           </h4>
           <div className="flex items-center gap-2">
-            <p className="text-earth">{infoCard.estimatedAge.range}</p>
+            <p className="text-earth">{getLocalizedText(infoCard.estimatedAge.range)}</p>
             <span
               className={`px-2 py-0.5 rounded-full text-md font-medium ${confidenceColor[infoCard.estimatedAge.confidence]
                 }`}
@@ -69,7 +77,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
           </div>
           {infoCard.estimatedAge.reasoning && (
             <p className="text-base text-text-secondary mt-1">
-              {infoCard.estimatedAge.reasoning}
+              {getLocalizedText(infoCard.estimatedAge.reasoning)}
             </p>
           )}
         </div>
@@ -79,7 +87,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
           <h4 className="text-base font-medium text-text-secondary mb-1">
             {t('infoCard.fields.possibleUse')}
           </h4>
-          <p className="text-earth">{infoCard.possibleUse}</p>
+          <p className="text-earth">{getLocalizedText(infoCard.possibleUse)}</p>
         </div>
 
         {/* Cultural Context */}
@@ -87,7 +95,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
           <h4 className="text-base font-medium text-text-secondary mb-1">
             {t('infoCard.fields.culturalContext')}
           </h4>
-          <p className="text-earth">{infoCard.culturalContext}</p>
+          <p className="text-earth">{getLocalizedText(infoCard.culturalContext)}</p>
         </div>
 
         {/* Similar Artifacts */}
@@ -99,7 +107,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
             <ul className="list-disc list-inside space-y-1">
               {infoCard.similarArtifacts.map((artifact, index) => (
                 <li key={index} className="text-earth text-base">
-                  {artifact}
+                  {getLocalizedText(artifact)}
                 </li>
               ))}
             </ul>
@@ -107,12 +115,12 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
         )}
 
         {/* Preservation Notes */}
-        {infoCard.preservationNotes && (
+        {getLocalizedText(infoCard.preservationNotes) && (
           <div className="p-4">
             <h4 className="text-base font-medium text-text-secondary mb-1">
               {t('infoCard.fields.preservationNotes')}
             </h4>
-            <p className="text-earth">{infoCard.preservationNotes}</p>
+            <p className="text-earth">{getLocalizedText(infoCard.preservationNotes)}</p>
           </div>
         )}
       </div>
@@ -126,7 +134,7 @@ export function InfoCardDisplay({ infoCard, onEdit, onExport }: InfoCardDisplayP
               {t('infoCard.aiDisclaimer')}
             </p>
             <p className="text-md text-text-secondary">
-              {infoCard.disclaimer}
+              {getLocalizedText(infoCard.disclaimer)}
             </p>
             {infoCard.isHumanEdited && (
               <p className="text-md text-success mt-1">

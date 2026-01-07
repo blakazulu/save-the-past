@@ -166,6 +166,7 @@
       "preservationNotes": "Preservation Notes"
     },
     "onePerLine": "one per line",
+    "editingLanguage": "Editing language",
     "metadata": {
       "name": "Artifact Name",
       "namePlaceholder": "Enter artifact name",
