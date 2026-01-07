@@ -21,13 +21,6 @@ interface ReconstructResponse {
 const STABLE_FAST_3D_SPACE = 'stabilityai/stable-fast-3d';
 const HUNYUAN3D_SPACE = 'tencent/Hunyuan3D-2';
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 2000;
-
-async function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 async function base64ToBlob(base64: string): Promise<Blob> {
   // Remove data URL prefix if present
   const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
@@ -182,7 +175,7 @@ export default async function handler(
   }
 
   const startTime = Date.now();
-  let retryCount = 0;
+  const errors: string[] = [];
 
   try {
     const body: ReconstructRequest = await req.json();
@@ -195,64 +188,41 @@ export default async function handler(
     }
 
     const imageBlob = await base64ToBlob(body.imageBase64);
-    const preferredMethod = body.method || 'stable-fast-3d';
     const removeBackground = body.removeBackground ?? true;
 
     let modelBlob: Blob | null = null;
-    let usedMethod: 'stable-fast-3d' | 'hunyuan3d' = preferredMethod;
-    let lastError: Error | null = null;
+    let usedMethod: 'stable-fast-3d' | 'hunyuan3d' = 'stable-fast-3d';
 
-    // Try preferred method first with retries
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        if (preferredMethod === 'stable-fast-3d') {
-          const result = await reconstructWithStableFast3D(imageBlob, removeBackground);
-          modelBlob = result.modelBlob;
-          usedMethod = result.method;
-        } else {
-          const result = await reconstructWithHunyuan3D(imageBlob, removeBackground);
-          modelBlob = result.modelBlob;
-          usedMethod = result.method;
-        }
-        break;
-      } catch (error) {
-        lastError = error as Error;
-        retryCount = attempt + 1;
-
-        // Check for rate limiting
-        if (lastError.message.includes('429') || lastError.message.includes('rate limit')) {
-          await sleep(RETRY_DELAY_MS * (attempt + 1));
-          continue;
-        }
-
-        // For other errors, try fallback method immediately
-        break;
-      }
+    // Try Stable Fast 3D first
+    try {
+      console.log('Trying Stable Fast 3D...');
+      const result = await reconstructWithStableFast3D(imageBlob, removeBackground);
+      modelBlob = result.modelBlob;
+      usedMethod = result.method;
+      console.log('Stable Fast 3D succeeded');
+    } catch (error) {
+      const errMsg = `SF3D: ${error instanceof Error ? error.message : String(error)}`;
+      console.error(errMsg);
+      errors.push(errMsg);
     }
 
-    // If primary method failed, try fallback
-    if (!modelBlob && preferredMethod === 'stable-fast-3d') {
+    // If Stable Fast 3D failed, try Hunyuan3D
+    if (!modelBlob) {
       try {
+        console.log('Trying Hunyuan3D...');
         const result = await reconstructWithHunyuan3D(imageBlob, removeBackground);
         modelBlob = result.modelBlob;
         usedMethod = result.method;
-        lastError = null;
+        console.log('Hunyuan3D succeeded');
       } catch (error) {
-        lastError = error as Error;
-      }
-    } else if (!modelBlob && preferredMethod === 'hunyuan3d') {
-      try {
-        const result = await reconstructWithStableFast3D(imageBlob, removeBackground);
-        modelBlob = result.modelBlob;
-        usedMethod = result.method;
-        lastError = null;
-      } catch (error) {
-        lastError = error as Error;
+        const errMsg = `Hunyuan3D: ${error instanceof Error ? error.message : String(error)}`;
+        console.error(errMsg);
+        errors.push(errMsg);
       }
     }
 
     if (!modelBlob) {
-      throw lastError || new Error('All reconstruction methods failed');
+      throw new Error(errors.join(' | '));
     }
 
     // Convert model to base64
@@ -264,7 +234,6 @@ export default async function handler(
       format: 'glb',
       method: usedMethod,
       processingTimeMs: Date.now() - startTime,
-      retryCount,
     };
 
     return new Response(JSON.stringify(response), {
@@ -279,7 +248,6 @@ export default async function handler(
       success: false,
       error: errorMessage,
       processingTimeMs: Date.now() - startTime,
-      retryCount,
     };
 
     return new Response(JSON.stringify(response), {
