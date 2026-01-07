@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * ScribbleBackground - Animated archaeological scribbles that draw themselves
@@ -109,6 +109,7 @@ let scribbleIdCounter = 0;
 
 export function ScribbleBackground() {
   const [scribbles, setScribbles] = useState<ActiveScribble[]>([]);
+  const timeoutIds = useRef<Set<number>>(new Set());
 
   const createRandomScribble = useCallback((): ActiveScribble => {
     // Avoid center - pick either left/right edge or top/bottom edge
@@ -148,26 +149,67 @@ export function ScribbleBackground() {
       const newScribble = createRandomScribble();
 
       // Schedule removal after animation completes
-      setTimeout(() => {
+      const timeoutId = window.setTimeout(() => {
         setScribbles(curr => curr.filter(s => s.id !== newScribble.id));
+        timeoutIds.current.delete(timeoutId);
       }, (newScribble.duration + 2) * 1000); // +2s for fade out
+
+      timeoutIds.current.add(timeoutId);
 
       return [...prev, newScribble];
     });
   }, [createRandomScribble]);
 
   useEffect(() => {
-    // Start with 3 scribbles
-    for (let i = 0; i < 3; i++) {
-      setTimeout(() => addScribble(), i * 600);
+    let interval: number | undefined;
+    const initialTimeouts: number[] = [];
+
+    const startAnimations = () => {
+      // Start with 3 scribbles
+      for (let i = 0; i < 3; i++) {
+        const timeoutId = window.setTimeout(() => addScribble(), i * 600);
+        initialTimeouts.push(timeoutId);
+      }
+
+      // Add new scribbles periodically (maintain 3-6 active)
+      interval = window.setInterval(() => {
+        addScribble();
+      }, 2500); // Every 2.5 seconds
+    };
+
+    const stopAnimations = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = undefined;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopAnimations();
+      } else {
+        startAnimations();
+      }
+    };
+
+    // Start if page is visible
+    if (!document.hidden) {
+      startAnimations();
     }
 
-    // Add new scribbles periodically (maintain 3-6 active)
-    const interval = setInterval(() => {
-      addScribble();
-    }, 2500); // Every 2.5 seconds
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    return () => clearInterval(interval);
+    return () => {
+      // Clean up interval
+      stopAnimations();
+      // Clean up initial timeouts
+      initialTimeouts.forEach(id => clearTimeout(id));
+      // Clean up all scribble removal timeouts
+      timeoutIds.current.forEach(id => clearTimeout(id));
+      timeoutIds.current.clear();
+      // Remove visibility listener
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [addScribble]);
 
   return (
