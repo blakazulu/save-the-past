@@ -17,7 +17,7 @@ interface ReconstructResponse {
   retryCount?: number;
 }
 
-const TRELLIS_SPACE = 'JeffreyXiang/TRELLIS';
+const TRELLIS_SPACE = 'trellis-community/TRELLIS';
 const TRIPOSR_SPACE = 'stabilityai/TripoSR';
 
 const MAX_RETRIES = 3;
@@ -55,18 +55,8 @@ async function reconstructWithTrellis(
   const hfToken = process.env.HF_TOKEN;
   const client = await Client.connect(TRELLIS_SPACE, hfToken ? { hf_token: hfToken } : undefined);
 
-  // TRELLIS expects: image, seed, randomize_seed, ss_guidance_strength, ss_sampling_steps, slat_guidance_strength, slat_sampling_steps, mesh_simplify, texture_size
-  const result = await client.predict('/image_to_3d', {
-    image: imageBlob,
-    seed: 0,
-    randomize_seed: true,
-    ss_guidance_strength: 7.5,
-    ss_sampling_steps: 12,
-    slat_guidance_strength: 3,
-    slat_sampling_steps: 12,
-    mesh_simplify: 0.95,
-    texture_size: 1024,
-  });
+  // Use minimal parameters - let TRELLIS use defaults for optional params
+  const result = await client.predict('/image_to_3d', [imageBlob]);
 
   // TRELLIS returns video preview and GLB file
   const data = result.data as { url?: string; path?: string }[];
