@@ -100,6 +100,41 @@
     "english": "English",
     "hebrew": "Hebrew"
   },
+  "reconstruction": {
+    "title": "3D Reconstruction",
+    "description": "Generate a 3D model from your photos",
+    "selectMethod": "Select reconstruction method",
+    "method": {
+      "single": {
+        "title": "Single Image",
+        "description": "Fast reconstruction from one photo"
+      },
+      "multi": {
+        "title": "Multi Image",
+        "description": "Higher quality from multiple angles"
+      }
+    },
+    "minImages": "Requires at least {{count}} images",
+    "generate": "Generate 3D Model",
+    "processing": "Generating 3D Model",
+    "pleaseWait": "This may take a few minutes",
+    "status": {
+      "uploading": "Uploading images...",
+      "processing": "Processing 3D reconstruction...",
+      "saving": "Saving model..."
+    },
+    "error": "Reconstruction Failed",
+    "errorDescription": "Unable to generate 3D model. Please try again.",
+    "complete": "Model Ready",
+    "completeDescription": "Your 3D model has been generated",
+    "viewModel": "View 3D Model"
+  },
+  "viewer": {
+    "fullscreen": "Enter fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "download": "Download model",
+    "hint": "Drag to rotate, pinch to zoom"
+  },
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",

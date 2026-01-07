@@ -100,6 +100,41 @@
     "english": "אנגלית",
     "hebrew": "עברית"
   },
+  "reconstruction": {
+    "title": "שחזור תלת-ממדי",
+    "description": "צור מודל תלת-ממדי מהתמונות שלך",
+    "selectMethod": "בחר שיטת שחזור",
+    "method": {
+      "single": {
+        "title": "תמונה בודדת",
+        "description": "שחזור מהיר מתמונה אחת"
+      },
+      "multi": {
+        "title": "מספר תמונות",
+        "description": "איכות גבוהה יותר ממספר זוויות"
+      }
+    },
+    "minImages": "דורש לפחות {{count}} תמונות",
+    "generate": "צור מודל תלת-ממדי",
+    "processing": "יוצר מודל תלת-ממדי",
+    "pleaseWait": "זה עשוי לקחת מספר דקות",
+    "status": {
+      "uploading": "מעלה תמונות...",
+      "processing": "מעבד שחזור תלת-ממדי...",
+      "saving": "שומר מודל..."
+    },
+    "error": "השחזור נכשל",
+    "errorDescription": "לא ניתן ליצור מודל תלת-ממדי. נסה שוב.",
+    "complete": "המודל מוכן",
+    "completeDescription": "המודל התלת-ממדי שלך נוצר",
+    "viewModel": "צפה במודל תלת-ממדי"
+  },
+  "viewer": {
+    "fullscreen": "מסך מלא",
+    "exitFullscreen": "צא ממסך מלא",
+    "download": "הורד מודל",
+    "hint": "גרור לסיבוב, צבוט לזום"
+  },
   "common": {
     "loading": "טוען...",
     "error": "אירעה שגיאה",

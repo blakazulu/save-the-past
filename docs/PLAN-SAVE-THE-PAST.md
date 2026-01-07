@@ -455,11 +455,11 @@ interface UseGenerateInfoCardReturn {
 - [x] Add empty states and loading skeletons
 
 ### Phase 6: 3D Reconstruction
-- [ ] Create MethodSelector component
-- [ ] Build ReconstructionProgress with status messages
-- [ ] Implement ReconstructionCard (idle, processing, complete, error states)
-- [ ] Create useReconstruct3D hook with full progress tracking
-- [ ] Build ModelViewer with Three.js:
+- [x] Create MethodSelector component
+- [x] Build ReconstructionProgress with status messages
+- [x] Implement ReconstructionCard (idle, processing, complete, error states)
+- [x] Create useReconstruct3D hook with full progress tracking
+- [x] Build ModelViewer with Three.js:
   - GLB loading
   - OrbitControls
   - Lighting setup
