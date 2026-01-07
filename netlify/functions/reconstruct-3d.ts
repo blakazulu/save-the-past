@@ -49,6 +49,27 @@ async function blobToBase64(blob: Blob): Promise<string> {
   return btoa(binary);
 }
 
+// Helper to extract URL from various Gradio response formats
+function extractUrl(item: unknown): string | null {
+  if (!item) return null;
+  if (typeof item === 'string') return item;
+  if (typeof item === 'object') {
+    const obj = item as Record<string, unknown>;
+    // Try common Gradio response properties
+    if (obj.url && typeof obj.url === 'string') return obj.url;
+    if (obj.path && typeof obj.path === 'string') return obj.path;
+    if (obj.value && typeof obj.value === 'string') return obj.value;
+    if (obj.value && typeof obj.value === 'object') {
+      const val = obj.value as Record<string, unknown>;
+      if (val.url && typeof val.url === 'string') return val.url;
+      if (val.path && typeof val.path === 'string') return val.path;
+    }
+    // Check for nested data property
+    if (obj.data && typeof obj.data === 'string') return obj.data;
+  }
+  return null;
+}
+
 async function reconstructWithStableFast3D(
   imageBlob: Blob,
   removeBackground: boolean
@@ -57,7 +78,6 @@ async function reconstructWithStableFast3D(
   const client = await Client.connect(STABLE_FAST_3D_SPACE, hfToken ? { hf_token: hfToken } : undefined);
 
   // Stable Fast 3D API: /run_button endpoint
-  // Parameters: input_image, foreground_ratio, remesh_option, vertex_count, texture_size
   const result = await client.predict('/run_button', {
     input_image: imageBlob,
     foreground_ratio: 0.85,
@@ -66,22 +86,27 @@ async function reconstructWithStableFast3D(
     texture_size: 1024,
   });
 
-  // Returns: [preview_image, 3d_model]
-  const data = result.data as (string | { url?: string; path?: string })[];
+  const data = result.data as unknown[];
 
   // The 3D model is the second item (index 1)
   let glbUrl: string | null = null;
   if (data.length > 1) {
-    const modelItem = data[1];
-    if (typeof modelItem === 'string') {
-      glbUrl = modelItem;
-    } else if (modelItem && typeof modelItem === 'object' && (modelItem.url || modelItem.path)) {
-      glbUrl = modelItem.url || modelItem.path || null;
+    glbUrl = extractUrl(data[1]);
+  }
+
+  // If not found at index 1, try other indices
+  if (!glbUrl) {
+    for (let i = 0; i < data.length; i++) {
+      const url = extractUrl(data[i]);
+      if (url && (url.endsWith('.glb') || url.endsWith('.gltf') || url.includes('file='))) {
+        glbUrl = url;
+        break;
+      }
     }
   }
 
   if (!glbUrl) {
-    throw new Error('No GLB model returned from Stable Fast 3D');
+    throw new Error(`No GLB from Stable Fast 3D. Response: ${JSON.stringify(data).slice(0, 500)}`);
   }
 
   const glbResponse = await fetch(glbUrl);
@@ -112,22 +137,27 @@ async function reconstructWithHunyuan3D(
     randomize_seed: true,
   });
 
-  // Returns: [File (3D model), Html, Json stats, Seed]
-  const data = result.data as (string | { url?: string; path?: string })[];
+  const data = result.data as unknown[];
 
   // The 3D model is the first item
   let modelUrl: string | null = null;
   if (data.length > 0) {
-    const modelItem = data[0];
-    if (typeof modelItem === 'string') {
-      modelUrl = modelItem;
-    } else if (modelItem && typeof modelItem === 'object' && (modelItem.url || modelItem.path)) {
-      modelUrl = modelItem.url || modelItem.path || null;
+    modelUrl = extractUrl(data[0]);
+  }
+
+  // If not found at index 0, try other indices
+  if (!modelUrl) {
+    for (let i = 0; i < data.length; i++) {
+      const url = extractUrl(data[i]);
+      if (url && (url.endsWith('.glb') || url.endsWith('.obj') || url.endsWith('.ply') || url.includes('file='))) {
+        modelUrl = url;
+        break;
+      }
     }
   }
 
   if (!modelUrl) {
-    throw new Error('No 3D model returned from Hunyuan3D');
+    throw new Error(`No 3D model from Hunyuan3D. Response: ${JSON.stringify(data).slice(0, 500)}`);
   }
 
   const modelResponse = await fetch(modelUrl);
