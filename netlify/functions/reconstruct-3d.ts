@@ -3,7 +3,7 @@ import { Client } from '@gradio/client';
 
 interface ReconstructRequest {
   imageBase64: string;
-  method?: 'stable-fast-3d' | 'instant-mesh';
+  method?: 'stable-fast-3d' | 'hunyuan3d';
   removeBackground?: boolean;
 }
 
@@ -11,7 +11,7 @@ interface ReconstructResponse {
   success: boolean;
   modelBase64?: string;
   format?: 'glb';
-  method?: 'stable-fast-3d' | 'instant-mesh';
+  method?: 'stable-fast-3d' | 'hunyuan3d';
   processingTimeMs?: number;
   error?: string;
   retryCount?: number;
@@ -19,7 +19,7 @@ interface ReconstructResponse {
 
 // Updated to use working HuggingFace Spaces
 const STABLE_FAST_3D_SPACE = 'stabilityai/stable-fast-3d';
-const INSTANT_MESH_SPACE = 'TencentARC/InstantMesh';
+const HUNYUAN3D_SPACE = 'tencent/Hunyuan3D-2';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
@@ -56,29 +56,27 @@ async function reconstructWithStableFast3D(
   const hfToken = process.env.HF_TOKEN;
   const client = await Client.connect(STABLE_FAST_3D_SPACE, hfToken ? { hf_token: hfToken } : undefined);
 
-  // Stable Fast 3D - try with image input
-  const result = await client.predict('/run', [
-    imageBlob,           // input image
-    removeBackground,    // remove background
-    0.85,               // foreground ratio
-    'none',             // remesh option
-    1024,               // texture size
-  ]);
+  // Stable Fast 3D API: /run_button endpoint
+  // Parameters: input_image, foreground_ratio, remesh_option, vertex_count, texture_size
+  const result = await client.predict('/run_button', {
+    input_image: imageBlob,
+    foreground_ratio: 0.85,
+    remesh_option: 'None',
+    vertex_count: -1,
+    texture_size: 1024,
+  });
 
+  // Returns: [preview_image, 3d_model]
   const data = result.data as (string | { url?: string; path?: string })[];
 
-  // Find the GLB file in the response
+  // The 3D model is the second item (index 1)
   let glbUrl: string | null = null;
-  for (const item of data) {
-    if (typeof item === 'string' && item.endsWith('.glb')) {
-      glbUrl = item;
-      break;
-    } else if (item && typeof item === 'object' && (item.url || item.path)) {
-      const url = item.url || item.path;
-      if (url) {
-        glbUrl = url;
-        break;
-      }
+  if (data.length > 1) {
+    const modelItem = data[1];
+    if (typeof modelItem === 'string') {
+      glbUrl = modelItem;
+    } else if (modelItem && typeof modelItem === 'object' && (modelItem.url || modelItem.path)) {
+      glbUrl = modelItem.url || modelItem.path || null;
     }
   }
 
@@ -95,47 +93,50 @@ async function reconstructWithStableFast3D(
   return { modelBlob, method: 'stable-fast-3d' };
 }
 
-async function reconstructWithInstantMesh(
+async function reconstructWithHunyuan3D(
   imageBlob: Blob,
   removeBackground: boolean
-): Promise<{ modelBlob: Blob; method: 'instant-mesh' }> {
+): Promise<{ modelBlob: Blob; method: 'hunyuan3d' }> {
   const hfToken = process.env.HF_TOKEN;
-  const client = await Client.connect(INSTANT_MESH_SPACE, hfToken ? { hf_token: hfToken } : undefined);
+  const client = await Client.connect(HUNYUAN3D_SPACE, hfToken ? { hf_token: hfToken } : undefined);
 
-  // InstantMesh - try with image input
-  const result = await client.predict('/run', [
-    imageBlob,           // input image
-    removeBackground,    // remove background
-  ]);
+  // Hunyuan3D API: /shape_generation endpoint
+  const result = await client.predict('/shape_generation', {
+    image: imageBlob,
+    check_box_rembg: removeBackground,
+    steps: 30,
+    guidance_scale: 5.0,
+    seed: 1234,
+    octree_resolution: 256,
+    num_chunks: 8000,
+    randomize_seed: true,
+  });
 
+  // Returns: [File (3D model), Html, Json stats, Seed]
   const data = result.data as (string | { url?: string; path?: string })[];
 
-  // Find the GLB/OBJ file in the response
+  // The 3D model is the first item
   let modelUrl: string | null = null;
-  for (const item of data) {
-    if (typeof item === 'string' && (item.endsWith('.glb') || item.endsWith('.obj'))) {
-      modelUrl = item;
-      break;
-    } else if (item && typeof item === 'object' && (item.url || item.path)) {
-      const url = item.url || item.path;
-      if (url) {
-        modelUrl = url;
-        break;
-      }
+  if (data.length > 0) {
+    const modelItem = data[0];
+    if (typeof modelItem === 'string') {
+      modelUrl = modelItem;
+    } else if (modelItem && typeof modelItem === 'object' && (modelItem.url || modelItem.path)) {
+      modelUrl = modelItem.url || modelItem.path || null;
     }
   }
 
   if (!modelUrl) {
-    throw new Error('No 3D model returned from InstantMesh');
+    throw new Error('No 3D model returned from Hunyuan3D');
   }
 
   const modelResponse = await fetch(modelUrl);
   if (!modelResponse.ok) {
-    throw new Error(`Failed to fetch model from InstantMesh: ${modelResponse.status}`);
+    throw new Error(`Failed to fetch model from Hunyuan3D: ${modelResponse.status}`);
   }
 
   const modelBlob = await modelResponse.blob();
-  return { modelBlob, method: 'instant-mesh' };
+  return { modelBlob, method: 'hunyuan3d' };
 }
 
 export default async function handler(
@@ -168,7 +169,7 @@ export default async function handler(
     const removeBackground = body.removeBackground ?? true;
 
     let modelBlob: Blob | null = null;
-    let usedMethod: 'stable-fast-3d' | 'instant-mesh' = preferredMethod;
+    let usedMethod: 'stable-fast-3d' | 'hunyuan3d' = preferredMethod;
     let lastError: Error | null = null;
 
     // Try preferred method first with retries
@@ -179,7 +180,7 @@ export default async function handler(
           modelBlob = result.modelBlob;
           usedMethod = result.method;
         } else {
-          const result = await reconstructWithInstantMesh(imageBlob, removeBackground);
+          const result = await reconstructWithHunyuan3D(imageBlob, removeBackground);
           modelBlob = result.modelBlob;
           usedMethod = result.method;
         }
@@ -202,14 +203,14 @@ export default async function handler(
     // If primary method failed, try fallback
     if (!modelBlob && preferredMethod === 'stable-fast-3d') {
       try {
-        const result = await reconstructWithInstantMesh(imageBlob, removeBackground);
+        const result = await reconstructWithHunyuan3D(imageBlob, removeBackground);
         modelBlob = result.modelBlob;
         usedMethod = result.method;
         lastError = null;
       } catch (error) {
         lastError = error as Error;
       }
-    } else if (!modelBlob && preferredMethod === 'instant-mesh') {
+    } else if (!modelBlob && preferredMethod === 'hunyuan3d') {
       try {
         const result = await reconstructWithStableFast3D(imageBlob, removeBackground);
         modelBlob = result.modelBlob;
