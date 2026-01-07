@@ -474,12 +474,12 @@ interface UseGenerateInfoCardReturn {
 - [x] Add InfoCardExport (PDF, JSON, Markdown)
 
 ### Phase 8: Backend Functions
-- [ ] Implement reconstruct-3d.ts:
+- [x] Implement reconstruct-3d.ts:
   - TRELLIS.2 integration via Gradio client
   - TripoSR fallback
   - Retry logic with exponential backoff
   - Error handling and categorization
-- [ ] Implement generate-info-card.ts:
+- [x] Implement generate-info-card.ts:
   - Gemini 2.0 Flash integration
   - Archaeology analysis prompt
   - Structured JSON response parsing

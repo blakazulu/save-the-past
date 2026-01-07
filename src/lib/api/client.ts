@@ -72,25 +72,33 @@ export interface InfoCardRequest {
   metadata?: {
     name?: string;
     discoveryLocation?: string;
+    excavationLayer?: string;
     siteName?: string;
+    notes?: string;
+    tags?: string[];
   };
 }
 
-export interface InfoCardGenerationResponse {
-  success: boolean;
-  material?: string;
-  estimatedAge?: {
+export interface InfoCardAnalysis {
+  material: string;
+  estimatedAge: {
     range: string;
     confidence: 'high' | 'medium' | 'low';
     reasoning?: string;
   };
-  possibleUse?: string;
-  culturalContext?: string;
-  similarArtifacts?: string[];
-  preservationNotes?: string;
-  aiModel?: string;
-  aiConfidence?: number;
-  disclaimer?: string;
+  possibleUse: string;
+  culturalContext: string;
+  similarArtifacts: string[];
+  preservationNotes: string;
+  aiModel: string;
+  aiConfidence: number;
+  isHumanEdited: boolean;
+  disclaimer: string;
+}
+
+export interface InfoCardGenerationResponse {
+  success: boolean;
+  infoCard?: InfoCardAnalysis;
   error?: string;
   processingTimeMs?: number;
 }

@@ -1,9 +1,24 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
 
 [build.environment]
   NODE_VERSION = "20"
+
+# API redirects (must come before SPA redirect)
+[[redirects]]
+  from = "/api/reconstruct-3d"
+  to = "/.netlify/functions/reconstruct-3d"
+  status = 200
+
+[[redirects]]
+  from = "/api/generate-info-card"
+  to = "/.netlify/functions/generate-info-card"
+  status = 200
 
 # SPA redirects
 [[redirects]]
