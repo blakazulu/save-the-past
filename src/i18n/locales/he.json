@@ -19,7 +19,37 @@
     "title": "צלם ממצא",
     "camera": "השתמש במצלמה",
     "upload": "העלה תמונות",
-    "instructions": "צלם מזוויות שונות לתוצאות מיטביות"
+    "instructions": "צלם מזוויות שונות לתוצאות מיטביות",
+    "cameraError": "שגיאת מצלמה",
+    "startingCamera": "מפעיל מצלמה...",
+    "switchCamera": "החלף מצלמה",
+    "takePhoto": "צלם תמונה",
+    "photoCount": "{{count}} / {{total}} תמונות",
+    "alignHint": "יישר את הממצא בתוך המסגרת",
+    "skip": "דלג",
+    "finish": "סיים",
+    "reviewPhotos": "סקור תמונות",
+    "addMore": "הוסף עוד",
+    "noPhotos": "אין תמונות",
+    "photosCount": "{{count}} תמונות נבחרו",
+    "createArtifact": "צור ממצא",
+    "selectAngle": "בחר זווית",
+    "dragDrop": "גרור ושחרר תמונות",
+    "dropHere": "שחרר תמונות כאן",
+    "uploadHint": "או לחץ לעיון בקבצים",
+    "browseFiles": "עיין בקבצים",
+    "selectedPhotos": "{{count}} תמונות נבחרו",
+    "continue": "המשך",
+    "angles": {
+      "front": "קדימה",
+      "back": "אחורה",
+      "left": "שמאל",
+      "right": "ימין",
+      "top": "למעלה",
+      "bottom": "למטה",
+      "detail": "פרט",
+      "context": "הקשר"
+    }
   },
   "gallery": {
     "title": "גלריה",
@@ -28,6 +58,7 @@
   },
   "artifact": {
     "title": "פרטי ממצא",
+    "defaultName": "ממצא {{date}}",
     "tabs": {
       "model": "מודל תלת-ממדי",
       "photos": "תמונות",

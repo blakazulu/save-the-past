@@ -19,7 +19,37 @@
     "title": "Capture Artifact",
     "camera": "Use Camera",
     "upload": "Upload Photos",
-    "instructions": "Take photos from multiple angles for best results"
+    "instructions": "Take photos from multiple angles for best results",
+    "cameraError": "Camera Error",
+    "startingCamera": "Starting camera...",
+    "switchCamera": "Switch Camera",
+    "takePhoto": "Take Photo",
+    "photoCount": "{{count}} / {{total}} photos",
+    "alignHint": "Align the artifact within the frame",
+    "skip": "Skip",
+    "finish": "Finish",
+    "reviewPhotos": "Review Photos",
+    "addMore": "Add More",
+    "noPhotos": "No Photos",
+    "photosCount": "{{count}} photos selected",
+    "createArtifact": "Create Artifact",
+    "selectAngle": "Select Angle",
+    "dragDrop": "Drag & Drop Photos",
+    "dropHere": "Drop Photos Here",
+    "uploadHint": "Or click to browse your files",
+    "browseFiles": "Browse Files",
+    "selectedPhotos": "{{count}} photos selected",
+    "continue": "Continue",
+    "angles": {
+      "front": "Front",
+      "back": "Back",
+      "left": "Left",
+      "right": "Right",
+      "top": "Top",
+      "bottom": "Bottom",
+      "detail": "Detail",
+      "context": "Context"
+    }
   },
   "gallery": {
     "title": "Gallery",
@@ -28,6 +58,7 @@
   },
   "artifact": {
     "title": "Artifact Details",
+    "defaultName": "Artifact {{date}}",
     "tabs": {
       "model": "3D Model",
       "photos": "Photos",

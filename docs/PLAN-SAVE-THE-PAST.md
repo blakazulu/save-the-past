@@ -439,12 +439,12 @@ interface UseGenerateInfoCardReturn {
 - [ ] Ensure all layouts work well on phones, scale gracefully to desktop
 
 ### Phase 4: Camera & Upload
-- [ ] Build CameraView with stream display
-- [ ] Create CaptureOverlay with angle guidance
-- [ ] Implement CaptureSession with multi-photo flow
-- [ ] Build FileUpload with drag-and-drop
-- [ ] Create CapturePreview for reviewing images
-- [ ] Wire up CapturePage with both options
+- [x] Build CameraView with stream display
+- [x] Create CaptureOverlay with angle guidance
+- [x] Implement CaptureSession with multi-photo flow
+- [x] Build FileUpload with drag-and-drop
+- [x] Create CapturePreview for reviewing images
+- [x] Wire up CapturePage with both options
 
 ### Phase 5: Gallery
 - [ ] Build ArtifactCard component
