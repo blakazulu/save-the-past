@@ -197,5 +197,11 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete"
+  },
+  "pwa": {
+    "installTitle": "Install Save The Past",
+    "installDescription": "Add to home screen for the best experience",
+    "install": "Install",
+    "notNow": "Not now"
   }
 }

@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { getDirection } from '@/i18n';
 import { queryClient } from '@/lib/query';
+import { InstallPrompt } from '@/components/ui';
 import HomePage from '@/pages/HomePage';
 import CapturePage from '@/pages/CapturePage';
 import GalleryPage from '@/pages/GalleryPage';
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/artifact/:id" element={<ArtifactDetailPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
+        <InstallPrompt />
       </BrowserRouter>
     </QueryClientProvider>
   );

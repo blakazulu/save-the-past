@@ -197,5 +197,11 @@
     "save": "שמור",
     "cancel": "ביטול",
     "delete": "מחק"
+  },
+  "pwa": {
+    "installTitle": "התקן שמור את העבר",
+    "installDescription": "הוסף למסך הבית לחוויה הטובה ביותר",
+    "install": "התקן",
+    "notNow": "לא עכשיו"
   }
 }

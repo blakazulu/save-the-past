@@ -493,10 +493,10 @@ interface UseGenerateInfoCardReturn {
 - [x] Wire up ArtifactDetailPage with all tabs
 
 ### Phase 10: PWA Installation
-- [ ] Add InstallPrompt for PWA installation on phones
-- [ ] Configure service worker for basic asset caching
-- [ ] Test PWA installation on iOS and Android
-- [ ] Ensure app looks native on phone home screens
+- [x] Add InstallPrompt for PWA installation on phones
+- [x] Configure service worker for basic asset caching
+- [x] Test PWA installation on iOS and Android
+- [x] Ensure app looks native on phone home screens
 
 ### Phase 11: Data Management
 - [ ] Build ExportDialog (ZIP with all data)
