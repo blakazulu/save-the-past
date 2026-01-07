@@ -1,61 +1,100 @@
 @import "tailwindcss";
 
-/* Earth-tone theme colors */
+/* Google Fonts - Vintage typography */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap');
+
+/* PastPalette - Archaeological Journal Theme */
 :root {
-  /* Primary earth tones */
-  --color-sand: #E8DCC4;
-  --color-terracotta: #C17F59;
-  --color-clay: #A0522D;
-  --color-earth: #8B4513;
-  --color-amber: #D4A574;
+  /* Primary earth tones - deeper, more antique */
+  --color-parchment: #F4E4C1;
+  --color-parchment-light: #FBF6ED;
+  --color-parchment-dark: #E8D5A8;
+  --color-sand: #DCC9A3;
+  --color-terracotta: #B5651D;
+  --color-terracotta-light: #C8784E;
+  --color-clay: #8B4513;
+  --color-earth: #5D3A1A;
+  --color-amber: #C68E17;
+  --color-sepia: #704214;
+  --color-burnt: #3D2314;
 
   /* Text colors */
-  --color-text-primary: #3D2914;
-  --color-text-secondary: #6B5344;
+  --color-text-primary: #2C1810;
+  --color-text-secondary: #5C4033;
+  --color-text-muted: #8B7355;
+  --color-ink: #1A0F0A;
 
   /* Supporting colors */
-  --color-success: #6B8E23;
-  --color-error: #CD5C5C;
-  --color-info: #7B9EA8;
+  --color-success: #4A6741;
+  --color-error: #8B3A3A;
+  --color-info: #5A6B7C;
+  --color-gold: #BFA05A;
+  --color-gold-light: #D4B86A;
 
   /* Background */
-  --color-bg: #F5EFE6;
-  --color-bg-card: #FFFFFF;
+  --color-bg: #F4E4C1;
+  --color-bg-card: rgba(251, 246, 237, 0.85);
+
+  /* Shadows */
+  --shadow-parchment: 0 2px 8px rgba(93, 58, 26, 0.15), 0 1px 3px rgba(93, 58, 26, 0.1);
+  --shadow-lifted: 0 8px 24px rgba(93, 58, 26, 0.2), 0 4px 8px rgba(93, 58, 26, 0.15);
+  --shadow-inset: inset 0 2px 4px rgba(93, 58, 26, 0.1);
 }
 
 /* Tailwind v4 theme extension */
 @theme {
-  --color-sand: #E8DCC4;
-  --color-terracotta: #C17F59;
-  --color-clay: #A0522D;
-  --color-earth: #8B4513;
-  --color-amber: #D4A574;
-  --color-text-primary: #3D2914;
-  --color-text-secondary: #6B5344;
-  --color-success: #6B8E23;
-  --color-error: #CD5C5C;
-  --color-info: #7B9EA8;
-  --color-bg: #F5EFE6;
-  --color-bg-card: #FFFFFF;
+  --color-parchment: #F4E4C1;
+  --color-parchment-light: #FBF6ED;
+  --color-parchment-dark: #E8D5A8;
+  --color-sand: #DCC9A3;
+  --color-terracotta: #B5651D;
+  --color-terracotta-light: #C8784E;
+  --color-clay: #8B4513;
+  --color-earth: #5D3A1A;
+  --color-amber: #C68E17;
+  --color-sepia: #704214;
+  --color-burnt: #3D2314;
+  --color-text-primary: #2C1810;
+  --color-text-secondary: #5C4033;
+  --color-text-muted: #8B7355;
+  --color-ink: #1A0F0A;
+  --color-success: #4A6741;
+  --color-error: #8B3A3A;
+  --color-info: #5A6B7C;
+  --color-gold: #BFA05A;
+  --color-gold-light: #D4B86A;
+  --color-bg: #F4E4C1;
+  --color-bg-card: rgba(251, 246, 237, 0.85);
 }
 
-/* Base styles */
+/* Typography */
+html {
+  font-size: 16px;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: var(--color-bg);
+  font-family: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+  background: url('/bg.webp') center center / cover fixed;
   color: var(--color-text-primary);
   min-height: 100dvh;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+/* Display/Header font */
+.font-display {
+  font-family: 'Cinzel', 'Times New Roman', serif;
+}
+
+/* Decorative/Handwritten font */
+.font-manuscript {
+  font-family: 'IM Fell English', Georgia, serif;
 }
 
 /* RTL support */
 [dir="rtl"] {
   text-align: right;
-}
-
-/* Mobile-first typography */
-html {
-  font-size: 16px;
 }
 
 /* PWA safe area padding */
@@ -67,7 +106,274 @@ html {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Animations */
+/* ============================================
+   PARCHMENT CARD STYLES
+   ============================================ */
+
+.parchment-card {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 246, 237, 0.95) 0%,
+    rgba(244, 228, 193, 0.9) 50%,
+    rgba(232, 213, 168, 0.95) 100%
+  );
+  border: 1px solid rgba(139, 69, 19, 0.2);
+  border-radius: 4px;
+  box-shadow: var(--shadow-parchment);
+  position: relative;
+}
+
+.parchment-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, rgba(139, 69, 19, 0.08) 0%, transparent 2%, transparent 98%, rgba(139, 69, 19, 0.08) 100%),
+    linear-gradient(180deg, rgba(139, 69, 19, 0.05) 0%, transparent 2%, transparent 98%, rgba(139, 69, 19, 0.05) 100%);
+  pointer-events: none;
+}
+
+/* Torn edge effect for special cards */
+.parchment-torn {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 246, 237, 0.95) 0%,
+    rgba(244, 228, 193, 0.9) 100%
+  );
+  border: none;
+  position: relative;
+  filter: drop-shadow(0 2px 4px rgba(93, 58, 26, 0.2));
+}
+
+.parchment-torn::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(139, 69, 19, 0.15) 10%,
+    transparent 20%,
+    rgba(139, 69, 19, 0.1) 30%,
+    transparent 45%,
+    rgba(139, 69, 19, 0.12) 60%,
+    transparent 75%,
+    rgba(139, 69, 19, 0.08) 90%,
+    transparent 100%
+  );
+}
+
+/* ============================================
+   DECORATIVE BORDERS
+   ============================================ */
+
+.border-ornate {
+  border: 2px solid var(--color-sepia);
+  position: relative;
+}
+
+.border-ornate::before,
+.border-ornate::after {
+  content: '❧';
+  position: absolute;
+  font-size: 12px;
+  color: var(--color-sepia);
+  opacity: 0.6;
+}
+
+.border-ornate::before {
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.border-ornate::after {
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+}
+
+/* Corner decorations */
+.corners-decorated {
+  position: relative;
+}
+
+.corners-decorated::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 16px;
+  height: 16px;
+  border-top: 2px solid var(--color-sepia);
+  border-left: 2px solid var(--color-sepia);
+  opacity: 0.4;
+}
+
+.corners-decorated::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-bottom: 2px solid var(--color-sepia);
+  border-right: 2px solid var(--color-sepia);
+  opacity: 0.4;
+}
+
+/* ============================================
+   BUTTON STYLES - WAX SEAL AESTHETIC
+   ============================================ */
+
+.btn-seal {
+  font-family: 'Cinzel', serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: linear-gradient(145deg, var(--color-terracotta) 0%, var(--color-clay) 100%);
+  color: var(--color-parchment-light);
+  border: none;
+  border-radius: 4px;
+  padding: 14px 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 4px 12px rgba(139, 69, 19, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.btn-seal:hover {
+  background: linear-gradient(145deg, var(--color-terracotta-light) 0%, var(--color-terracotta) 100%);
+  box-shadow:
+    0 6px 16px rgba(139, 69, 19, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.btn-seal:active {
+  transform: translateY(0);
+  box-shadow:
+    0 2px 8px rgba(139, 69, 19, 0.25),
+    inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-seal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-seal:hover::before {
+  left: 100%;
+}
+
+/* Secondary button - parchment style */
+.btn-parchment {
+  font-family: 'Crimson Pro', serif;
+  font-weight: 500;
+  background: linear-gradient(135deg, var(--color-parchment-light) 0%, var(--color-parchment) 100%);
+  color: var(--color-earth);
+  border: 1px solid var(--color-sand);
+  border-radius: 4px;
+  padding: 12px 24px;
+  box-shadow: var(--shadow-parchment);
+  transition: all 0.2s ease;
+}
+
+.btn-parchment:hover {
+  background: linear-gradient(135deg, #fff 0%, var(--color-parchment-light) 100%);
+  border-color: var(--color-terracotta);
+  box-shadow: var(--shadow-lifted);
+}
+
+/* ============================================
+   INPUT STYLES - MANUSCRIPT AESTHETIC
+   ============================================ */
+
+.input-manuscript {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1rem;
+  background: rgba(251, 246, 237, 0.8);
+  border: 1px solid var(--color-sand);
+  border-radius: 4px;
+  padding: 12px 16px;
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-inset);
+  transition: all 0.2s ease;
+}
+
+.input-manuscript:focus {
+  outline: none;
+  border-color: var(--color-terracotta);
+  background: rgba(251, 246, 237, 0.95);
+  box-shadow: 0 0 0 3px rgba(181, 101, 29, 0.15), var(--shadow-inset);
+}
+
+.input-manuscript::placeholder {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ============================================
+   DIVIDER STYLES
+   ============================================ */
+
+.divider-ornate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-sepia);
+  opacity: 0.5;
+}
+
+.divider-ornate::before,
+.divider-ornate::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-sepia), transparent);
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-parchment-dark);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-sand);
+  border-radius: 4px;
+  border: 1px solid var(--color-parchment-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-terracotta-light);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -79,6 +385,176 @@ html {
   }
 }
 
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ink-spread {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes page-turn {
+  0% {
+    transform: perspective(1000px) rotateY(-5deg);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(1000px) rotateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes stamp {
+  0% {
+    transform: scale(1.3) rotate(-5deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(0.95) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
 .animate-fade-in-up {
-  animation: fade-in-up 0.3s ease-out forwards;
+  animation: fade-in-up 0.4s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-ink {
+  animation: ink-spread 0.5s ease-out forwards;
+}
+
+.animate-page {
+  animation: page-turn 0.4s ease-out forwards;
+}
+
+.animate-stamp {
+  animation: stamp 0.3s ease-out forwards;
+}
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Text shadows for headers */
+.text-shadow-vintage {
+  text-shadow: 1px 1px 0 rgba(244, 228, 193, 0.8), 2px 2px 4px rgba(93, 58, 26, 0.15);
+}
+
+/* Sepia filter for images */
+.sepia-light {
+  filter: sepia(15%) saturate(90%);
+}
+
+/* Vignette effect */
+.vignette {
+  position: relative;
+}
+
+.vignette::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(93, 58, 26, 0.15) 100%);
+}
+
+/* Noise texture overlay */
+.noise-overlay {
+  position: relative;
+}
+
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Glass/frosted effect for overlays */
+.glass-parchment {
+  background: rgba(244, 228, 193, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Status badge styles */
+.badge-status {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 2px;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.badge-draft {
+  background: var(--color-sand);
+  color: var(--color-text-secondary);
+}
+
+.badge-captured {
+  background: rgba(198, 142, 23, 0.2);
+  color: var(--color-amber);
+  border: 1px solid rgba(198, 142, 23, 0.3);
+}
+
+.badge-processing {
+  background: rgba(90, 107, 124, 0.2);
+  color: var(--color-info);
+  border: 1px solid rgba(90, 107, 124, 0.3);
+}
+
+.badge-complete {
+  background: rgba(74, 103, 65, 0.2);
+  color: var(--color-success);
+  border: 1px solid rgba(74, 103, 65, 0.3);
+}
+
+.badge-error {
+  background: rgba(139, 58, 58, 0.2);
+  color: var(--color-error);
+  border: 1px solid rgba(139, 58, 58, 0.3);
 }

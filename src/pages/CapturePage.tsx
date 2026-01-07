@@ -133,33 +133,78 @@ export default function CapturePage() {
 
   // Selection mode (default)
   return (
-    <div className="min-h-dvh bg-bg flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       <PageHeader title={t('capture.title')} backTo="/" />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md space-y-4">
-          <p className="text-center text-text-secondary mb-8">
-            {t('capture.instructions')}
-          </p>
+        <div className="w-full max-w-md">
+          {/* Decorative header */}
+          <div className="text-center mb-8 animate-fade-in">
+            <div className="inline-block mb-4">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-terracotta/20 to-clay/10 flex items-center justify-center">
+                <CameraIcon className="w-10 h-10 text-terracotta" />
+              </div>
+            </div>
+            <p className="text-text-secondary font-manuscript text-lg italic">
+              {t('capture.instructions')}
+            </p>
+          </div>
 
-          {/* Camera Button */}
-          <button
-            onClick={() => setMode('camera')}
-            className="w-full bg-terracotta text-white p-6 rounded-xl flex items-center justify-center gap-4 hover:bg-clay transition-colors shadow-lg"
-          >
-            <CameraIcon className="w-8 h-8" />
-            <span className="text-lg font-semibold">{t('capture.camera')}</span>
-          </button>
+          {/* Option Cards */}
+          <div className="space-y-4">
+            {/* Camera Option */}
+            <button
+              onClick={() => setMode('camera')}
+              className="parchment-card corners-decorated w-full p-6 text-left transition-all duration-200 hover:shadow-lg group animate-fade-in-up"
+            >
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-terracotta to-clay flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                  <CameraIcon className="w-7 h-7 text-parchment-light" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-display text-lg font-semibold text-earth mb-1">
+                    {t('capture.camera')}
+                  </h3>
+                  <p className="text-sm text-text-secondary">
+                    {t('capture.cameraDescription', 'Take photos directly with your device camera')}
+                  </p>
+                </div>
+              </div>
+            </button>
 
-          {/* Upload Button */}
-          <button
-            onClick={() => setMode('upload')}
-            className="w-full bg-white text-earth border-2 border-sand p-6 rounded-xl flex items-center justify-center gap-4 hover:bg-sand transition-colors"
-          >
-            <UploadIcon className="w-8 h-8" />
-            <span className="text-lg font-semibold">{t('capture.upload')}</span>
-          </button>
+            {/* Decorative divider */}
+            <div className="divider-ornate my-6">
+              <span className="font-manuscript text-sm">{t('common.or', 'or')}</span>
+            </div>
+
+            {/* Upload Option */}
+            <button
+              onClick={() => setMode('upload')}
+              className="parchment-card corners-decorated w-full p-6 text-left transition-all duration-200 hover:shadow-lg group animate-fade-in-up stagger-2"
+            >
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-sand to-parchment-dark flex items-center justify-center flex-shrink-0 shadow-md border border-sepia/20 group-hover:scale-105 transition-transform">
+                  <UploadIcon className="w-7 h-7 text-earth" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-display text-lg font-semibold text-earth mb-1">
+                    {t('capture.upload')}
+                  </h3>
+                  <p className="text-sm text-text-secondary">
+                    {t('capture.uploadDescription', 'Select existing photos from your gallery')}
+                  </p>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Decorative footer */}
+          <div className="mt-10 text-center animate-fade-in stagger-3">
+            <p className="text-xs text-text-muted font-manuscript">
+              {t('capture.hint', 'Multiple angles help create better 3D reconstructions')}
+            </p>
+          </div>
         </div>
       </main>
     </div>

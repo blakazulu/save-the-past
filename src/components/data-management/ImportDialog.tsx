@@ -140,16 +140,22 @@ export function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-burnt/60 z-50 flex items-center justify-center p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl p-6 w-full max-w-md"
+        className="parchment-card corners-decorated p-6 w-full max-w-md animate-fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold text-earth mb-4">
-          {t('dataManagement.importTitle', 'Import Data')}
-        </h2>
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-terracotta to-clay flex items-center justify-center">
+            <UploadIcon className="w-5 h-5 text-parchment-light" />
+          </div>
+          <h2 className="font-display text-xl font-semibold text-earth">
+            {t('dataManagement.importTitle', 'Import Data')}
+          </h2>
+        </div>
 
         <p className="text-text-secondary mb-6">
           {t(
@@ -170,10 +176,14 @@ export function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isImporting}
-            className="w-full p-6 border-2 border-dashed border-sand rounded-xl hover:border-terracotta transition-colors flex flex-col items-center gap-2"
+            className={`w-full p-6 border-2 border-dashed rounded transition-all duration-200 flex flex-col items-center gap-2 ${
+              selectedFile
+                ? 'border-terracotta bg-terracotta/5'
+                : 'border-sepia/30 hover:border-terracotta hover:bg-sand/30'
+            }`}
           >
-            <UploadIcon className="w-8 h-8 text-text-secondary" />
-            <span className="text-sm text-text-secondary">
+            <UploadIcon className={`w-8 h-8 ${selectedFile ? 'text-terracotta' : 'text-text-muted'}`} />
+            <span className={`text-sm ${selectedFile ? 'text-terracotta font-medium' : 'text-text-muted'}`}>
               {selectedFile
                 ? selectedFile.name
                 : t('dataManagement.selectFile', 'Select ZIP file')}
@@ -181,32 +191,34 @@ export function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
           </button>
         </div>
 
+        {/* Progress bar */}
         {isImporting && (
           <div className="mb-6">
-            <div className="h-2 bg-sand rounded-full overflow-hidden">
+            <div className="h-2 bg-sand/50 rounded-full overflow-hidden">
               <div
-                className="h-full bg-terracotta rounded-full transition-all duration-300"
+                className="h-full bg-gradient-to-r from-terracotta to-clay rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-sm text-text-secondary text-center mt-2">
+            <p className="text-sm text-text-secondary text-center mt-2 font-manuscript">
               {Math.round(progress)}%
             </p>
           </div>
         )}
 
+        {/* Actions */}
         <div className="flex gap-3">
           <button
             onClick={onClose}
             disabled={isImporting}
-            className="flex-1 py-3 border border-sand text-earth rounded-xl font-medium hover:bg-sand transition-colors disabled:opacity-50"
+            className="btn-parchment flex-1 disabled:opacity-50"
           >
             {t('common.cancel')}
           </button>
           <button
             onClick={handleImport}
             disabled={isImporting || !selectedFile}
-            className="flex-1 py-3 bg-terracotta text-white rounded-xl font-semibold hover:bg-clay transition-colors disabled:opacity-50"
+            className="btn-seal flex-1 text-sm disabled:opacity-50"
           >
             {isImporting
               ? t('dataManagement.importing', 'Importing...')

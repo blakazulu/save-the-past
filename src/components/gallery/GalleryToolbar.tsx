@@ -28,51 +28,52 @@ export function GalleryToolbar({
     <div className="flex items-center gap-3">
       {/* Search input */}
       <div className="flex-1 relative">
-        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" />
+        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t('gallery.searchPlaceholder')}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-sand rounded-xl text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-terracotta transition-colors"
+          className="input-manuscript w-full pl-10 pr-4 py-2.5"
         />
       </div>
 
       {/* Filter button */}
       <button
         onClick={onFilterClick}
-        className={`p-2.5 rounded-xl border transition-colors relative ${
+        className={`p-2.5 rounded transition-all duration-200 relative ${
           hasActiveFilters
-            ? 'bg-terracotta text-white border-terracotta'
-            : 'bg-white text-earth border-sand hover:border-clay'
+            ? 'bg-terracotta text-parchment-light shadow-md'
+            : 'parchment-card text-earth hover:text-terracotta'
         }`}
         aria-label={t('gallery.filters')}
       >
         <FilterIcon className="w-5 h-5" />
         {hasActiveFilters && (
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-error rounded-full" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-gold rounded-full border-2 border-parchment-light" />
         )}
       </button>
 
       {/* View mode toggle */}
-      <div className="flex bg-white border border-sand rounded-xl overflow-hidden">
+      <div className="flex parchment-card overflow-hidden">
         <button
           onClick={() => onViewModeChange('grid')}
-          className={`p-2.5 transition-colors ${
+          className={`p-2.5 transition-all duration-200 ${
             viewMode === 'grid'
-              ? 'bg-terracotta text-white'
-              : 'text-earth hover:bg-sand'
+              ? 'bg-terracotta text-parchment-light'
+              : 'text-earth hover:text-terracotta hover:bg-sand/50'
           }`}
           aria-label={t('gallery.viewGrid')}
         >
           <GridIcon className="w-5 h-5" />
         </button>
+        <div className="w-px bg-sepia/15" />
         <button
           onClick={() => onViewModeChange('list')}
-          className={`p-2.5 transition-colors ${
+          className={`p-2.5 transition-all duration-200 ${
             viewMode === 'list'
-              ? 'bg-terracotta text-white'
-              : 'text-earth hover:bg-sand'
+              ? 'bg-terracotta text-parchment-light'
+              : 'text-earth hover:text-terracotta hover:bg-sand/50'
           }`}
           aria-label={t('gallery.viewList')}
         >

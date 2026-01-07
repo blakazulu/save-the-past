@@ -44,7 +44,7 @@ export default function GalleryPage() {
   // No artifacts at all
   if (!isLoading && artifacts?.length === 0) {
     return (
-      <div className="min-h-dvh bg-bg flex flex-col">
+      <div className="min-h-dvh flex flex-col">
         <PageHeader title={t('gallery.title')} backTo="/" />
         <GalleryEmpty variant="no-artifacts" />
         <BottomNav />
@@ -53,13 +53,13 @@ export default function GalleryPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-bg flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       <PageHeader title={t('gallery.title')} backTo="/" />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col p-4">
+      <main className="flex-1 flex flex-col p-4 pb-20">
         {/* Toolbar */}
-        <div className="mb-4">
+        <div className="mb-4 animate-fade-in">
           <GalleryToolbar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -71,19 +71,21 @@ export default function GalleryPage() {
         </div>
 
         {/* Content */}
-        {isLoading ? (
-          <GallerySkeleton variant={viewMode} count={6} />
-        ) : filteredArtifacts.length === 0 ? (
-          <GalleryEmpty
-            variant="no-results"
-            searchQuery={searchQuery}
-            onClearSearch={clearFilters}
-          />
-        ) : viewMode === 'grid' ? (
-          <GalleryGrid artifacts={filteredArtifacts} />
-        ) : (
-          <GalleryList artifacts={filteredArtifacts} />
-        )}
+        <div className="flex-1">
+          {isLoading ? (
+            <GallerySkeleton variant={viewMode} count={6} />
+          ) : filteredArtifacts.length === 0 ? (
+            <GalleryEmpty
+              variant="no-results"
+              searchQuery={searchQuery}
+              onClearSearch={clearFilters}
+            />
+          ) : viewMode === 'grid' ? (
+            <GalleryGrid artifacts={filteredArtifacts} />
+          ) : (
+            <GalleryList artifacts={filteredArtifacts} />
+          )}
+        </div>
       </main>
 
       <BottomNav />

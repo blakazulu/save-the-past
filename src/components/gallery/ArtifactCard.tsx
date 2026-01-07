@@ -9,13 +9,13 @@ interface ArtifactCardProps {
   variant?: 'grid' | 'list';
 }
 
-const STATUS_STYLES: Record<ArtifactStatus, { bg: string; text: string }> = {
-  draft: { bg: 'bg-sand', text: 'text-text-secondary' },
-  'images-captured': { bg: 'bg-amber/20', text: 'text-amber' },
-  'processing-3d': { bg: 'bg-info/20', text: 'text-info' },
-  'processing-info': { bg: 'bg-info/20', text: 'text-info' },
-  complete: { bg: 'bg-success/20', text: 'text-success' },
-  error: { bg: 'bg-error/20', text: 'text-error' },
+const STATUS_BADGES: Record<ArtifactStatus, string> = {
+  draft: 'badge-draft',
+  'images-captured': 'badge-captured',
+  'processing-3d': 'badge-processing',
+  'processing-info': 'badge-processing',
+  complete: 'badge-complete',
+  error: 'badge-error',
 };
 
 export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) {
@@ -52,7 +52,7 @@ export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) 
     };
   }, [artifact.thumbnailBlob, artifact.imageIds]);
 
-  const statusStyle = STATUS_STYLES[artifact.status];
+  const badgeClass = STATUS_BADGES[artifact.status];
   const name = artifact.metadata.name || t('artifact.defaultName', { date: artifact.createdAt.toLocaleDateString() });
   const photoCount = artifact.imageIds.length;
 
@@ -60,35 +60,35 @@ export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) 
     return (
       <Link
         to={`/artifact/${artifact.id}`}
-        className="flex items-center gap-4 p-3 bg-white rounded-xl hover:bg-sand/50 transition-colors"
+        className="parchment-card flex items-center gap-4 p-3 transition-all duration-200 hover:shadow-lg group"
       >
         {/* Thumbnail */}
-        <div className="w-16 h-16 rounded-lg overflow-hidden bg-sand flex-shrink-0">
+        <div className="w-16 h-16 rounded overflow-hidden bg-sand/50 flex-shrink-0 border border-sepia/15">
           {thumbnailUrl ? (
             <img
               src={thumbnailUrl}
               alt={name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover sepia-light group-hover:filter-none transition-all duration-300"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-2xl">🏺</span>
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-sand to-parchment-dark">
+              <span className="text-2xl opacity-50">🏺</span>
             </div>
           )}
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-earth truncate">{name}</h3>
-          <p className="text-sm text-text-secondary">
+          <h3 className="font-display font-semibold text-earth truncate group-hover:text-terracotta transition-colors">
+            {name}
+          </h3>
+          <p className="text-sm text-text-muted font-manuscript italic">
             {t('gallery.photoCount', { count: photoCount })}
           </p>
         </div>
 
         {/* Status badge */}
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text}`}
-        >
+        <span className={`badge-status ${badgeClass}`}>
           {t(`gallery.status.${artifact.status}`)}
         </span>
       </Link>
@@ -99,34 +99,37 @@ export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) 
   return (
     <Link
       to={`/artifact/${artifact.id}`}
-      className="block bg-white rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+      className="parchment-card block overflow-hidden transition-all duration-200 hover:shadow-lg group"
     >
       {/* Thumbnail */}
-      <div className="aspect-square bg-sand relative">
+      <div className="aspect-square bg-sand/30 relative overflow-hidden">
         {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
             alt={name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover sepia-light group-hover:filter-none group-hover:scale-105 transition-all duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-4xl">🏺</span>
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-sand to-parchment-dark">
+            <span className="text-4xl opacity-40">🏺</span>
           </div>
         )}
 
         {/* Status badge */}
-        <span
-          className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text}`}
-        >
+        <span className={`badge-status ${badgeClass} absolute top-2 right-2`}>
           {t(`gallery.status.${artifact.status}`)}
         </span>
+
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-burnt/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       {/* Info */}
-      <div className="p-3">
-        <h3 className="font-semibold text-earth truncate">{name}</h3>
-        <p className="text-sm text-text-secondary mt-1">
+      <div className="p-3 border-t border-sepia/10">
+        <h3 className="font-display font-semibold text-earth truncate group-hover:text-terracotta transition-colors">
+          {name}
+        </h3>
+        <p className="text-sm text-text-muted mt-1 font-manuscript italic">
           {t('gallery.photoCount', { count: photoCount })}
         </p>
       </div>

@@ -58,23 +58,28 @@ export function InstallPrompt() {
   }
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-40 animate-fade-in-up">
-      <div className="bg-white rounded-2xl shadow-lg border border-sand p-4 max-w-md mx-auto">
+    <div className="fixed bottom-20 left-4 right-4 z-40 animate-slide-up">
+      <div className="parchment-card p-4 max-w-md mx-auto">
         <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-xl bg-terracotta flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl">🏛️</span>
+          {/* Logo */}
+          <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-terracotta to-clay flex items-center justify-center shadow-md">
+            <img src="/logo-64.png" alt="" className="w-10 h-10" />
           </div>
+
+          {/* Content */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-earth text-sm">
+            <h3 className="font-display font-semibold text-earth text-sm">
               {t('pwa.installTitle', 'Install Save The Past')}
             </h3>
-            <p className="text-xs text-text-secondary mt-0.5">
+            <p className="text-xs text-text-secondary mt-0.5 font-manuscript italic">
               {t('pwa.installDescription', 'Add to home screen for the best experience')}
             </p>
           </div>
+
+          {/* Dismiss button */}
           <button
             onClick={handleDismiss}
-            className="text-text-secondary hover:text-earth p-1"
+            className="text-text-muted hover:text-earth p-1 transition-colors"
             aria-label="Dismiss"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +87,9 @@ export function InstallPrompt() {
             </svg>
           </button>
         </div>
-        <div className="flex gap-2 mt-3">
+
+        {/* Actions */}
+        <div className="flex gap-2 mt-4">
           <button
             onClick={handleDismiss}
             className="flex-1 py-2 text-sm text-text-secondary hover:text-earth transition-colors"
@@ -91,7 +98,7 @@ export function InstallPrompt() {
           </button>
           <button
             onClick={handleInstall}
-            className="flex-1 py-2 bg-terracotta text-white rounded-lg text-sm font-medium hover:bg-clay transition-colors"
+            className="flex-1 py-2 bg-terracotta text-parchment-light rounded text-sm font-display font-medium hover:bg-clay transition-colors"
           >
             {t('pwa.install', 'Install')}
           </button>

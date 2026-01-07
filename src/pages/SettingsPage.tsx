@@ -22,15 +22,16 @@ export default function SettingsPage() {
   const currentLang = i18n.resolvedLanguage || i18n.language;
 
   return (
-    <div className="min-h-dvh bg-bg flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       <PageHeader title={t('settings.title')} backTo="/" />
 
       {/* Main Content */}
-      <main className="flex-1 p-4 pb-24">
-        <div className="max-w-md mx-auto space-y-4">
+      <main className="flex-1 p-4 pb-20">
+        <div className="max-w-md mx-auto space-y-6">
           {/* Language Setting */}
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <h2 className="text-lg font-semibold text-earth mb-4">
+          <section className="parchment-card p-5 animate-fade-in-up">
+            <h2 className="font-display text-lg font-semibold text-earth mb-4 flex items-center gap-2">
+              <span className="text-terracotta">❧</span>
               {t('settings.language')}
             </h2>
             <div className="space-y-2">
@@ -47,59 +48,58 @@ export default function SettingsPage() {
                 onChange={changeLanguage}
               />
             </div>
-          </div>
+          </section>
 
           {/* Data Management */}
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <h2 className="text-lg font-semibold text-earth mb-4">
+          <section className="parchment-card p-5 animate-fade-in-up stagger-1">
+            <h2 className="font-display text-lg font-semibold text-earth mb-4 flex items-center gap-2">
+              <span className="text-terracotta">❧</span>
               {t('dataManagement.title')}
             </h2>
             <div className="space-y-2">
-              <button
+              <DataButton
+                icon={<DownloadIcon className="w-5 h-5" />}
+                label={t('dataManagement.export')}
                 onClick={() => setShowExport(true)}
                 disabled={!artifacts || artifacts.length === 0}
-                className="w-full p-3 rounded-lg flex items-center gap-3 hover:bg-sand/50 text-text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <DownloadIcon className="w-5 h-5 text-terracotta" />
-                <span className="font-medium">
-                  {t('dataManagement.export')}
-                </span>
-                {artifacts && artifacts.length > 0 && (
-                  <span className="ml-auto text-sm text-text-secondary">
-                    {artifacts.length} {t('gallery.status.all').toLowerCase()}
-                  </span>
-                )}
-              </button>
+                count={artifacts?.length}
+              />
 
-              <button
+              <DataButton
+                icon={<UploadIcon className="w-5 h-5" />}
+                label={t('dataManagement.import')}
                 onClick={() => setShowImport(true)}
-                className="w-full p-3 rounded-lg flex items-center gap-3 hover:bg-sand/50 text-text-primary transition-colors"
-              >
-                <UploadIcon className="w-5 h-5 text-terracotta" />
-                <span className="font-medium">
-                  {t('dataManagement.import')}
-                </span>
-              </button>
+              />
 
-              <div className="border-t border-sand my-2" />
+              <div className="my-3 border-t border-sepia/15" />
 
-              <button
+              <DataButton
+                icon={<TrashIcon className="w-5 h-5" />}
+                label={t('dataManagement.clearAll')}
                 onClick={() => setShowClearAll(true)}
                 disabled={!artifacts || artifacts.length === 0}
-                className="w-full p-3 rounded-lg flex items-center gap-3 hover:bg-error/10 text-error transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <TrashIcon className="w-5 h-5" />
-                <span className="font-medium">
-                  {t('dataManagement.clearAll')}
-                </span>
-              </button>
+                danger
+              />
             </div>
-          </div>
+          </section>
 
           {/* App Info */}
-          <div className="text-center text-sm text-text-secondary pt-4">
-            <p>{t('app.name')} v1.0.0</p>
-            <p className="mt-1">{t('app.tagline')}</p>
+          <div className="text-center pt-6 animate-fade-in stagger-3">
+            <div className="inline-block mb-4">
+              <img src="/logo-64.png" alt="" className="w-12 h-12 mx-auto opacity-60" />
+            </div>
+            <p className="font-display text-sm text-earth">{t('app.name')}</p>
+            <p className="text-xs text-text-muted mt-1">v1.0.0</p>
+            <p className="font-manuscript text-sm text-text-secondary italic mt-2">
+              {t('app.tagline')}
+            </p>
+
+            {/* Decorative footer */}
+            <div className="mt-6 flex items-center justify-center gap-2 text-text-muted">
+              <span className="w-12 h-px bg-gradient-to-r from-transparent to-sepia/30" />
+              <span className="text-xs opacity-50">✦</span>
+              <span className="w-12 h-px bg-gradient-to-l from-transparent to-sepia/30" />
+            </div>
           </div>
         </div>
       </main>
@@ -130,14 +130,49 @@ function LanguageOption({ label, value, selected, onChange }: LanguageOptionProp
   return (
     <button
       onClick={() => onChange(value)}
-      className={`w-full p-3 rounded-lg flex items-center justify-between transition-colors ${
+      className={`w-full p-3 rounded-lg flex items-center justify-between transition-all duration-200 ${
         selected
-          ? 'bg-sand text-earth'
-          : 'hover:bg-sand/50 text-text-secondary'
+          ? 'bg-terracotta/10 text-earth border border-terracotta/30'
+          : 'hover:bg-sand/50 text-text-secondary border border-transparent'
       }`}
     >
-      <span className="font-medium">{label}</span>
-      {selected && <CheckIcon className="w-5 h-5 text-terracotta" />}
+      <span className={`font-medium ${selected ? 'font-semibold' : ''}`}>{label}</span>
+      {selected && (
+        <span className="w-6 h-6 rounded-full bg-terracotta flex items-center justify-center animate-stamp">
+          <CheckIcon className="w-4 h-4 text-parchment-light" />
+        </span>
+      )}
+    </button>
+  );
+}
+
+interface DataButtonProps {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  count?: number;
+  danger?: boolean;
+}
+
+function DataButton({ icon, label, onClick, disabled, count, danger }: DataButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`w-full p-3 rounded-lg flex items-center gap-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+        danger
+          ? 'text-error hover:bg-error/10'
+          : 'text-text-primary hover:bg-sand/50'
+      }`}
+    >
+      <span className={danger ? '' : 'text-terracotta'}>{icon}</span>
+      <span className="font-medium flex-1 text-left">{label}</span>
+      {count !== undefined && count > 0 && (
+        <span className="text-sm text-text-muted">
+          {count} {count === 1 ? 'item' : 'items'}
+        </span>
+      )}
     </button>
   );
 }

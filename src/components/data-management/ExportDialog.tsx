@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
 import JSZip from 'jszip';
 import { db } from '@/lib/db';
+import { DownloadIcon } from '@/components/icons';
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -111,18 +112,24 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-burnt/60 z-50 flex items-center justify-center p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl p-6 w-full max-w-md"
+        className="parchment-card corners-decorated p-6 w-full max-w-md animate-fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold text-earth mb-4">
-          {t('dataManagement.exportTitle', 'Export Data')}
-        </h2>
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-terracotta to-clay flex items-center justify-center">
+            <DownloadIcon className="w-5 h-5 text-parchment-light" />
+          </div>
+          <h2 className="font-display text-xl font-semibold text-earth">
+            {t('dataManagement.exportTitle', 'Export Data')}
+          </h2>
+        </div>
 
-        <p className="text-text-secondary mb-6">
+        <p className="text-text-secondary mb-4">
           {t(
             'dataManagement.exportDescription',
             'Export all artifacts, photos, 3D models, and info cards to a ZIP file.'
@@ -130,39 +137,41 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
         </p>
 
         {artifacts && (
-          <p className="text-sm text-text-secondary mb-4">
+          <p className="text-sm text-text-muted font-manuscript italic mb-4">
             {t('dataManagement.artifactCount', '{{count}} artifacts will be exported', {
               count: artifacts.length,
             })}
           </p>
         )}
 
+        {/* Progress bar */}
         {isExporting && (
           <div className="mb-6">
-            <div className="h-2 bg-sand rounded-full overflow-hidden">
+            <div className="h-2 bg-sand/50 rounded-full overflow-hidden">
               <div
-                className="h-full bg-terracotta rounded-full transition-all duration-300"
+                className="h-full bg-gradient-to-r from-terracotta to-clay rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-sm text-text-secondary text-center mt-2">
+            <p className="text-sm text-text-secondary text-center mt-2 font-manuscript">
               {Math.round(progress)}%
             </p>
           </div>
         )}
 
+        {/* Actions */}
         <div className="flex gap-3">
           <button
             onClick={onClose}
             disabled={isExporting}
-            className="flex-1 py-3 border border-sand text-earth rounded-xl font-medium hover:bg-sand transition-colors disabled:opacity-50"
+            className="btn-parchment flex-1 disabled:opacity-50"
           >
             {t('common.cancel')}
           </button>
           <button
             onClick={handleExport}
             disabled={isExporting || !artifacts || artifacts.length === 0}
-            className="flex-1 py-3 bg-terracotta text-white rounded-xl font-semibold hover:bg-clay transition-colors disabled:opacity-50"
+            className="btn-seal flex-1 text-sm disabled:opacity-50"
           >
             {isExporting
               ? t('dataManagement.exporting', 'Exporting...')

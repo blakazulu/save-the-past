@@ -59,19 +59,20 @@ export function DeleteConfirmDialog({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-burnt/60 z-50 flex items-center justify-center p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl p-6 w-full max-w-md"
+        className="parchment-card p-6 w-full max-w-md animate-fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header with warning icon */}
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-12 h-12 rounded-full bg-error/20 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-error/15 flex items-center justify-center border border-error/30">
             <TrashIcon className="w-6 h-6 text-error" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-earth">
+            <h2 className="font-display text-xl font-semibold text-earth">
               {isMultiple
                 ? t('dataManagement.deleteMultipleTitle', 'Delete {{count}} Artifacts?', { count })
                 : t('dataManagement.deleteTitle', 'Delete Artifact?')}
@@ -93,18 +94,26 @@ export function DeleteConfirmDialog({
               )}
         </p>
 
+        {/* Warning banner */}
+        <div className="mb-6 p-3 bg-error/10 border border-error/20 rounded">
+          <p className="text-sm text-error font-medium">
+            {t('dataManagement.deleteWarning', 'This action cannot be undone.')}
+          </p>
+        </div>
+
+        {/* Actions */}
         <div className="flex gap-3">
           <button
             onClick={onClose}
             disabled={isDeleting}
-            className="flex-1 py-3 border border-sand text-earth rounded-xl font-medium hover:bg-sand transition-colors disabled:opacity-50"
+            className="btn-parchment flex-1 disabled:opacity-50"
           >
             {t('common.cancel')}
           </button>
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="flex-1 py-3 bg-error text-white rounded-xl font-semibold hover:bg-error/80 transition-colors disabled:opacity-50"
+            className="flex-1 py-3 bg-error text-white rounded font-display font-medium text-sm uppercase tracking-wider hover:bg-error/80 transition-colors disabled:opacity-50"
           >
             {isDeleting
               ? t('dataManagement.deleting', 'Deleting...')
