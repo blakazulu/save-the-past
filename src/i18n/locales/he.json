@@ -205,6 +205,10 @@
     "install": "התקן",
     "notNow": "לא עכשיו"
   },
+  "offline": {
+    "youAreOffline": "אתה במצב לא מקוון. חלק מהתכונות עשויות להיות לא זמינות.",
+    "backOnline": "אתה שוב מחובר!"
+  },
   "dataManagement": {
     "title": "ניהול נתונים",
     "exportTitle": "ייצוא נתונים",

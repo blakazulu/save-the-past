@@ -205,6 +205,10 @@
     "install": "Install",
     "notNow": "Not now"
   },
+  "offline": {
+    "youAreOffline": "You're offline. Some features may be unavailable.",
+    "backOnline": "You're back online!"
+  },
   "dataManagement": {
     "title": "Data Management",
     "exportTitle": "Export Data",
