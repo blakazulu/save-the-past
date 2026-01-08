@@ -6,13 +6,15 @@ import { checkReconstruct3DStatus, generateInfoCard, base64ToBlob } from '@/lib/
 import { db } from '@/lib/db';
 import type { Model3D, InfoCard } from '@/types';
 
-const POLL_INTERVAL_MS = 3000;
+// Smart polling intervals
+const FAST_POLL_INTERVAL_MS = 10000; // 10 seconds for first minute
+const SLOW_POLL_INTERVAL_MS = 30000; // 30 seconds after first minute
+const FAST_POLL_DURATION_MS = 60000; // First minute uses fast polling
 
 export function JobProcessor() {
   const navigate = useNavigate();
   const { jobs, updateJob, removeJob, notificationPermission } = useJobsStore();
   const hasHydrated = useJobsHydrated();
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Request notification permission on mount
   useEffect(() => {
@@ -272,42 +274,119 @@ export function JobProcessor() {
     [updateJob, removeJob, showNotification]
   );
 
-  // Poll active jobs (only after hydration)
-  useEffect(() => {
-    // Wait for hydration before polling
-    if (!hasHydrated) return;
+  // Track polling state
+  const pollingStartTimeRef = useRef<number>(Date.now());
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isPollingRef = useRef<boolean>(false);
 
-    // Clear any existing interval first to prevent multiple intervals
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-      pollingRef.current = null;
+  // Get current polling interval based on how long we've been polling
+  const getCurrentPollInterval = useCallback(() => {
+    const elapsed = Date.now() - pollingStartTimeRef.current;
+    return elapsed < FAST_POLL_DURATION_MS ? FAST_POLL_INTERVAL_MS : SLOW_POLL_INTERVAL_MS;
+  }, []);
+
+  // Single poll cycle
+  const doPoll = useCallback(async () => {
+    // Get fresh jobs from store
+    const currentJobs = useJobsStore.getState().jobs;
+    const activeJobs = currentJobs.filter(
+      (job) =>
+        job.type === 'reconstruction' &&
+        (job.status === 'pending' || job.status === 'processing')
+    );
+
+    for (const job of activeJobs) {
+      await processReconstructionJob(job);
     }
 
-    const pollJobs = async () => {
-      const activeJobs = jobs.filter(
-        (job) =>
-          job.type === 'reconstruction' &&
-          (job.status === 'pending' || job.status === 'processing')
-      );
+    return activeJobs.length > 0;
+  }, [processReconstructionJob]);
 
-      for (const job of activeJobs) {
-        await processReconstructionJob(job);
+  // Schedule next poll with adaptive interval
+  const scheduleNextPoll = useCallback(() => {
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
+    // Check if we still have active jobs
+    const currentJobs = useJobsStore.getState().jobs;
+    const hasActiveJobs = currentJobs.some((j) => j.status === 'pending' || j.status === 'processing');
+
+    if (!hasActiveJobs) {
+      isPollingRef.current = false;
+      return;
+    }
+
+    const interval = getCurrentPollInterval();
+    timeoutRef.current = setTimeout(async () => {
+      const stillHasJobs = await doPoll();
+      if (stillHasJobs) {
+        scheduleNextPoll();
+      } else {
+        isPollingRef.current = false;
       }
-    };
+    }, interval);
+  }, [getCurrentPollInterval, doPoll]);
 
-    // Start polling if we have active jobs
-    if (jobs.some((j) => j.status === 'pending' || j.status === 'processing')) {
-      pollJobs(); // Poll immediately
-      pollingRef.current = setInterval(pollJobs, POLL_INTERVAL_MS);
+  // Start polling if not already polling
+  const startPolling = useCallback(() => {
+    if (isPollingRef.current) return;
+
+    isPollingRef.current = true;
+    pollingStartTimeRef.current = Date.now();
+
+    // Poll immediately, then schedule next
+    doPoll().then((hasJobs) => {
+      if (hasJobs) {
+        scheduleNextPoll();
+      } else {
+        isPollingRef.current = false;
+      }
+    });
+  }, [doPoll, scheduleNextPoll]);
+
+  // Check if we need to start polling when jobs change or hydration completes
+  useEffect(() => {
+    if (!hasHydrated) return;
+
+    const hasActiveJobs = jobs.some((j) => j.status === 'pending' || j.status === 'processing');
+
+    if (hasActiveJobs && !isPollingRef.current) {
+      startPolling();
     }
 
     return () => {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-        pollingRef.current = null;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
     };
-  }, [jobs, hasHydrated, processReconstructionJob]);
+  }, [hasHydrated, jobs, startPolling]);
+
+  // Handle visibility change - poll immediately when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && hasHydrated) {
+        const currentJobs = useJobsStore.getState().jobs;
+        const hasActiveJobs = currentJobs.some((j) => j.status === 'pending' || j.status === 'processing');
+        if (hasActiveJobs) {
+          // Reset polling timer and poll immediately
+          pollingStartTimeRef.current = Date.now();
+          doPoll().then((hasJobs) => {
+            if (hasJobs && !isPollingRef.current) {
+              isPollingRef.current = true;
+              scheduleNextPoll();
+            }
+          });
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [hasHydrated, doPoll, scheduleNextPoll]);
 
   // This component doesn't render anything
   return null;
