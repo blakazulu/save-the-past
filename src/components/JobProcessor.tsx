@@ -42,12 +42,33 @@ export function JobProcessor() {
     [navigate, notificationPermission]
   );
 
+  // Track retry counts for network errors
+  const retryCountRef = useRef<Map<string, number>>(new Map());
+  const MAX_RETRIES = 3;
+
   const processReconstructionJob = useCallback(
     async (job: ProcessingJob) => {
       try {
         const statusResult = await checkReconstruct3DStatus(job.taskId);
 
         if (!statusResult.success || !statusResult.data) {
+          // Check if this is a network error (Failed to fetch)
+          const isNetworkError = statusResult.error?.includes('fetch') ||
+                                  statusResult.error?.includes('network') ||
+                                  statusResult.error?.includes('Failed to');
+
+          if (isNetworkError) {
+            const retryCount = retryCountRef.current.get(job.id) || 0;
+            if (retryCount < MAX_RETRIES) {
+              // Increment retry count and try again on next poll
+              retryCountRef.current.set(job.id, retryCount + 1);
+              console.log(`Network error for job ${job.id}, retry ${retryCount + 1}/${MAX_RETRIES}`);
+              return; // Don't mark as failed yet, will retry on next poll
+            }
+            // Clear retry count after max retries
+            retryCountRef.current.delete(job.id);
+          }
+
           updateJob(job.id, {
             status: 'failed',
             error: statusResult.error || 'Failed to check status',
@@ -59,6 +80,9 @@ export function JobProcessor() {
           });
           return;
         }
+
+        // Reset retry count on successful response
+        retryCountRef.current.delete(job.id);
 
         const status = statusResult.data;
 
