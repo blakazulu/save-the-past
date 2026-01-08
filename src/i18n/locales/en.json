@@ -110,7 +110,8 @@
     "processingDescription": "This may take a few minutes",
     "errorTitle": "Generation Failed",
     "next": "Next",
-    "generate": "Generate 3D Model"
+    "generate": "Generate 3D Model",
+    "canLeave": "You can leave this page - we'll notify you when it's ready!"
   },
   "reconstruction": {
     "title": "3D Reconstruction",

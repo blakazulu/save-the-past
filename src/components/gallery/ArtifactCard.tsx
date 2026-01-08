@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { db } from '@/lib/db';
+import { useJobsStore } from '@/stores/jobsStore';
 import type { Artifact, ArtifactStatus } from '@/types';
 
 interface ArtifactCardProps {
@@ -21,6 +22,11 @@ const STATUS_BADGES: Record<ArtifactStatus, string> = {
 export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) {
   const { t } = useTranslation();
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const getJobByArtifactId = useJobsStore((state) => state.getJobByArtifactId);
+
+  // Check for active processing job
+  const activeJob = getJobByArtifactId(artifact.id);
+  const isProcessing = activeJob && (activeJob.status === 'pending' || activeJob.status === 'processing');
 
   useEffect(() => {
     let url: string | null = null;
@@ -87,10 +93,22 @@ export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) 
           </p>
         </div>
 
-        {/* Status badge */}
-        <span className={`badge-status ${badgeClass}`}>
-          {t(`gallery.status.${artifact.status}`)}
-        </span>
+        {/* Status badge or progress */}
+        {isProcessing ? (
+          <div className="flex items-center gap-2">
+            <div className="w-16 h-1.5 bg-sand rounded-full overflow-hidden">
+              <div
+                className="h-full bg-terracotta rounded-full transition-all duration-300"
+                style={{ width: `${activeJob.progress}%` }}
+              />
+            </div>
+            <span className="text-xs text-text-muted">{Math.round(activeJob.progress)}%</span>
+          </div>
+        ) : (
+          <span className={`badge-status ${badgeClass}`}>
+            {t(`gallery.status.${artifact.status}`)}
+          </span>
+        )}
       </Link>
     );
   }
@@ -120,8 +138,31 @@ export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) 
           {t(`gallery.status.${artifact.status}`)}
         </span>
 
+        {/* Processing progress overlay */}
+        {isProcessing && (
+          <div className="absolute inset-0 bg-burnt/60 flex flex-col items-center justify-center">
+            <div className="w-12 h-12 mb-2">
+              <div className="cube-container scale-75">
+                <div className="cube">
+                  <div className="cube-face cube-front" />
+                  <div className="cube-face cube-back" />
+                  <div className="cube-face cube-right" />
+                  <div className="cube-face cube-left" />
+                  <div className="cube-face cube-top" />
+                  <div className="cube-face cube-bottom" />
+                </div>
+              </div>
+            </div>
+            <span className="text-white text-sm font-medium">
+              {Math.round(activeJob.progress)}%
+            </span>
+          </div>
+        )}
+
         {/* Hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-burnt/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {!isProcessing && (
+          <div className="absolute inset-0 bg-gradient-to-t from-burnt/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        )}
       </div>
 
       {/* Info */}

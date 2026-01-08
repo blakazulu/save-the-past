@@ -6,6 +6,7 @@ import { getDirection } from '@/i18n';
 import { queryClient } from '@/lib/query';
 import { InstallPrompt, ErrorBoundary, LoadingSpinner, OfflineIndicator, ScribbleBackground } from '@/components/ui';
 import { BottomNav } from '@/components/layout';
+import { JobProcessor } from '@/components/JobProcessor';
 
 // Eager load lightweight pages
 import HomePage from '@/pages/HomePage';
@@ -65,6 +66,7 @@ export default function App() {
           <BottomNav />
           <InstallPrompt />
           <OfflineIndicator />
+          <JobProcessor />
         </BrowserRouter>
       </QueryClientProvider>
     </ErrorBoundary>

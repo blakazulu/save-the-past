@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { v4 as uuidv4 } from 'uuid';
 import { db } from '@/lib/db';
 import { PageHeader } from '@/components/layout';
 import { MetadataForm } from '@/components/info-card';
@@ -9,11 +10,12 @@ import { MethodSelector } from '@/components/reconstruction/MethodSelector';
 import { ReconstructionProgress } from '@/components/reconstruction/ReconstructionProgress';
 import { ModelViewer } from '@/components/viewer/ModelViewer';
 import { InfoCardDisplay } from '@/components/info-card';
-import { useReconstruct3D } from '@/hooks/useReconstruct3D';
-import { useGenerateInfoCard } from '@/hooks/useGenerateInfoCard';
+import { useJobsStore } from '@/stores/jobsStore';
+import { useRequestNotificationPermission } from '@/components/JobProcessor';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { startReconstruct3D, blobToBase64 } from '@/lib/api/client';
 import { CubeIcon, InfoIcon, TrashIcon } from '@/components/icons';
-import type { ArtifactMetadata, Model3D, InfoCard } from '@/types';
+import type { ArtifactMetadata } from '@/types';
 import type { ReconstructionMethod } from '@/components/reconstruction/MethodSelector';
 
 type WizardStep = 'metadata' | 'generate';
@@ -29,8 +31,19 @@ export default function ArtifactDetailPage() {
   const [selectedMethod, setSelectedMethod] = useState<ReconstructionMethod>('single');
   const [activeTab, setActiveTab] = useState<TabId>('model');
   const [modelUrl, setModelUrl] = useState<string | null>(null);
+  const [isStartingJob, setIsStartingJob] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const autoRemoveBackground = useSettingsStore((state) => state.autoRemoveBackground);
+  const requestNotificationPermission = useRequestNotificationPermission();
+
+  // Jobs store
+  const { addJob, getJobByArtifactId } = useJobsStore();
+
+  // Get active job for this artifact
+  const activeJob = id ? getJobByArtifactId(id) : undefined;
+  const isProcessing = activeJob && (activeJob.status === 'pending' || activeJob.status === 'processing');
+  const hasJobError = activeJob?.status === 'failed';
 
   // Load artifact from database
   const artifact = useLiveQuery(
@@ -56,34 +69,6 @@ export default function ArtifactDetailPage() {
     [id]
   );
 
-  // 3D Reconstruction hook
-  const {
-    reconstruct,
-    status: reconstructStatus,
-    progress: reconstructProgress,
-    error: reconstructError,
-    reset: resetReconstruct,
-  } = useReconstruct3D({
-    onComplete: async (_newModel: Model3D) => {
-      // Model saved, now generate info card
-      if (images && images.length > 0 && artifact) {
-        await generateInfoCardFn(artifact.id, images[0].blob, artifact.metadata);
-      }
-    },
-  });
-
-  // Info Card generation hook
-  const {
-    generate: generateInfoCardFn,
-    status: infoCardStatus,
-    progress: infoCardProgress,
-    error: infoCardError,
-  } = useGenerateInfoCard({
-    onComplete: async (_newInfoCard: InfoCard) => {
-      // Both complete
-    },
-  });
-
   // Create object URL for model blob
   useEffect(() => {
     if (model?.blob) {
@@ -93,6 +78,13 @@ export default function ArtifactDetailPage() {
     }
     setModelUrl(null);
   }, [model]);
+
+  // Skip to processing state if there's an active job
+  useEffect(() => {
+    if (isProcessing) {
+      setWizardStep('generate');
+    }
+  }, [isProcessing]);
 
   // Don't show loading state for fast IndexedDB queries
   if (artifact === undefined) {
@@ -135,10 +127,50 @@ export default function ArtifactDetailPage() {
   const handleGenerate = async () => {
     if (!images || images.length === 0) return;
 
-    const imageBlobs = images.map((img) => img.blob);
-    await reconstruct(artifact.id, imageBlobs, selectedMethod, {
-      removeBackground: autoRemoveBackground,
-    });
+    setIsStartingJob(true);
+    setLocalError(null);
+
+    try {
+      // Request notification permission
+      await requestNotificationPermission();
+
+      // Convert image to base64
+      const imageBlob = images[0].blob;
+      const imageBase64 = await blobToBase64(imageBlob);
+
+      // Start the reconstruction task
+      const result = await startReconstruct3D({
+        imageBase64,
+        removeBackground: autoRemoveBackground,
+      });
+
+      if (!result.success || !result.data?.taskId) {
+        throw new Error(result.error || result.data?.error || 'Failed to start reconstruction');
+      }
+
+      // Add job to store for background processing
+      const jobId = uuidv4();
+      addJob({
+        id: jobId,
+        artifactId: artifact.id,
+        taskId: result.data.taskId,
+        type: 'reconstruction',
+        status: 'pending',
+        progress: 0,
+        imageBase64, // Keep for info card generation later
+        metadata: { ...artifact.metadata },
+      });
+
+      // Update artifact status
+      await db.artifacts.update(artifact.id, {
+        status: 'processing-3d',
+        updatedAt: new Date(),
+      });
+    } catch (err) {
+      setLocalError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setIsStartingJob(false);
+    }
   };
 
   // Get artifact name for display
@@ -147,25 +179,21 @@ export default function ArtifactDetailPage() {
 
   // Check if we have a completed model (show result view)
   const hasModel = !!model && !!modelUrl;
-  const isProcessing = reconstructStatus === 'uploading' || reconstructStatus === 'processing' || reconstructStatus === 'saving' || infoCardStatus === 'generating';
-  const hasError = reconstructStatus === 'error' || infoCardStatus === 'error';
+  const hasError = hasJobError || !!localError;
+  const errorMessage = activeJob?.error || localError;
 
-  // Determine current progress status for display
-  const getProgressStatus = () => {
-    if (reconstructStatus === 'uploading') return 'uploading';
-    if (reconstructStatus === 'processing') return 'processing';
-    if (reconstructStatus === 'saving') return 'saving';
-    if (infoCardStatus === 'generating') return 'processing';
-    return 'processing';
+  // Get progress info from active job
+  const getProgress = () => {
+    if (!activeJob) return 0;
+    // 3D reconstruction takes 0-70%, info card would be 70-100%
+    return activeJob.progress * 0.7;
   };
 
-  const getProgress = () => {
-    if (infoCardStatus === 'generating') {
-      // 3D is done (0-70%), info card is generating (70-100%)
-      return 70 + (infoCardProgress * 0.3);
-    }
-    // 3D reconstruction takes 0-70%
-    return reconstructProgress * 0.7;
+  const getProgressStatus = (): 'uploading' | 'processing' | 'saving' => {
+    if (!activeJob) return 'processing';
+    if (activeJob.progress < 10) return 'uploading';
+    if (activeJob.progress >= 95) return 'saving';
+    return 'processing';
   };
 
   // RESULT VIEW - Has completed model
@@ -301,7 +329,7 @@ export default function ArtifactDetailPage() {
           )}
 
           {/* Step 2: Generate */}
-          {wizardStep === 'generate' && !isProcessing && !hasError && (
+          {wizardStep === 'generate' && !isProcessing && !hasError && !isStartingJob && (
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <h2 className="text-xl font-semibold text-earth">
@@ -335,8 +363,30 @@ export default function ArtifactDetailPage() {
             </div>
           )}
 
+          {/* Starting Job State */}
+          {isStartingJob && (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-semibold text-earth">
+                  {t('wizard.processingTitle')}
+                </h2>
+                <p className="text-text-secondary text-base mt-1">
+                  {t('reconstruction.status.uploading')}
+                </p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 border border-sand">
+                <ReconstructionProgress
+                  progress={5}
+                  status="uploading"
+                  startTime={Date.now()}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Processing State */}
-          {isProcessing && (
+          {isProcessing && !isStartingJob && (
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <h2 className="text-xl font-semibold text-earth">
@@ -351,27 +401,38 @@ export default function ArtifactDetailPage() {
                 <ReconstructionProgress
                   progress={getProgress()}
                   status={getProgressStatus()}
+                  startTime={activeJob?.startedAt}
                 />
+              </div>
+
+              {/* Info that user can leave */}
+              <div className="text-center">
+                <p className="text-sm text-text-muted">
+                  {t('wizard.canLeave')}
+                </p>
               </div>
             </div>
           )}
 
           {/* Error State */}
-          {hasError && (
+          {hasError && !isStartingJob && (
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <h2 className="text-xl font-semibold text-error">
                   {t('wizard.errorTitle')}
                 </h2>
                 <p className="text-text-secondary text-base mt-1">
-                  {reconstructError || infoCardError}
+                  {errorMessage}
                 </p>
               </div>
 
               <button
                 onClick={() => {
-                  resetReconstruct();
-                  setWizardStep('generate');
+                  setLocalError(null);
+                  // Remove failed job if exists
+                  if (activeJob) {
+                    useJobsStore.getState().removeJob(activeJob.id);
+                  }
                 }}
                 className="w-full py-3 bg-terracotta text-white rounded-xl font-semibold hover:bg-clay transition-colors"
               >

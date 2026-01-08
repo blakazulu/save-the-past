@@ -110,7 +110,8 @@
     "processingDescription": "זה עשוי לקחת מספר דקות",
     "errorTitle": "היצירה נכשלה",
     "next": "הבא",
-    "generate": "צור מודל תלת-ממדי"
+    "generate": "צור מודל תלת-ממדי",
+    "canLeave": "אפשר לעזוב את הדף הזה - נודיע לך כשזה יהיה מוכן!"
   },
   "reconstruction": {
     "title": "שחזור תלת-ממדי",
