@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { getDirection } from '@/i18n';
@@ -24,12 +24,10 @@ function PageLoader() {
 }
 
 function AnimatedRoutes() {
-  const location = useLocation();
-
   return (
-    <div key={location.pathname} className="page-transition">
+    <div className="min-h-dvh">
       <Suspense fallback={<PageLoader />}>
-        <Routes location={location}>
+        <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/capture" element={<CapturePage />} />
           <Route path="/gallery" element={<GalleryPage />} />

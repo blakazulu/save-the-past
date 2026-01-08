@@ -82,9 +82,9 @@ export function Model3DTab({ artifact }: Model3DTabProps) {
   // If model exists and we're not reprocessing, show viewer
   if (model && modelUrl && componentStatus !== 'processing') {
     return (
-      <div className="flex flex-col h-full">
-        <div className="flex-1 min-h-[400px] sm:min-h-[500px]">
-          <ModelViewer modelUrl={modelUrl} className="w-full h-full min-h-[400px] sm:min-h-[500px]" />
+      <div className="flex flex-col">
+        <div className="h-[70vh]">
+          <ModelViewer modelUrl={modelUrl} className="w-full h-full" />
         </div>
         <div className="p-4 bg-white border-t border-sand">
           <div className="flex items-center justify-between text-base text-text-secondary">

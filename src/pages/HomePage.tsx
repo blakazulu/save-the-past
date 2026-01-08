@@ -7,7 +7,7 @@ export default function HomePage() {
   const { t } = useTranslation();
 
   return (
-    <div className="h-dvh flex flex-col overflow-hidden">
+    <div className="min-h-dvh flex flex-col">
       {/* Decorative Header */}
       <header className="safe-area-top relative">
         <div className="absolute inset-0 bg-gradient-to-b from-burnt/20 to-transparent pointer-events-none" />

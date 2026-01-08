@@ -96,11 +96,13 @@ export function ModelViewer({ modelUrl, onDownload, className = '' }: ModelViewe
         </Suspense>
 
         <OrbitControls
+          makeDefault
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          minDistance={1}
+          minDistance={0.5}
           maxDistance={10}
+          target={[0, 0, 0]}
         />
       </Canvas>
 
