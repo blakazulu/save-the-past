@@ -364,13 +364,21 @@ export function JobProcessor() {
       startPolling();
     }
 
+    // Note: Don't clear timeout in cleanup here - job updates during polling
+    // would trigger cleanup and stop the polling prematurely.
+    // Polling stops itself when no more active jobs (in scheduleNextPoll).
+  }, [hasHydrated, jobs, startPolling]);
+
+  // Cleanup timeout only on component unmount
+  useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
+      isPollingRef.current = false;
     };
-  }, [hasHydrated, jobs, startPolling]);
+  }, []);
 
   // Handle visibility change - poll immediately when tab becomes visible
   useEffect(() => {
