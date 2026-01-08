@@ -461,13 +461,16 @@ body::before {
     stroke-dashoffset: 1000;
     opacity: 0;
   }
+
   5% {
     opacity: 0.2;
   }
+
   70% {
     stroke-dashoffset: 0;
     opacity: 0.2;
   }
+
   100% {
     stroke-dashoffset: 0;
     opacity: 0;
@@ -510,13 +513,16 @@ body::before {
     opacity: 0;
     clip-path: inset(0 100% 0 0);
   }
+
   10% {
     opacity: 0.25;
   }
+
   70% {
     opacity: 0.25;
     clip-path: inset(0 0 0 0);
   }
+
   100% {
     opacity: 0;
     clip-path: inset(0 0 0 0);
@@ -649,7 +655,7 @@ body::before {
 
 /* Glass/frosted effect for overlays */
 .glass-parchment {
-  background: rgba(251, 246, 237, 0.85);
+  background: rgba(244, 228, 193, 0.55);
   /* Removed backdrop-filter - causes heavy repaints during route transitions */
   /* Use solid semi-transparent background instead for better performance */
 }
@@ -720,28 +726,50 @@ body::before {
   top: 10px;
   border: 2px solid var(--color-terracotta);
   background: linear-gradient(135deg,
-    rgba(181, 101, 29, 0.15) 0%,
-    rgba(139, 69, 19, 0.25) 100%);
+      rgba(181, 101, 29, 0.15) 0%,
+      rgba(139, 69, 19, 0.25) 100%);
   border-radius: 4px;
 }
 
-.cube-front  { transform: rotateY(0deg) translateZ(30px); }
-.cube-back   { transform: rotateY(180deg) translateZ(30px); }
-.cube-right  { transform: rotateY(90deg) translateZ(30px); }
-.cube-left   { transform: rotateY(-90deg) translateZ(30px); }
-.cube-top    { transform: rotateX(90deg) translateZ(30px); }
-.cube-bottom { transform: rotateX(-90deg) translateZ(30px); }
+.cube-front {
+  transform: rotateY(0deg) translateZ(30px);
+}
+
+.cube-back {
+  transform: rotateY(180deg) translateZ(30px);
+}
+
+.cube-right {
+  transform: rotateY(90deg) translateZ(30px);
+}
+
+.cube-left {
+  transform: rotateY(-90deg) translateZ(30px);
+}
+
+.cube-top {
+  transform: rotateX(90deg) translateZ(30px);
+}
+
+.cube-bottom {
+  transform: rotateX(-90deg) translateZ(30px);
+}
 
 @keyframes cube-spin {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: rotateX(-20deg) rotateY(0deg);
   }
+
   25% {
     transform: rotateX(-20deg) rotateY(90deg);
   }
+
   50% {
     transform: rotateX(-20deg) rotateY(180deg);
   }
+
   75% {
     transform: rotateX(-20deg) rotateY(270deg);
   }
@@ -749,8 +777,16 @@ body::before {
 
 /* Fact fade animation */
 @keyframes fact-fade {
-  0%, 100% { opacity: 1; }
-  45%, 55% { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  45%,
+  55% {
+    opacity: 0;
+  }
 }
 
 .animate-fact-fade {

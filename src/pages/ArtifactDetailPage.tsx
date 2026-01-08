@@ -257,7 +257,11 @@ export default function ArtifactDetailPage() {
           )}
           {activeTab === 'info' && infoCard && (
             <div className="flex-1 overflow-y-auto p-4">
-              <InfoCardDisplay infoCard={infoCard} />
+              <InfoCardDisplay
+                infoCard={infoCard}
+                metadata={artifact.metadata}
+                artifactName={artifactName}
+              />
             </div>
           )}
           {activeTab === 'info' && !infoCard && (
