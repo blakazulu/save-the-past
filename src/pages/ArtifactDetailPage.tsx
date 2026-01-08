@@ -21,16 +21,11 @@ export default function ArtifactDetailPage() {
     [id]
   );
 
-  // Show loading state
+  // Don't show loading state for fast IndexedDB queries - prevents flash
   if (artifact === undefined) {
     return (
-      <div className="min-h-dvh flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-2 border-terracotta border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="font-manuscript text-text-secondary italic">
-            {t('common.loading')}
-          </p>
-        </div>
+      <div className="min-h-dvh flex flex-col">
+        <PageHeader title="" backTo="/gallery" />
       </div>
     );
   }

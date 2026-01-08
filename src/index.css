@@ -75,11 +75,21 @@ html {
 body {
   margin: 0;
   font-family: 'Crimson Pro', Georgia, 'Times New Roman', serif;
-  background: url('/bg.webp') center center / cover fixed;
+  /* Use solid color base - the fixed bg is handled by pseudo-element for better performance */
+  background-color: var(--color-parchment);
   color: var(--color-text-primary);
   min-height: 100dvh;
   line-height: 1.6;
   letter-spacing: 0.01em;
+}
+
+/* Fixed background using pseudo-element - much better performance than background-attachment: fixed */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: url('/bg.webp') center center / cover no-repeat;
 }
 
 /* Display/Header font */
@@ -570,6 +580,33 @@ body {
 }
 
 /* ============================================
+   PAGE TRANSITIONS
+   ============================================ */
+
+/* Wrapper ensures consistent layout during transitions */
+.page-transition-wrapper {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+/* Route content - NO animation to prevent flash */
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Loading skeleton that maintains layout structure */
+.page-skeleton {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================
    UTILITY CLASSES
    ============================================ */
 
@@ -612,9 +649,9 @@ body {
 
 /* Glass/frosted effect for overlays */
 .glass-parchment {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background: rgba(251, 246, 237, 0.85);
+  /* Removed backdrop-filter - causes heavy repaints during route transitions */
+  /* Use solid semi-transparent background instead for better performance */
 }
 
 /* Status badge styles */

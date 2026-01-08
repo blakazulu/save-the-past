@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BottomNav } from '@/components/layout';
 import { SettingsIcon, CameraIcon, GalleryIcon } from '@/components/icons';
 
 export default function HomePage() {
@@ -26,7 +25,7 @@ export default function HomePage() {
       <main className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
         <div className="max-w-sm w-full text-center">
           {/* Logo with vintage frame */}
-          <div className="relative animate-fade-in">
+          <div className="relative">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-44 h-44 rounded-full bg-gradient-to-br from-sand/50 to-parchment-dark/30 blur-xl" />
             </div>
@@ -41,25 +40,25 @@ export default function HomePage() {
 
           {/* Title with vintage typography */}
           <div className="space-y-3 mb-8">
-            <h1 className="font-display text-3xl md:text-4xl font-semibold text-earth tracking-wide text-shadow-vintage animate-fade-in-up">
+            <h1 className="font-display text-3xl md:text-4xl font-semibold text-earth tracking-wide text-shadow-vintage">
               {t('app.name')}
             </h1>
 
-            <div className="divider-ornate animate-fade-in stagger-1">
+            <div className="divider-ornate">
               <span className="font-manuscript text-base">✦</span>
             </div>
 
-            <p className="font-manuscript text-xl text-terracotta italic animate-fade-in-up stagger-2">
+            <p className="font-manuscript text-xl text-terracotta italic">
               {t('home.subtitle')}
             </p>
 
-            <p className="text-text-secondary leading-relaxed animate-fade-in-up stagger-3">
+            <p className="text-text-secondary leading-relaxed">
               {t('home.description')}
             </p>
           </div>
 
           {/* CTA Buttons */}
-          <div className="space-y-4 animate-fade-in-up stagger-4">
+          <div className="space-y-4">
             {/* Primary CTA - Camera */}
             <Link
               to="/capture"
@@ -80,7 +79,7 @@ export default function HomePage() {
           </div>
 
           {/* Decorative footer element */}
-          <div className="mt-12 animate-fade-in stagger-5">
+          <div className="mt-12">
             <div className="flex items-center justify-center gap-2 text-text-muted text-base font-manuscript">
               <span className="w-8 h-px bg-gradient-to-r from-transparent to-sepia/30" />
               <span className="opacity-50">❧</span>
@@ -91,9 +90,6 @@ export default function HomePage() {
           </div>
         </div>
       </main>
-
-      {/* Bottom Navigation */}
-      <BottomNav />
     </div>
   );
 }

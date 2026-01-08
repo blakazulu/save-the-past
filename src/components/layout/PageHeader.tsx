@@ -9,7 +9,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, backTo, action }: PageHeaderProps) {
   return (
-    <header className="safe-area-top relative">
+    <header className="safe-area-top relative transform-gpu">
       {/* Gradient overlay for depth */}
       <div className="absolute inset-0 bg-gradient-to-b from-burnt/15 to-transparent pointer-events-none" />
 

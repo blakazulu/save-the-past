@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { getDirection } from '@/i18n';
 import { queryClient } from '@/lib/query';
 import { InstallPrompt, ErrorBoundary, LoadingSpinner, OfflineIndicator, ScribbleBackground } from '@/components/ui';
+import { BottomNav } from '@/components/layout';
 
 // Eager load lightweight pages
 import HomePage from '@/pages/HomePage';
@@ -15,27 +16,33 @@ const CapturePage = lazy(() => import('@/pages/CapturePage'));
 const GalleryPage = lazy(() => import('@/pages/GalleryPage'));
 const ArtifactDetailPage = lazy(() => import('@/pages/ArtifactDetailPage'));
 
-function PageLoader() {
+function PageSkeleton() {
+  // Maintains layout structure during lazy load to prevent flash/jump
   return (
-    <div className="min-h-dvh flex items-center justify-center">
-      <LoadingSpinner />
+    <div className="page-skeleton">
+      {/* Header placeholder */}
+      <div className="h-14 safe-area-top" />
+      {/* Content area with centered spinner */}
+      <div className="flex-1 flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+      {/* Bottom nav placeholder */}
+      <div className="h-16 safe-area-bottom" />
     </div>
   );
 }
 
 function AnimatedRoutes() {
   return (
-    <div className="min-h-dvh">
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/capture" element={<CapturePage />} />
-          <Route path="/gallery" element={<GalleryPage />} />
-          <Route path="/artifact/:id" element={<ArtifactDetailPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
-      </Suspense>
-    </div>
+    <Suspense fallback={<PageSkeleton />}>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/capture" element={<CapturePage />} />
+        <Route path="/gallery" element={<GalleryPage />} />
+        <Route path="/artifact/:id" element={<ArtifactDetailPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Routes>
+    </Suspense>
   );
 }
 
@@ -54,6 +61,8 @@ export default function App() {
         <BrowserRouter>
           <ScribbleBackground />
           <AnimatedRoutes />
+          {/* BottomNav at app level - never unmounts during navigation */}
+          <BottomNav />
           <InstallPrompt />
           <OfflineIndicator />
         </BrowserRouter>

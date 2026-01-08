@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { PageHeader, BottomNav } from '@/components/layout';
+import { PageHeader } from '@/components/layout';
 import {
   GalleryGrid,
   GalleryList,
   GalleryToolbar,
   GalleryFilters,
-  GallerySkeleton,
   GalleryEmpty,
 } from '@/components/gallery';
 import { useGalleryFilters } from '@/hooks/useGalleryFilters';
@@ -47,7 +46,6 @@ export default function GalleryPage() {
       <div className="min-h-dvh flex flex-col">
         <PageHeader title={t('gallery.title')} backTo="/" />
         <GalleryEmpty variant="no-artifacts" />
-        <BottomNav />
       </div>
     );
   }
@@ -60,7 +58,7 @@ export default function GalleryPage() {
       <main className="flex-1 flex flex-col p-4 pb-20">
         <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col">
           {/* Toolbar */}
-          <div className="mb-4 animate-fade-in">
+          <div className="mb-4">
             <GalleryToolbar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -71,11 +69,9 @@ export default function GalleryPage() {
             />
           </div>
 
-          {/* Content */}
+          {/* Content - no skeleton for fast IndexedDB loads to prevent flash */}
           <div className="flex-1">
-            {isLoading ? (
-              <GallerySkeleton variant={viewMode} count={6} />
-            ) : filteredArtifacts.length === 0 ? (
+            {isLoading ? null : filteredArtifacts.length === 0 ? (
               <GalleryEmpty
                 variant="no-results"
                 searchQuery={searchQuery}
@@ -89,8 +85,6 @@ export default function GalleryPage() {
           </div>
         </div>
       </main>
-
-      <BottomNav />
 
       {/* Filters panel */}
       <GalleryFilters

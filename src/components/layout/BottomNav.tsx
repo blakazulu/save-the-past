@@ -1,14 +1,22 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { HomeIcon, CameraIcon, GalleryIcon, SettingsIcon } from '@/components/icons';
+import { HomeIcon, CameraIcon, GalleryIcon, SettingsIcon, LanguageIcon } from '@/components/icons';
 
 export function BottomNav() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'he' ? 'en' : 'he';
+    i18n.changeLanguage(newLang);
+  };
+
+  // Get short language code for display
+  const langLabel = i18n.language === 'he' ? 'עב' : 'EN';
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 safe-area-bottom z-40"
+      className="fixed bottom-0 left-0 right-0 safe-area-bottom z-40 transform-gpu"
       role="navigation"
       aria-label={t('nav.mainNavigation', 'Main navigation')}
     >
@@ -41,6 +49,11 @@ export function BottomNav() {
             icon={<SettingsIcon />}
             label={t('nav.settings')}
             active={location.pathname === '/settings'}
+          />
+          <LanguageToggle
+            icon={<LanguageIcon />}
+            label={langLabel}
+            onClick={toggleLanguage}
           />
         </div>
       </div>
@@ -88,5 +101,33 @@ function NavTab({ to, icon, label, active }: NavTabProps) {
         {label}
       </span>
     </Link>
+  );
+}
+
+interface LanguageToggleProps {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}
+
+function LanguageToggle({ icon, label, onClick }: LanguageToggleProps) {
+  return (
+    <button
+      onClick={onClick}
+      className="relative flex flex-col items-center justify-center gap-1 px-4 py-2 transition-all duration-200 text-text-muted hover:text-earth"
+      aria-label="Toggle language"
+    >
+      {/* Icon container */}
+      <span className="relative p-1.5 rounded-lg transition-all duration-200" aria-hidden="true">
+        <span className="block w-5 h-5 transition-transform">
+          {icon}
+        </span>
+      </span>
+
+      {/* Language code label */}
+      <span className="text-md font-semibold tracking-wide">
+        {label}
+      </span>
+    </button>
   );
 }

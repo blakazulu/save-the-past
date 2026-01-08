@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PageHeader, BottomNav } from '@/components/layout';
+import { PageHeader } from '@/components/layout';
 import { CheckIcon, DownloadIcon, UploadIcon, TrashIcon } from '@/components/icons';
 import { ExportDialog, ImportDialog, DeleteConfirmDialog } from '@/components/data-management';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -29,7 +29,7 @@ export default function SettingsPage() {
       <main className="flex-1 p-4 pb-20">
         <div className="max-w-md mx-auto space-y-6">
           {/* Language Setting */}
-          <section className="parchment-card p-5 animate-fade-in-up">
+          <section className="parchment-card p-5">
             <h2 className="font-display text-lg font-semibold text-earth mb-4 flex items-center gap-2">
               <span className="text-terracotta">❧</span>
               {t('settings.language')}
@@ -51,7 +51,7 @@ export default function SettingsPage() {
           </section>
 
           {/* Data Management */}
-          <section className="parchment-card p-5 animate-fade-in-up stagger-1">
+          <section className="parchment-card p-5">
             <h2 className="font-display text-lg font-semibold text-earth mb-4 flex items-center gap-2">
               <span className="text-terracotta">❧</span>
               {t('dataManagement.title')}
@@ -84,7 +84,7 @@ export default function SettingsPage() {
           </section>
 
           {/* App Info */}
-          <div className="text-center pt-6 animate-fade-in stagger-3">
+          <div className="text-center pt-6">
             <div className="inline-block mb-4">
               <img src="/logo-64.png" alt="" className="w-12 h-12 mx-auto opacity-60" />
             </div>
@@ -103,8 +103,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
-
-      <BottomNav />
 
       {/* Dialogs */}
       <ExportDialog isOpen={showExport} onClose={() => setShowExport(false)} />

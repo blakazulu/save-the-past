@@ -140,7 +140,7 @@ export default function CapturePage() {
       <main className="flex-1 flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md">
           {/* Decorative header */}
-          <div className="text-center mb-8 animate-fade-in">
+          <div className="text-center mb-8">
             <div className="inline-block mb-4">
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-terracotta/20 to-clay/10 flex items-center justify-center">
                 <CameraIcon className="w-10 h-10 text-terracotta" />
@@ -156,7 +156,7 @@ export default function CapturePage() {
             {/* Camera Option */}
             <button
               onClick={() => setMode('camera')}
-              className="parchment-card corners-decorated w-full p-6 text-left transition-all duration-200 hover:shadow-lg group animate-fade-in-up"
+              className="parchment-card corners-decorated w-full p-6 text-left transition-all duration-200 hover:shadow-lg group"
             >
               <div className="flex items-center gap-5">
                 <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-terracotta to-clay flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
@@ -181,7 +181,7 @@ export default function CapturePage() {
             {/* Upload Option */}
             <button
               onClick={() => setMode('upload')}
-              className="parchment-card corners-decorated w-full p-6 text-left transition-all duration-200 hover:shadow-lg group animate-fade-in-up stagger-2"
+              className="parchment-card corners-decorated w-full p-6 text-left transition-all duration-200 hover:shadow-lg group"
             >
               <div className="flex items-center gap-5">
                 <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-sand to-parchment-dark flex items-center justify-center flex-shrink-0 shadow-md border border-sepia/20 group-hover:scale-105 transition-transform">
@@ -200,7 +200,7 @@ export default function CapturePage() {
           </div>
 
           {/* Decorative footer */}
-          <div className="mt-10 text-center animate-fade-in stagger-3">
+          <div className="mt-10 text-center">
             <p className="text-md text-text-muted font-manuscript">
               {t('capture.hint', 'Multiple angles help create better 3D reconstructions')}
             </p>
