@@ -136,6 +136,13 @@ export function JobProcessor() {
 
           // Start info card generation if we have image data
           if (job.imageBase64) {
+            // Check if artifact still exists (user might have deleted it during 3D processing)
+            const artifactStillExists = await db.artifacts.get(job.artifactId);
+            if (!artifactStillExists) {
+              removeJob(job.id);
+              return;
+            }
+
             const infoCardJobId = uuidv4();
             useJobsStore.getState().addJob({
               id: infoCardJobId,
@@ -212,7 +219,7 @@ export function JobProcessor() {
             // Remove info card job after processing (success or failure)
             setTimeout(() => {
               useJobsStore.getState().removeJob(infoCardJobId);
-            }, 1000);
+            }, 2000);
           } else {
             // No info card to generate, mark as complete
             await db.artifacts.update(job.artifactId, {

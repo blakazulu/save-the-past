@@ -82,12 +82,12 @@ export default function ArtifactDetailPage() {
     setModelUrl(null);
   }, [model]);
 
-  // Skip to processing state if there's an active job
+  // Skip to processing state if there's an active job (wait for hydration)
   useEffect(() => {
-    if (isProcessing) {
+    if (hasHydrated && isProcessing) {
       setWizardStep('generate');
     }
-  }, [isProcessing]);
+  }, [isProcessing, hasHydrated]);
 
   // Don't show loading state for fast IndexedDB queries
   if (artifact === undefined) {
@@ -105,6 +105,11 @@ export default function ArtifactDetailPage() {
 
   const handleDelete = async () => {
     if (!confirm(t('common.delete') + '?')) return;
+
+    // Remove any active jobs first to prevent orphaned processing
+    if (activeJob) {
+      useJobsStore.getState().removeJob(activeJob.id);
+    }
 
     // Delete related data
     await db.images.where('artifactId').equals(id).delete();
@@ -192,8 +197,8 @@ export default function ArtifactDetailPage() {
   // Get progress info from active job
   const getProgress = () => {
     if (!activeJob) return 0;
-    // Show actual job progress (0-100%)
-    return activeJob.progress;
+    // Show actual job progress, clamped to 0-100%
+    return Math.min(100, Math.max(0, activeJob.progress));
   };
 
   const getProgressStatus = (): 'uploading' | 'processing' | 'saving' => {
@@ -443,12 +448,17 @@ export default function ArtifactDetailPage() {
               </div>
 
               <button
-                onClick={() => {
+                onClick={async () => {
                   setLocalError(null);
                   // Remove failed job if exists
                   if (activeJob) {
                     useJobsStore.getState().removeJob(activeJob.id);
                   }
+                  // Reset artifact status so user can retry
+                  await db.artifacts.update(artifact.id, {
+                    status: 'images-captured',
+                    updatedAt: new Date(),
+                  });
                 }}
                 className="w-full py-3 bg-terracotta text-white rounded-xl font-semibold hover:bg-clay transition-colors"
               >
