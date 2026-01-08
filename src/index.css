@@ -638,40 +638,42 @@ body::before {
 .badge-status {
   font-family: 'Crimson Pro', serif;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   padding: 4px 10px;
-  border-radius: 2px;
+  border-radius: 4px;
   text-transform: lowercase;
   letter-spacing: 0.02em;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .badge-draft {
   background: var(--color-sand);
   color: var(--color-text-secondary);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .badge-captured {
-  background: rgba(198, 142, 23, 0.2);
-  color: var(--color-amber);
-  border: 1px solid rgba(198, 142, 23, 0.3);
+  background: rgba(198, 142, 23, 0.85);
+  color: white;
+  border: 1px solid rgba(198, 142, 23, 0.9);
 }
 
 .badge-processing {
-  background: rgba(90, 107, 124, 0.2);
-  color: var(--color-info);
-  border: 1px solid rgba(90, 107, 124, 0.3);
+  background: rgba(90, 107, 124, 0.85);
+  color: white;
+  border: 1px solid rgba(90, 107, 124, 0.9);
 }
 
 .badge-complete {
-  background: rgba(74, 103, 65, 0.2);
-  color: var(--color-success);
-  border: 1px solid rgba(74, 103, 65, 0.3);
+  background: rgba(74, 103, 65, 0.85);
+  color: white;
+  border: 1px solid rgba(74, 103, 65, 0.9);
 }
 
 .badge-error {
-  background: rgba(139, 58, 58, 0.2);
-  color: var(--color-error);
-  border: 1px solid rgba(139, 58, 58, 0.3);
+  background: rgba(139, 58, 58, 0.9);
+  color: white;
+  border: 1px solid rgba(139, 58, 58, 0.95);
 }
 
 /* ============================================

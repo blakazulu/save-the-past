@@ -52,6 +52,11 @@ export function JobProcessor() {
             status: 'failed',
             error: statusResult.error || 'Failed to check status',
           });
+          // Update artifact status to error
+          await db.artifacts.update(job.artifactId, {
+            status: 'error',
+            updatedAt: new Date(),
+          });
           return;
         }
 
@@ -196,6 +201,11 @@ export function JobProcessor() {
         updateJob(job.id, {
           status: 'failed',
           error: err instanceof Error ? err.message : 'Unknown error',
+        });
+        // Update artifact status to error
+        await db.artifacts.update(job.artifactId, {
+          status: 'error',
+          updatedAt: new Date(),
         });
       }
     },
