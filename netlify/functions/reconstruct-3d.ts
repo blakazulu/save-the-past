@@ -3,6 +3,7 @@ import type { Context } from '@netlify/functions';
 interface ReconstructRequest {
   imageBase64: string;
   removeBackground?: boolean;
+  texturePrompt?: string;
 }
 
 interface StartResponse {
@@ -48,23 +49,32 @@ export default async function handler(
 
     console.log('Creating Meshy task...');
 
+    // Build request body with optional texture prompt
+    const meshyRequestBody: Record<string, unknown> = {
+      image_url: dataUri,
+      // Use the same image to guide texture generation for better fidelity
+      texture_image_url: dataUri,
+      ai_model: 'meshy-5',
+      topology: 'triangle',
+      target_polycount: 30000,
+      should_remesh: true,
+      should_texture: true,
+      enable_pbr: true,
+    };
+
+    // Add texture prompt if provided (max 600 chars per Meshy API)
+    if (body.texturePrompt) {
+      meshyRequestBody.texture_prompt = body.texturePrompt.slice(0, 600);
+      console.log('Using texture prompt:', meshyRequestBody.texture_prompt);
+    }
+
     const response = await fetch(`${MESHY_API_BASE}/image-to-3d`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        image_url: dataUri,
-        // Use the same image to guide texture generation for better fidelity
-        texture_image_url: dataUri,
-        ai_model: 'meshy-5',
-        topology: 'triangle',
-        target_polycount: 30000,
-        should_remesh: true,
-        should_texture: true,
-        enable_pbr: true,
-      }),
+      body: JSON.stringify(meshyRequestBody),
     });
 
     if (!response.ok) {

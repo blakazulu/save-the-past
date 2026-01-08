@@ -127,11 +127,30 @@
         "description": "Coming soon - photogrammetry from multiple angles"
       }
     },
+    "textureMode": {
+      "title": "Texture Instructions",
+      "recommended": "Recommended",
+      "auto": {
+        "title": "Auto-analyze artifact",
+        "description": "AI analyzes the image to detect material and surface details",
+        "descriptionWithInfoCard": "Uses existing artifact analysis for texture guidance"
+      },
+      "manual": {
+        "title": "Manual instructions",
+        "description": "Enter your own texture description",
+        "placeholder": "e.g., Weathered terracotta with red ochre traces and surface cracks..."
+      },
+      "none": {
+        "title": "Image only",
+        "description": "Use image without additional texture guidance"
+      }
+    },
     "minImages": "Requires at least {{count}} images",
     "generate": "Generate 3D Model",
     "processing": "Generating 3D Model",
     "pleaseWait": "This may take a few minutes",
     "status": {
+      "analyzing": "Analyzing artifact texture...",
       "uploading": "Uploading images...",
       "processing": "Processing 3D reconstruction...",
       "saving": "Saving model..."
