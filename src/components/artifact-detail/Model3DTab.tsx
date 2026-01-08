@@ -71,23 +71,23 @@ export function Model3DTab({ artifact }: Model3DTabProps) {
   const componentStatus = status === 'uploading' || status === 'processing' || status === 'saving'
     ? 'processing'
     : status === 'error'
-    ? 'error'
-    : status === 'complete'
-    ? 'complete'
-    : 'idle';
+      ? 'error'
+      : status === 'complete'
+        ? 'complete'
+        : 'idle';
 
   // Map hook status to progress status
   const progressStatus = status === 'uploading'
     ? 'uploading'
     : status === 'saving'
-    ? 'saving'
-    : 'processing';
+      ? 'saving'
+      : 'processing';
 
   // If model exists and we're not reprocessing, show viewer
   if (model && modelUrl && componentStatus !== 'processing') {
     return (
       <div className="flex flex-col">
-        <div className="h-[70vh]">
+        <div className="h-[70vh] w-[70vw] mx-auto">
           <ModelViewer modelUrl={modelUrl} className="w-full h-full" />
         </div>
         <div className="p-4 bg-white border-t border-sand">

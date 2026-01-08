@@ -50,7 +50,7 @@ export function InfoCardDisplay({
   const confidence = confidenceConfig[infoCard.estimatedAge.confidence];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-2xl mx-auto">
       {/* Header Card - Artifact Identity */}
       <div className="parchment-card p-6 relative overflow-hidden">
         {/* Decorative corner */}
