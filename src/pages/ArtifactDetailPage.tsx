@@ -7,16 +7,18 @@ import { db } from '@/lib/db';
 import { PageHeader } from '@/components/layout';
 import { MetadataForm } from '@/components/info-card';
 import { MethodSelector } from '@/components/reconstruction/MethodSelector';
+import { TextureModeSelector } from '@/components/reconstruction/TextureModeSelector';
 import { ReconstructionProgress } from '@/components/reconstruction/ReconstructionProgress';
 import { ModelViewer } from '@/components/viewer/ModelViewer';
 import { InfoCardDisplay } from '@/components/info-card';
 import { useJobsStore } from '@/stores/jobsStore';
 import { useRequestNotificationPermission } from '@/components/JobProcessor';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { startReconstruct3D, blobToBase64 } from '@/lib/api/client';
+import { startReconstruct3D, blobToBase64, analyzeTexture } from '@/lib/api/client';
 import { CubeIcon, InfoIcon, TrashIcon } from '@/components/icons';
 import type { ArtifactMetadata } from '@/types';
 import type { ReconstructionMethod } from '@/components/reconstruction/MethodSelector';
+import type { TextureMode } from '@/components/reconstruction/TextureModeSelector';
 
 type WizardStep = 'metadata' | 'generate';
 type TabId = 'model' | 'info';
@@ -29,9 +31,12 @@ export default function ArtifactDetailPage() {
   // Wizard state
   const [wizardStep, setWizardStep] = useState<WizardStep>('metadata');
   const [selectedMethod, setSelectedMethod] = useState<ReconstructionMethod>('single');
+  const [textureMode, setTextureMode] = useState<TextureMode>('auto');
+  const [manualTexturePrompt, setManualTexturePrompt] = useState('');
   const [activeTab, setActiveTab] = useState<TabId>('model');
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const [isStartingJob, setIsStartingJob] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
   const autoRemoveBackground = useSettingsStore((state) => state.autoRemoveBackground);
@@ -138,10 +143,51 @@ export default function ArtifactDetailPage() {
       const imageBlob = images[0].blob;
       const imageBase64 = await blobToBase64(imageBlob);
 
+      // Determine texture prompt based on mode
+      let texturePrompt: string | undefined;
+
+      if (textureMode === 'auto') {
+        setIsAnalyzing(true);
+
+        // Check if artifact has an info card with material info
+        if (artifact.infoCardId) {
+          const existingInfoCard = await db.infoCards.get(artifact.infoCardId);
+          if (existingInfoCard?.material) {
+            const material = typeof existingInfoCard.material === 'object' && 'en' in existingInfoCard.material
+              ? existingInfoCard.material.en
+              : String(existingInfoCard.material);
+
+            let preservationInfo = '';
+            if (existingInfoCard.preservationNotes) {
+              const notes = typeof existingInfoCard.preservationNotes === 'object' && 'en' in existingInfoCard.preservationNotes
+                ? existingInfoCard.preservationNotes.en
+                : String(existingInfoCard.preservationNotes);
+              preservationInfo = `, ${notes}`;
+            }
+
+            texturePrompt = `${material}${preservationInfo}`;
+          }
+        }
+
+        // If no info card or no material, call analyze-texture API
+        if (!texturePrompt) {
+          const analyzeResult = await analyzeTexture({ imageBase64 });
+          if (analyzeResult.success && analyzeResult.data?.texturePrompt) {
+            texturePrompt = analyzeResult.data.texturePrompt;
+          }
+          // If analysis fails, continue without texture prompt (graceful degradation)
+        }
+
+        setIsAnalyzing(false);
+      } else if (textureMode === 'manual' && manualTexturePrompt.trim()) {
+        texturePrompt = manualTexturePrompt.trim();
+      }
+
       // Start the reconstruction task
       const result = await startReconstruct3D({
         imageBase64,
         removeBackground: autoRemoveBackground,
+        texturePrompt,
       });
 
       if (!result.success || !result.data?.taskId) {
@@ -168,6 +214,7 @@ export default function ArtifactDetailPage() {
       });
     } catch (err) {
       setLocalError(err instanceof Error ? err.message : 'Unknown error');
+      setIsAnalyzing(false);
     } finally {
       setIsStartingJob(false);
     }
@@ -333,7 +380,7 @@ export default function ArtifactDetailPage() {
           )}
 
           {/* Step 2: Generate */}
-          {wizardStep === 'generate' && !isProcessing && !hasError && !isStartingJob && (
+          {wizardStep === 'generate' && !isProcessing && !hasError && !isStartingJob && !isAnalyzing && (
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <h2 className="text-xl font-semibold text-earth">
@@ -350,9 +397,17 @@ export default function ArtifactDetailPage() {
                 imageCount={images?.length || 0}
               />
 
+              <TextureModeSelector
+                textureMode={textureMode}
+                onTextureModeChange={setTextureMode}
+                manualTexturePrompt={manualTexturePrompt}
+                onManualTexturePromptChange={setManualTexturePrompt}
+                hasInfoCard={!!artifact.infoCardId}
+              />
+
               <button
                 onClick={handleGenerate}
-                disabled={!images || images.length === 0}
+                disabled={!images || images.length === 0 || (textureMode === 'manual' && !manualTexturePrompt.trim())}
                 className="w-full py-3 bg-terracotta text-white rounded-xl font-semibold hover:bg-clay transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t('wizard.generate')}
@@ -364,6 +419,28 @@ export default function ArtifactDetailPage() {
               >
                 {t('common.back')}
               </button>
+            </div>
+          )}
+
+          {/* Analyzing State */}
+          {isAnalyzing && (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-semibold text-earth">
+                  {t('wizard.processingTitle')}
+                </h2>
+                <p className="text-text-secondary text-base mt-1">
+                  {t('reconstruction.status.analyzing')}
+                </p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 border border-sand">
+                <ReconstructionProgress
+                  progress={10}
+                  status="analyzing"
+                  startTime={Date.now()}
+                />
+              </div>
             </div>
           )}
 
