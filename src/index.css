@@ -455,28 +455,6 @@ body::before {
   }
 }
 
-/* Scribble drawing animation - draws stroke then fades */
-@keyframes scribble-draw {
-  0% {
-    stroke-dashoffset: 1000;
-    opacity: 0;
-  }
-
-  5% {
-    opacity: 0.2;
-  }
-
-  70% {
-    stroke-dashoffset: 0;
-    opacity: 0.2;
-  }
-
-  100% {
-    stroke-dashoffset: 0;
-    opacity: 0;
-  }
-}
-
 /* Scribble background container */
 .scribble-background {
   position: fixed;
@@ -486,18 +464,6 @@ body::before {
   overflow: hidden;
 }
 
-/* Individual scribble elements */
-.scribble-background .scribble-item {
-  position: absolute;
-  color: var(--color-sepia);
-}
-
-.scribble-background .scribble-item path {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: scribble-draw var(--draw-duration, 5s) ease-out forwards;
-}
-
 /* Handwritten text scribbles */
 .scribble-background .scribble-text {
   position: absolute;
@@ -505,7 +471,7 @@ body::before {
   font-style: italic;
   color: var(--color-sepia);
   white-space: nowrap;
-  animation: scribble-text-appear var(--draw-duration, 4s) ease-out forwards;
+  animation: scribble-text-appear var(--total-duration, 5s) ease-out forwards;
 }
 
 @keyframes scribble-text-appear {
@@ -515,14 +481,22 @@ body::before {
   }
 
   10% {
-    opacity: 0.25;
+    opacity: 0.6;
   }
 
-  70% {
-    opacity: 0.25;
+  /* Text fully revealed */
+  50% {
+    opacity: 0.6;
     clip-path: inset(0 0 0 0);
   }
 
+  /* Hold at full visibility for ~2 seconds */
+  85% {
+    opacity: 0.6;
+    clip-path: inset(0 0 0 0);
+  }
+
+  /* Fade out */
   100% {
     opacity: 0;
     clip-path: inset(0 0 0 0);

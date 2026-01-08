@@ -20,41 +20,44 @@ export function BottomNav() {
       role="navigation"
       aria-label={t('nav.mainNavigation', 'Main navigation')}
     >
-      {/* Top decorative border */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sepia/40 to-transparent" />
+      {/* Centered container for tablet max-width */}
+      <div className="max-w-3xl mx-auto">
+        {/* Top decorative border */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sepia/40 to-transparent" />
 
-      {/* Navigation background - journal tabs style */}
-      <div className="glass-parchment border-t border-sepia/10">
-        <div className="flex justify-around items-stretch h-16 max-w-lg mx-auto">
-          <NavTab
-            to="/"
-            icon={<HomeIcon />}
-            label={t('nav.home')}
-            active={location.pathname === '/'}
-          />
-          <NavTab
-            to="/capture"
-            icon={<CameraIcon />}
-            label={t('nav.capture')}
-            active={location.pathname === '/capture'}
-          />
-          <NavTab
-            to="/gallery"
-            icon={<GalleryIcon />}
-            label={t('nav.gallery')}
-            active={location.pathname === '/gallery' || location.pathname.startsWith('/artifact/')}
-          />
-          <NavTab
-            to="/settings"
-            icon={<SettingsIcon />}
-            label={t('nav.settings')}
-            active={location.pathname === '/settings'}
-          />
-          <LanguageToggle
-            icon={<LanguageIcon />}
-            label={langLabel}
-            onClick={toggleLanguage}
-          />
+        {/* Navigation background - journal tabs style */}
+        <div className="glass-parchment border-t border-sepia/10 md:border-x md:border-sepia/10">
+          <div className="flex justify-around items-stretch h-16">
+            <NavTab
+              to="/"
+              icon={<HomeIcon />}
+              label={t('nav.home')}
+              active={location.pathname === '/'}
+            />
+            <NavTab
+              to="/capture"
+              icon={<CameraIcon />}
+              label={t('nav.capture')}
+              active={location.pathname === '/capture'}
+            />
+            <NavTab
+              to="/gallery"
+              icon={<GalleryIcon />}
+              label={t('nav.gallery')}
+              active={location.pathname === '/gallery' || location.pathname.startsWith('/artifact/')}
+            />
+            <NavTab
+              to="/settings"
+              icon={<SettingsIcon />}
+              label={t('nav.settings')}
+              active={location.pathname === '/settings'}
+            />
+            <LanguageToggle
+              icon={<LanguageIcon />}
+              label={langLabel}
+              onClick={toggleLanguage}
+            />
+          </div>
         </div>
       </div>
     </nav>
