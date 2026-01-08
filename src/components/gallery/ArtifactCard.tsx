@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { db } from '@/lib/db';
-import { useJobsStore } from '@/stores/jobsStore';
+import { useJobsStore, useJobsHydrated } from '@/stores/jobsStore';
 import type { Artifact, ArtifactStatus } from '@/types';
 
 interface ArtifactCardProps {
@@ -23,9 +23,10 @@ export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) 
   const { t } = useTranslation();
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const getJobByArtifactId = useJobsStore((state) => state.getJobByArtifactId);
+  const hasHydrated = useJobsHydrated();
 
-  // Check for active processing job
-  const activeJob = getJobByArtifactId(artifact.id);
+  // Check for active processing job (only after hydration)
+  const activeJob = hasHydrated ? getJobByArtifactId(artifact.id) : undefined;
   const isProcessing = activeJob && (activeJob.status === 'pending' || activeJob.status === 'processing');
 
   useEffect(() => {

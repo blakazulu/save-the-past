@@ -11,7 +11,7 @@ import { TextureModeSelector } from '@/components/reconstruction/TextureModeSele
 import { ReconstructionProgress } from '@/components/reconstruction/ReconstructionProgress';
 import { ModelViewer } from '@/components/viewer/ModelViewer';
 import { InfoCardDisplay } from '@/components/info-card';
-import { useJobsStore } from '@/stores/jobsStore';
+import { useJobsStore, useJobsHydrated } from '@/stores/jobsStore';
 import { useRequestNotificationPermission } from '@/components/JobProcessor';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { startReconstruct3D, blobToBase64, analyzeTexture } from '@/lib/api/client';
@@ -44,9 +44,10 @@ export default function ArtifactDetailPage() {
 
   // Jobs store
   const { addJob, getJobByArtifactId } = useJobsStore();
+  const hasHydrated = useJobsHydrated();
 
-  // Get active job for this artifact
-  const activeJob = id ? getJobByArtifactId(id) : undefined;
+  // Get active job for this artifact (only after hydration)
+  const activeJob = (hasHydrated && id) ? getJobByArtifactId(id) : undefined;
   const isProcessing = activeJob && (activeJob.status === 'pending' || activeJob.status === 'processing');
   const hasJobError = activeJob?.status === 'failed';
 

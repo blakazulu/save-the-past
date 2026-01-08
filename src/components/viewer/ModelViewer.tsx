@@ -79,7 +79,7 @@ export function ModelViewer({ modelUrl, onDownload, className = '' }: ModelViewe
   return (
     <div
       ref={containerRef}
-      className={`relative bg-sand rounded-xl overflow-hidden h-[70vh] ${className}`}
+      className={`relative bg-sand rounded-xl overflow-hidden h-[70vh] w-[70vw] mx-auto ${className}`}
     >
       <Canvas
         camera={{ position: [2, 2, 2], fov: 50 }}

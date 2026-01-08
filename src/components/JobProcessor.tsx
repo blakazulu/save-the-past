@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { useJobsStore, type ProcessingJob } from '@/stores/jobsStore';
+import { useJobsStore, useJobsHydrated, type ProcessingJob } from '@/stores/jobsStore';
 import { checkReconstruct3DStatus, generateInfoCard, base64ToBlob } from '@/lib/api/client';
 import { db } from '@/lib/db';
 import type { Model3D, InfoCard } from '@/types';
@@ -11,6 +11,7 @@ const POLL_INTERVAL_MS = 3000;
 export function JobProcessor() {
   const navigate = useNavigate();
   const { jobs, updateJob, removeJob, notificationPermission } = useJobsStore();
+  const hasHydrated = useJobsHydrated();
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Request notification permission on mount
@@ -201,8 +202,11 @@ export function JobProcessor() {
     [updateJob, removeJob, showNotification]
   );
 
-  // Poll active jobs
+  // Poll active jobs (only after hydration)
   useEffect(() => {
+    // Wait for hydration before polling
+    if (!hasHydrated) return;
+
     const pollJobs = async () => {
       const activeJobs = jobs.filter(
         (job) =>
@@ -227,7 +231,7 @@ export function JobProcessor() {
         pollingRef.current = null;
       }
     };
-  }, [jobs, processReconstructionJob]);
+  }, [jobs, hasHydrated, processReconstructionJob]);
 
   // This component doesn't render anything
   return null;

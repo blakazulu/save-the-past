@@ -18,6 +18,7 @@ export interface ProcessingJob {
 interface JobsState {
   jobs: ProcessingJob[];
   notificationPermission: NotificationPermission | 'default';
+  _hasHydrated: boolean;
 
   // Actions
   addJob: (job: Omit<ProcessingJob, 'startedAt'>) => void;
@@ -26,6 +27,7 @@ interface JobsState {
   getJobByArtifactId: (artifactId: string) => ProcessingJob | undefined;
   getActiveJobs: () => ProcessingJob[];
   setNotificationPermission: (permission: NotificationPermission) => void;
+  setHasHydrated: (hasHydrated: boolean) => void;
 }
 
 export const useJobsStore = create<JobsState>()(
@@ -33,6 +35,7 @@ export const useJobsStore = create<JobsState>()(
     (set, get) => ({
       jobs: [],
       notificationPermission: 'default',
+      _hasHydrated: false,
 
       addJob: (job) =>
         set((state) => ({
@@ -63,9 +66,20 @@ export const useJobsStore = create<JobsState>()(
 
       setNotificationPermission: (permission) =>
         set({ notificationPermission: permission }),
+
+      setHasHydrated: (hasHydrated) =>
+        set({ _hasHydrated: hasHydrated }),
     }),
     {
       name: 'save-the-past-jobs',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );
+
+// Hook to wait for hydration
+export function useJobsHydrated() {
+  return useJobsStore((state) => state._hasHydrated);
+}
