@@ -40,28 +40,116 @@ async function apiRequest<T>(
   }
 }
 
-// 3D Reconstruction API
+// 3D Reconstruction API - Start Task
 export interface ReconstructRequest {
   imageBase64: string;
   removeBackground?: boolean;
 }
 
-export interface ReconstructResponse {
+export interface ReconstructStartResponse {
+  success: boolean;
+  taskId?: string;
+  error?: string;
+}
+
+export async function startReconstruct3D(
+  req: ReconstructRequest
+): Promise<ApiResponse<ReconstructStartResponse>> {
+  return apiRequest<ReconstructStartResponse>('/reconstruct-3d', {
+    method: 'POST',
+    body: JSON.stringify(req),
+  });
+}
+
+// 3D Reconstruction API - Check Status
+export interface ReconstructStatusResponse {
+  success: boolean;
+  status: 'pending' | 'processing' | 'succeeded' | 'failed';
+  progress: number;
+  modelBase64?: string;
+  format?: 'glb';
+  error?: string;
+}
+
+export async function checkReconstruct3DStatus(
+  taskId: string
+): Promise<ApiResponse<ReconstructStatusResponse>> {
+  return apiRequest<ReconstructStatusResponse>(`/reconstruct-3d-status?taskId=${taskId}`, {
+    method: 'GET',
+  });
+}
+
+// Polling helper for 3D reconstruction
+const POLL_INTERVAL_MS = 3000;
+const MAX_POLL_TIME_MS = 5 * 60 * 1000; // 5 minutes
+
+export interface ReconstructResult {
   success: boolean;
   modelBase64?: string;
   format?: 'glb';
-  method?: 'meshy';
-  processingTimeMs?: number;
   error?: string;
 }
 
 export async function reconstruct3D(
-  req: ReconstructRequest
-): Promise<ApiResponse<ReconstructResponse>> {
-  return apiRequest<ReconstructResponse>('/reconstruct-3d', {
-    method: 'POST',
-    body: JSON.stringify(req),
-  });
+  req: ReconstructRequest,
+  onProgress?: (progress: number, status: string) => void
+): Promise<ReconstructResult> {
+  // Step 1: Start the task
+  const startResult = await startReconstruct3D(req);
+
+  if (!startResult.success || !startResult.data?.taskId) {
+    return {
+      success: false,
+      error: startResult.error || startResult.data?.error || 'Failed to start reconstruction',
+    };
+  }
+
+  const taskId = startResult.data.taskId;
+  const startTime = Date.now();
+
+  // Step 2: Poll for completion
+  while (Date.now() - startTime < MAX_POLL_TIME_MS) {
+    const statusResult = await checkReconstruct3DStatus(taskId);
+
+    if (!statusResult.success) {
+      return {
+        success: false,
+        error: statusResult.error || 'Failed to check status',
+      };
+    }
+
+    const status = statusResult.data!;
+
+    // Report progress
+    if (onProgress) {
+      onProgress(status.progress, status.status);
+    }
+
+    // Check if completed
+    if (status.status === 'succeeded') {
+      return {
+        success: true,
+        modelBase64: status.modelBase64,
+        format: status.format,
+      };
+    }
+
+    // Check if failed
+    if (status.status === 'failed') {
+      return {
+        success: false,
+        error: status.error || 'Reconstruction failed',
+      };
+    }
+
+    // Wait before next poll
+    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
+  }
+
+  return {
+    success: false,
+    error: 'Reconstruction timed out after 5 minutes',
+  };
 }
 
 // Info Card Generation API

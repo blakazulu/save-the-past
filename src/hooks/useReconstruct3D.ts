@@ -62,22 +62,34 @@ export function useReconstruct3D(options: UseReconstruct3DOptions = {}) {
         const base64 = await blobToBase64(imageBlob);
         setProgress(30);
 
-        // Call reconstruction API (Meshy)
+        // Call reconstruction API (Meshy) with polling
         setStatus('processing');
-        const response = await reconstruct3D({
-          imageBase64: base64,
-          removeBackground,
-        });
+        const response = await reconstruct3D(
+          {
+            imageBase64: base64,
+            removeBackground,
+          },
+          // Progress callback - map Meshy's 0-100 to our 30-80 range
+          (meshyProgress, meshyStatus) => {
+            const mappedProgress = 30 + (meshyProgress * 0.5);
+            setProgress(mappedProgress);
+            if (meshyStatus === 'pending') {
+              setStatus('uploading');
+            } else {
+              setStatus('processing');
+            }
+          }
+        );
 
-        if (!response.success || !response.data?.modelBase64) {
-          throw new Error(response.error || response.data?.error || 'Reconstruction failed');
+        if (!response.success || !response.modelBase64) {
+          throw new Error(response.error || 'Reconstruction failed');
         }
 
         setProgress(80);
 
         // Convert base64 to blob
         setStatus('saving');
-        const modelBlob = base64ToBlob(response.data.modelBase64, 'model/gltf-binary');
+        const modelBlob = base64ToBlob(response.modelBase64!, 'model/gltf-binary');
         setProgress(90);
 
         // Create model record
