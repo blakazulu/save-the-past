@@ -141,21 +141,7 @@ export function ArtifactCard({ artifact, variant = 'grid', onDelete }: ArtifactC
           {t(`gallery.status.${artifact.status}`)}
         </span>
 
-        {/* Delete button (appears on hover) */}
-        {onDelete && (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onDelete(artifact);
-            }}
-            className="absolute top-2 left-2 p-1.5 rounded-lg bg-white/90 text-text-muted hover:bg-error/10 hover:text-error opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-sm"
-            aria-label={t('common.delete')}
-          >
-            <TrashIcon className="w-4 h-4" />
-          </button>
-        )}
-
+        
         {/* Processing progress overlay */}
         {isProcessing && (
           <div className="absolute inset-0 bg-burnt/60 flex flex-col items-center justify-center">
@@ -188,9 +174,24 @@ export function ArtifactCard({ artifact, variant = 'grid', onDelete }: ArtifactC
         <h3 className="font-display font-semibold text-earth truncate group-hover:text-terracotta transition-colors">
           {name}
         </h3>
-        <p className="text-base text-text-muted mt-1 font-manuscript italic">
-          {t('gallery.photoCount', { count: photoCount })}
-        </p>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-base text-text-muted font-manuscript italic">
+            {t('gallery.photoCount', { count: photoCount })}
+          </p>
+          {onDelete && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete(artifact);
+              }}
+              className="p-1.5 rounded-lg text-text-muted hover:bg-error/10 hover:text-error transition-colors flex-shrink-0 cursor-pointer"
+              aria-label={t('common.delete')}
+            >
+              <TrashIcon className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
     </Link>
   );

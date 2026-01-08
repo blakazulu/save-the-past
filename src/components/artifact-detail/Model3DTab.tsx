@@ -90,7 +90,7 @@ export function Model3DTab({ artifact }: Model3DTabProps) {
     return (
       <div className="flex flex-col">
         <div className="h-[70vh] w-[70vw] mx-auto">
-          <ModelViewer modelUrl={modelUrl} className="w-full h-full" />
+          <ModelViewer modelUrl={modelUrl} />
         </div>
         <div className="p-4 bg-white border-t border-sand">
           <div className="flex items-center justify-between text-base text-text-secondary">

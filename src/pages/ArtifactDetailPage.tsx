@@ -255,7 +255,7 @@ export default function ArtifactDetailPage() {
           {activeTab === 'model' && (
             <div className="flex flex-col">
               <div className="p-4">
-                <ModelViewer modelUrl={modelUrl} className="w-full" />
+                <ModelViewer modelUrl={modelUrl} />
               </div>
               {model?.metadata?.fileSize && (
                 <div className="px-4 pb-4">
