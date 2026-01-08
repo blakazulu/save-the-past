@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 interface ReconstructionProgressProps {
   progress: number;
-  status: 'analyzing' | 'uploading' | 'processing' | 'saving';
+  status: 'uploading' | 'processing' | 'saving';
   startTime?: number;
   message?: string;
 }

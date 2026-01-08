@@ -8,7 +8,6 @@ import { useReconstruct3D } from '@/hooks/useReconstruct3D';
 import { useSettingsStore } from '@/stores/settingsStore';
 import type { Artifact, Model3D } from '@/types';
 import type { ReconstructionMethod } from '@/components/reconstruction/MethodSelector';
-import type { TextureMode } from '@/components/reconstruction/TextureModeSelector';
 
 interface Model3DTabProps {
   artifact: Artifact;
@@ -18,7 +17,6 @@ export function Model3DTab({ artifact }: Model3DTabProps) {
   const { t } = useTranslation();
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<ReconstructionMethod>('single');
-  const [textureMode, setTextureMode] = useState<TextureMode>('auto');
   const [manualTexturePrompt, setManualTexturePrompt] = useState('');
   const autoRemoveBackground = useSettingsStore((state) => state.autoRemoveBackground);
 
@@ -67,13 +65,12 @@ export function Model3DTab({ artifact }: Model3DTabProps) {
     const imageBlobs = images.map((img) => img.blob);
     await reconstruct(artifact.id, imageBlobs, selectedMethod, {
       removeBackground: autoRemoveBackground,
-      textureMode,
-      manualTexturePrompt: textureMode === 'manual' ? manualTexturePrompt : undefined,
+      manualTexturePrompt: manualTexturePrompt.trim() || undefined,
     });
   };
 
   // Map hook status to component status
-  const componentStatus = status === 'analyzing' || status === 'uploading' || status === 'processing' || status === 'saving'
+  const componentStatus = status === 'uploading' || status === 'processing' || status === 'saving'
     ? 'processing'
     : status === 'error'
       ? 'error'
@@ -82,13 +79,11 @@ export function Model3DTab({ artifact }: Model3DTabProps) {
         : 'idle';
 
   // Map hook status to progress status
-  const progressStatus = status === 'analyzing'
-    ? 'analyzing'
-    : status === 'uploading'
-      ? 'uploading'
-      : status === 'saving'
-        ? 'saving'
-        : 'processing';
+  const progressStatus = status === 'uploading'
+    ? 'uploading'
+    : status === 'saving'
+      ? 'saving'
+      : 'processing';
 
   // If model exists and we're not reprocessing, show viewer
   if (model && modelUrl && componentStatus !== 'processing') {
@@ -118,8 +113,6 @@ export function Model3DTab({ artifact }: Model3DTabProps) {
         status={componentStatus}
         selectedMethod={selectedMethod}
         onMethodChange={setSelectedMethod}
-        textureMode={textureMode}
-        onTextureModeChange={setTextureMode}
         manualTexturePrompt={manualTexturePrompt}
         onManualTexturePromptChange={setManualTexturePrompt}
         onStartReconstruction={handleStartReconstruction}
@@ -129,7 +122,6 @@ export function Model3DTab({ artifact }: Model3DTabProps) {
         progressStatus={progressStatus}
         errorMessage={error || undefined}
         hasModel={!!model}
-        hasInfoCard={!!artifact.infoCardId}
       />
     </div>
   );

@@ -47,27 +47,6 @@ export interface ReconstructRequest {
   texturePrompt?: string;
 }
 
-// Texture Analysis API
-export interface AnalyzeTextureRequest {
-  imageBase64: string;
-}
-
-export interface AnalyzeTextureResponse {
-  success: boolean;
-  texturePrompt?: string;
-  error?: string;
-  processingTimeMs?: number;
-}
-
-export async function analyzeTexture(
-  req: AnalyzeTextureRequest
-): Promise<ApiResponse<AnalyzeTextureResponse>> {
-  return apiRequest<AnalyzeTextureResponse>('/analyze-texture', {
-    method: 'POST',
-    body: JSON.stringify(req),
-  });
-}
-
 export interface ReconstructStartResponse {
   success: boolean;
   taskId?: string;

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { MethodSelector, type ReconstructionMethod } from './MethodSelector';
 import { ReconstructionProgress } from './ReconstructionProgress';
-import { TextureModeSelector, type TextureMode } from './TextureModeSelector';
+import { TextureModeSelector } from './TextureModeSelector';
 
 type ReconstructionStatus = 'idle' | 'processing' | 'complete' | 'error';
 
@@ -9,19 +9,16 @@ interface ReconstructionCardProps {
   status: ReconstructionStatus;
   selectedMethod: ReconstructionMethod;
   onMethodChange: (method: ReconstructionMethod) => void;
-  textureMode: TextureMode;
-  onTextureModeChange: (mode: TextureMode) => void;
   manualTexturePrompt: string;
   onManualTexturePromptChange: (prompt: string) => void;
   onStartReconstruction: () => void;
   onRetry?: () => void;
   imageCount: number;
   progress?: number;
-  progressStatus?: 'analyzing' | 'uploading' | 'processing' | 'saving';
+  progressStatus?: 'uploading' | 'processing' | 'saving';
   progressMessage?: string;
   errorMessage?: string;
   hasModel?: boolean;
-  hasInfoCard?: boolean;
   onViewModel?: () => void;
 }
 
@@ -29,8 +26,6 @@ export function ReconstructionCard({
   status,
   selectedMethod,
   onMethodChange,
-  textureMode,
-  onTextureModeChange,
   manualTexturePrompt,
   onManualTexturePromptChange,
   onStartReconstruction,
@@ -41,7 +36,6 @@ export function ReconstructionCard({
   progressMessage,
   errorMessage,
   hasModel = false,
-  hasInfoCard = false,
   onViewModel,
 }: ReconstructionCardProps) {
   const { t } = useTranslation();
@@ -169,16 +163,13 @@ export function ReconstructionCard({
       />
 
       <TextureModeSelector
-        textureMode={textureMode}
-        onTextureModeChange={onTextureModeChange}
         manualTexturePrompt={manualTexturePrompt}
         onManualTexturePromptChange={onManualTexturePromptChange}
-        hasInfoCard={hasInfoCard}
       />
 
       <button
         onClick={onStartReconstruction}
-        disabled={imageCount === 0 || (textureMode === 'manual' && !manualTexturePrompt.trim())}
+        disabled={imageCount === 0}
         className="w-full bg-terracotta text-white py-3 rounded-xl font-semibold hover:bg-clay transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {t('reconstruction.generate')}

@@ -95,6 +95,16 @@ export function JobProcessor() {
 
         // Handle completion
         if (status.status === 'succeeded' && status.modelBase64) {
+          // Clear retry count for this job
+          retryCountRef.current.delete(job.id);
+
+          // Check if artifact still exists (user might have deleted it)
+          const artifactExists = await db.artifacts.get(job.artifactId);
+          if (!artifactExists) {
+            removeJob(job.id);
+            return;
+          }
+
           // Save model to database
           const modelBlob = base64ToBlob(status.modelBase64, 'model/gltf-binary');
           const modelId = uuidv4();
@@ -112,11 +122,14 @@ export function JobProcessor() {
             },
           };
 
-          await db.models.add(newModel);
-          await db.artifacts.update(job.artifactId, {
-            model3DId: modelId,
-            status: 'processing-info',
-            updatedAt: now,
+          // Use transaction for atomic operations
+          await db.transaction('rw', [db.models, db.artifacts], async () => {
+            await db.models.add(newModel);
+            await db.artifacts.update(job.artifactId, {
+              model3DId: modelId,
+              status: 'processing-info',
+              updatedAt: now,
+            });
           });
 
           // Start info card generation if we have image data
@@ -172,19 +185,29 @@ export function JobProcessor() {
                   progress: 100,
                 });
               } else {
+                // Info card failed but 3D model is ready - mark as complete anyway
                 useJobsStore.getState().updateJob(infoCardJobId, {
                   status: 'failed',
                   error: infoResult.error || 'Info card generation failed',
                 });
+                await db.artifacts.update(job.artifactId, {
+                  status: 'complete',
+                  updatedAt: new Date(),
+                });
               }
             } catch (err) {
+              // Info card failed but 3D model is ready - mark as complete anyway
               useJobsStore.getState().updateJob(infoCardJobId, {
                 status: 'failed',
                 error: err instanceof Error ? err.message : 'Unknown error',
               });
+              await db.artifacts.update(job.artifactId, {
+                status: 'complete',
+                updatedAt: new Date(),
+              });
             }
 
-            // Remove info card job after processing
+            // Remove info card job after processing (success or failure)
             setTimeout(() => {
               useJobsStore.getState().removeJob(infoCardJobId);
             }, 1000);
@@ -209,28 +232,41 @@ export function JobProcessor() {
 
         // Handle failure
         if (status.status === 'failed') {
-          await db.artifacts.update(job.artifactId, {
-            status: 'error',
-            updatedAt: new Date(),
-          });
+          // Clear retry count for this job
+          retryCountRef.current.delete(job.id);
 
-          showNotification(
-            'Reconstruction Failed',
-            status.error || 'Please try again.',
-            job.artifactId
-          );
+          // Check if artifact still exists before updating
+          const artifactExists = await db.artifacts.get(job.artifactId);
+          if (artifactExists) {
+            await db.artifacts.update(job.artifactId, {
+              status: 'error',
+              updatedAt: new Date(),
+            });
+
+            showNotification(
+              'Reconstruction Failed',
+              status.error || 'Please try again.',
+              job.artifactId
+            );
+          }
         }
       } catch (err) {
         console.error('Job processing error:', err);
+        // Clear retry count for this job
+        retryCountRef.current.delete(job.id);
+
         updateJob(job.id, {
           status: 'failed',
           error: err instanceof Error ? err.message : 'Unknown error',
         });
-        // Update artifact status to error
-        await db.artifacts.update(job.artifactId, {
-          status: 'error',
-          updatedAt: new Date(),
-        });
+        // Update artifact status to error (check existence first)
+        const artifactExists = await db.artifacts.get(job.artifactId);
+        if (artifactExists) {
+          await db.artifacts.update(job.artifactId, {
+            status: 'error',
+            updatedAt: new Date(),
+          });
+        }
       }
     },
     [updateJob, removeJob, showNotification]
@@ -240,6 +276,12 @@ export function JobProcessor() {
   useEffect(() => {
     // Wait for hydration before polling
     if (!hasHydrated) return;
+
+    // Clear any existing interval first to prevent multiple intervals
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
 
     const pollJobs = async () => {
       const activeJobs = jobs.filter(

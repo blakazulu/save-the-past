@@ -1,12 +1,11 @@
 import { useState, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '@/lib/db';
-import { reconstruct3D, analyzeTexture } from '@/lib/api/client';
+import { reconstruct3D } from '@/lib/api/client';
 import type { Model3D } from '@/types';
 
-export type ReconstructionStatus = 'idle' | 'analyzing' | 'uploading' | 'processing' | 'saving' | 'complete' | 'error';
+export type ReconstructionStatus = 'idle' | 'uploading' | 'processing' | 'saving' | 'complete' | 'error';
 export type ReconstructionMethod = 'single' | 'multi';
-export type TextureMode = 'auto' | 'manual' | 'none';
 
 interface UseReconstruct3DOptions {
   onComplete?: (model: Model3D) => void;
@@ -15,7 +14,6 @@ interface UseReconstruct3DOptions {
 
 export interface ReconstructOptions {
   removeBackground?: boolean;
-  textureMode?: TextureMode;
   manualTexturePrompt?: string;
 }
 
@@ -43,7 +41,7 @@ export function useReconstruct3D(options: UseReconstruct3DOptions = {}) {
       }
 
       // Reset state
-      setStatus('analyzing');
+      setStatus('uploading');
       setProgress(0);
       setError(null);
       setModel(null);
@@ -54,8 +52,7 @@ export function useReconstruct3D(options: UseReconstruct3DOptions = {}) {
       try {
         // Get options
         const removeBackground = reconstructOptions.removeBackground ?? true;
-        const textureMode = reconstructOptions.textureMode ?? 'none';
-        const manualTexturePrompt = reconstructOptions.manualTexturePrompt;
+        const texturePrompt = reconstructOptions.manualTexturePrompt;
 
         // Select image based on method
         const imageBlob = method === 'single'
@@ -63,59 +60,9 @@ export function useReconstruct3D(options: UseReconstruct3DOptions = {}) {
           : imageBlobs[0]; // TODO: Multi-view reconstruction not yet supported by current AI services
 
         // Convert blob to base64
-        setProgress(5);
-        const base64 = await blobToBase64(imageBlob);
         setProgress(10);
-
-        // Determine texture prompt based on mode
-        let texturePrompt: string | undefined;
-
-        if (textureMode === 'auto') {
-          setStatus('analyzing');
-          setProgress(12);
-
-          // First, check if artifact has an info card with material info
-          const artifact = await db.artifacts.get(artifactId);
-          if (artifact?.infoCardId) {
-            const infoCard = await db.infoCards.get(artifact.infoCardId);
-            if (infoCard?.material) {
-              // Use material from info card (prefer English for Meshy API)
-              const material = typeof infoCard.material === 'object' && 'en' in infoCard.material
-                ? infoCard.material.en
-                : String(infoCard.material);
-
-              // Optionally add preservation notes for more texture detail
-              let preservationInfo = '';
-              if (infoCard.preservationNotes) {
-                const notes = typeof infoCard.preservationNotes === 'object' && 'en' in infoCard.preservationNotes
-                  ? infoCard.preservationNotes.en
-                  : String(infoCard.preservationNotes);
-                preservationInfo = `, ${notes}`;
-              }
-
-              texturePrompt = `${material}${preservationInfo}`;
-            }
-          }
-
-          // If no info card or no material, call analyze-texture API
-          if (!texturePrompt) {
-            setProgress(15);
-            const analyzeResult = await analyzeTexture({ imageBase64: base64 });
-            if (analyzeResult.success && analyzeResult.data?.texturePrompt) {
-              texturePrompt = analyzeResult.data.texturePrompt;
-            }
-            // If analysis fails, continue without texture prompt (graceful degradation)
-          }
-          setProgress(25);
-        } else if (textureMode === 'manual' && manualTexturePrompt) {
-          texturePrompt = manualTexturePrompt;
-          setProgress(25);
-        } else {
-          setProgress(25);
-        }
-
-        setStatus('uploading');
-        setProgress(30);
+        const base64 = await blobToBase64(imageBlob);
+        setProgress(20);
 
         // Call reconstruction API (Meshy) with polling
         setStatus('processing');
@@ -125,9 +72,9 @@ export function useReconstruct3D(options: UseReconstruct3DOptions = {}) {
             removeBackground,
             texturePrompt,
           },
-          // Progress callback - map Meshy's 0-100 to our 30-80 range
+          // Progress callback - map Meshy's 0-100 to our 20-80 range
           (meshyProgress, meshyStatus) => {
-            const mappedProgress = 30 + (meshyProgress * 0.5);
+            const mappedProgress = 20 + (meshyProgress * 0.6);
             setProgress(mappedProgress);
             if (meshyStatus === 'pending') {
               setStatus('uploading');

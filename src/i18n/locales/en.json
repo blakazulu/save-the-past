@@ -129,20 +129,10 @@
     },
     "textureMode": {
       "title": "Texture Instructions",
-      "recommended": "Recommended",
-      "auto": {
-        "title": "Auto-analyze artifact",
-        "description": "AI analyzes the image to detect material and surface details",
-        "descriptionWithInfoCard": "Uses existing artifact analysis for texture guidance"
-      },
+      "optional": "optional",
       "manual": {
-        "title": "Manual instructions",
-        "description": "Enter your own texture description",
+        "description": "Optionally describe texture/material for better results",
         "placeholder": "e.g., Weathered terracotta with red ochre traces and surface cracks..."
-      },
-      "none": {
-        "title": "Image only",
-        "description": "Use image without additional texture guidance"
       }
     },
     "minImages": "Requires at least {{count}} images",
@@ -150,7 +140,6 @@
     "processing": "Generating 3D Model",
     "pleaseWait": "This may take a few minutes",
     "status": {
-      "analyzing": "Analyzing artifact texture...",
       "uploading": "Uploading images...",
       "processing": "Processing 3D reconstruction...",
       "saving": "Saving model..."

@@ -9,12 +9,15 @@ import {
   GalleryFilters,
   GalleryEmpty,
 } from '@/components/gallery';
+import { DeleteConfirmDialog } from '@/components/data-management/DeleteConfirmDialog';
 import { useGalleryFilters } from '@/hooks/useGalleryFilters';
 import { db } from '@/lib/db';
+import type { Artifact } from '@/types';
 
 export default function GalleryPage() {
   const { t } = useTranslation();
   const [showFilters, setShowFilters] = useState(false);
+  const [artifactToDelete, setArtifactToDelete] = useState<Artifact | null>(null);
 
   // Live query for artifacts from IndexedDB
   const artifacts = useLiveQuery(
@@ -78,9 +81,9 @@ export default function GalleryPage() {
                 onClearSearch={clearFilters}
               />
             ) : viewMode === 'grid' ? (
-              <GalleryGrid artifacts={filteredArtifacts} />
+              <GalleryGrid artifacts={filteredArtifacts} onDelete={setArtifactToDelete} />
             ) : (
-              <GalleryList artifacts={filteredArtifacts} />
+              <GalleryList artifacts={filteredArtifacts} onDelete={setArtifactToDelete} />
             )}
           </div>
         </div>
@@ -97,6 +100,14 @@ export default function GalleryPage() {
         sortOrder={sortOrder}
         onSortOrderChange={setSortOrder}
         onClearFilters={clearFilters}
+      />
+
+      {/* Delete confirmation dialog */}
+      <DeleteConfirmDialog
+        isOpen={!!artifactToDelete}
+        onClose={() => setArtifactToDelete(null)}
+        artifacts={artifactToDelete ? [artifactToDelete] : []}
+        onDeleted={() => setArtifactToDelete(null)}
       />
     </div>
   );

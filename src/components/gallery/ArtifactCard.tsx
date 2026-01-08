@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { db } from '@/lib/db';
 import { useJobsStore, useJobsHydrated } from '@/stores/jobsStore';
+import { TrashIcon } from '@/components/icons';
 import type { Artifact, ArtifactStatus } from '@/types';
 
 interface ArtifactCardProps {
   artifact: Artifact;
   variant?: 'grid' | 'list';
+  onDelete?: (artifact: Artifact) => void;
 }
 
 const STATUS_BADGES: Record<ArtifactStatus, string> = {
@@ -19,7 +21,7 @@ const STATUS_BADGES: Record<ArtifactStatus, string> = {
   error: 'badge-error',
 };
 
-export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) {
+export function ArtifactCard({ artifact, variant = 'grid', onDelete }: ArtifactCardProps) {
   const { t } = useTranslation();
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const getJobByArtifactId = useJobsStore((state) => state.getJobByArtifactId);
@@ -138,6 +140,21 @@ export function ArtifactCard({ artifact, variant = 'grid' }: ArtifactCardProps) 
         <span className={`badge-status ${badgeClass} absolute top-2 right-2`}>
           {t(`gallery.status.${artifact.status}`)}
         </span>
+
+        {/* Delete button (appears on hover) */}
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onDelete(artifact);
+            }}
+            className="absolute top-2 left-2 p-1.5 rounded-lg bg-white/90 text-text-muted hover:bg-error/10 hover:text-error opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-sm"
+            aria-label={t('common.delete')}
+          >
+            <TrashIcon className="w-4 h-4" />
+          </button>
+        )}
 
         {/* Processing progress overlay */}
         {isProcessing && (
