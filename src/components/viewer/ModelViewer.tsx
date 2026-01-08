@@ -1,6 +1,6 @@
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Environment, Center } from '@react-three/drei';
+import { OrbitControls, useGLTF, Environment, Center, Bounds, useBounds } from '@react-three/drei';
 import { useTranslation } from 'react-i18next';
 import * as THREE from 'three';
 
@@ -12,6 +12,7 @@ interface ModelViewerProps {
 
 function Model({ url }: { url: string }) {
   const { scene } = useGLTF(url);
+  const bounds = useBounds();
 
   // Ensure materials render correctly and enable shadows
   useEffect(() => {
@@ -33,13 +34,11 @@ function Model({ url }: { url: string }) {
         }
       }
     });
-  }, [scene]);
+    // Fit camera to model bounds after load
+    bounds.refresh(scene).fit();
+  }, [scene, bounds]);
 
-  return (
-    <Center>
-      <primitive object={scene} />
-    </Center>
-  );
+  return <primitive object={scene} />;
 }
 
 function LoadingSpinner() {
@@ -80,7 +79,7 @@ export function ModelViewer({ modelUrl, onDownload, className = '' }: ModelViewe
   return (
     <div
       ref={containerRef}
-      className={`relative bg-sand rounded-xl overflow-hidden ${className}`}
+      className={`relative bg-sand rounded-xl overflow-hidden h-[70vh] ${className}`}
     >
       <Canvas
         camera={{ position: [2, 2, 2], fov: 50 }}
@@ -91,7 +90,11 @@ export function ModelViewer({ modelUrl, onDownload, className = '' }: ModelViewe
         <directionalLight position={[-10, -10, -5]} intensity={0.3} />
 
         <Suspense fallback={<LoadingSpinner />}>
-          <Model url={modelUrl} />
+          <Bounds fit clip observe margin={1.2}>
+            <Center>
+              <Model url={modelUrl} />
+            </Center>
+          </Bounds>
           <Environment preset="studio" />
         </Suspense>
 
@@ -102,7 +105,6 @@ export function ModelViewer({ modelUrl, onDownload, className = '' }: ModelViewe
           enableRotate={true}
           minDistance={0.5}
           maxDistance={10}
-          target={[0, 0, 0]}
         />
       </Canvas>
 

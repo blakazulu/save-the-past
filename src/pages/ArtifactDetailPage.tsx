@@ -241,12 +241,12 @@ export default function ArtifactDetailPage() {
         {/* Tab Content */}
         <main className="flex-1 flex flex-col overflow-hidden">
           {activeTab === 'model' && (
-            <div className="flex-1 flex flex-col">
-              <div className="flex-1">
-                <ModelViewer modelUrl={modelUrl} className="w-full h-full" />
+            <div className="flex flex-col">
+              <div className="p-4">
+                <ModelViewer modelUrl={modelUrl} className="w-full" />
               </div>
               {model?.metadata?.fileSize && (
-                <div className="p-4 bg-white border-t border-sand">
+                <div className="px-4 pb-4">
                   <div className="flex items-center justify-between text-base text-text-secondary">
                     <span>{t('reconstruction.complete')}</span>
                     <span>{(model.metadata.fileSize / 1024).toFixed(1)} KB</span>
