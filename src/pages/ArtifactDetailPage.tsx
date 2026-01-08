@@ -359,8 +359,8 @@ export default function ArtifactDetailPage() {
       {/* Step Content */}
       <main className="flex-1 overflow-y-auto p-4">
         <div className="max-w-md mx-auto">
-          {/* Step 1: Metadata */}
-          {wizardStep === 'metadata' && (
+          {/* Step 1: Metadata - only show when not processing */}
+          {wizardStep === 'metadata' && !isProcessing && !isStartingJob && !isAnalyzing && !hasError && (
             <div className="space-y-4">
               <div className="text-center mb-6">
                 <h2 className="text-xl font-semibold text-earth">
@@ -423,7 +423,7 @@ export default function ArtifactDetailPage() {
             </div>
           )}
 
-          {/* Analyzing State */}
+          {/* Analyzing State - takes priority over isStartingJob */}
           {isAnalyzing && (
             <div className="space-y-6">
               <div className="text-center mb-6">
@@ -445,8 +445,8 @@ export default function ArtifactDetailPage() {
             </div>
           )}
 
-          {/* Starting Job State */}
-          {isStartingJob && (
+          {/* Starting Job State - only when not analyzing */}
+          {isStartingJob && !isAnalyzing && (
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <h2 className="text-xl font-semibold text-earth">
@@ -459,7 +459,7 @@ export default function ArtifactDetailPage() {
 
               <div className="bg-white rounded-xl p-6 border border-sand">
                 <ReconstructionProgress
-                  progress={5}
+                  progress={20}
                   status="uploading"
                   startTime={Date.now()}
                 />

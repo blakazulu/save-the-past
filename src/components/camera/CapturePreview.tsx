@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCaptureStore } from '@/stores';
-import { BackIcon, TrashIcon } from '@/components/icons';
+import { BackIcon, TrashIcon, CameraIcon } from '@/components/icons';
 import type { ImageAngle, CaptureImage } from '@/types';
 
 interface CapturePreviewProps {
@@ -54,15 +54,12 @@ export function CapturePreview({
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6">
         <div className="parchment-card p-8 text-center max-w-sm">
           <div className="w-16 h-16 rounded-full bg-sand/50 flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl opacity-50">📷</span>
+            <CameraIcon className="w-8 h-8 text-text-muted" />
           </div>
           <h2 className="font-display text-xl font-semibold text-earth mb-4">
             {t('capture.noPhotos')}
           </h2>
-          <button
-            onClick={onCancel}
-            className="btn-seal"
-          >
+          <button onClick={onCancel} className="btn-seal">
             {t('common.back')}
           </button>
         </div>
@@ -71,49 +68,51 @@ export function CapturePreview({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col safe-area-top safe-area-bottom bg-burnt/95">
+    <div className="fixed inset-0 z-50 flex flex-col safe-area-top safe-area-bottom">
       {/* Header */}
-      <div className="glass-parchment border-b border-sepia/20">
+      <div className="bg-parchment-light/80 border-b border-sand">
         <div className="max-w-4xl mx-auto flex items-center justify-between px-4 py-3">
           <button
             onClick={onCancel}
             className="p-2 -ml-2 hover:bg-sand/50 rounded-lg transition-colors"
           >
-            <BackIcon className="w-5 h-5 text-earth" />
+            <BackIcon className="w-5 h-5 text-earth rtl:rotate-180" />
           </button>
           <h1 className="font-display text-lg font-semibold text-earth">
             {t('capture.reviewPhotos')}
           </h1>
           <button
             onClick={onRetake}
-            className="text-terracotta font-medium hover:text-clay text-base"
+            className="flex items-center gap-1.5 text-terracotta font-medium hover:text-clay transition-colors"
           >
-            {t('capture.addMore')}
+            <CameraIcon className="w-4 h-4" />
+            <span className="text-sm">{t('capture.addMore')}</span>
           </button>
         </div>
       </div>
 
-      {/* Main content - scrollable */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Main preview - constrained height */}
+      {/* Main content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto p-4 space-y-4">
+          {/* Main preview */}
           {selectedImage && (
-            <div className="parchment-card p-2 mb-4">
-              <div className="relative rounded overflow-hidden bg-burnt/10 flex items-center justify-center" style={{ maxHeight: '50vh' }}>
+            <div className="parchment-card overflow-hidden">
+              {/* Image container with dark background for contrast */}
+              <div className="relative bg-ink/90 flex items-center justify-center">
                 <img
                   src={selectedImage.previewUrl}
                   alt={selectedImage.angle}
-                  className="max-w-full max-h-[50vh] object-contain"
+                  className="max-w-full max-h-[55vh] object-contain"
                 />
 
-                {/* Angle badge */}
+                {/* Angle badge - top right */}
                 <button
                   onClick={() => setShowAngleSelector(true)}
-                  className="absolute top-3 right-3 bg-burnt/70 text-parchment-light px-3 py-1.5 rounded text-base font-medium flex items-center gap-2 backdrop-blur-sm"
+                  className="absolute top-3 right-3 bg-parchment/95 text-earth px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 shadow-md hover:bg-parchment-light transition-colors"
                 >
-                  {t(`capture.angles.${selectedImage.angle}`)}
+                  <span>{t(`capture.angles.${selectedImage.angle}`)}</span>
                   <svg
-                    className="w-4 h-4"
+                    className="w-3.5 h-3.5 text-text-muted"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -127,10 +126,10 @@ export function CapturePreview({
                   </svg>
                 </button>
 
-                {/* Delete button */}
+                {/* Delete button - top left */}
                 <button
                   onClick={() => handleRemoveImage(selectedImage.id)}
-                  className="absolute top-3 left-3 bg-error/80 text-white p-2 rounded backdrop-blur-sm"
+                  className="absolute top-3 left-3 bg-error/90 hover:bg-error text-white p-2 rounded-md shadow-md transition-colors"
                   aria-label={t('common.delete')}
                 >
                   <TrashIcon className="w-4 h-4" />
@@ -140,19 +139,21 @@ export function CapturePreview({
           )}
 
           {/* Thumbnail strip */}
-          <div className="parchment-card p-3">
-            <p className="text-base text-text-muted font-manuscript mb-2">
-              {t('capture.photosCount', { count: capturedImages.length })}
-            </p>
-            <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="parchment-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm text-text-secondary font-medium">
+                {t('capture.photosCount', { count: capturedImages.length })}
+              </p>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-1">
               {capturedImages.map((img) => (
                 <button
                   key={img.id}
                   onClick={() => setSelectedImage(img)}
-                  className={`w-16 h-16 md:w-20 md:h-20 rounded overflow-hidden flex-shrink-0 border-2 transition-all ${
+                  className={`relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 transition-all ${
                     selectedImage?.id === img.id
-                      ? 'border-terracotta shadow-md scale-105'
-                      : 'border-sepia/20 hover:border-terracotta/50'
+                      ? 'ring-2 ring-terracotta ring-offset-2 ring-offset-parchment scale-105'
+                      : 'ring-1 ring-sand hover:ring-terracotta/50'
                   }`}
                 >
                   <img
@@ -160,6 +161,10 @@ export function CapturePreview({
                     alt={img.angle}
                     className="w-full h-full object-cover"
                   />
+                  {/* Angle label */}
+                  <span className="absolute bottom-0 inset-x-0 bg-ink/70 text-parchment-light text-xs py-0.5 text-center truncate">
+                    {t(`capture.angles.${img.angle}`)}
+                  </span>
                 </button>
               ))}
             </div>
@@ -167,13 +172,10 @@ export function CapturePreview({
         </div>
       </div>
 
-      {/* Bottom actions - fixed */}
-      <div className="glass-parchment border-t border-sepia/20 p-4">
+      {/* Bottom action */}
+      <div className="bg-parchment-light/80 border-t border-sand p-4">
         <div className="max-w-md mx-auto">
-          <button
-            onClick={onConfirm}
-            className="btn-seal w-full"
-          >
+          <button onClick={onConfirm} className="btn-seal w-full">
             {t('capture.createArtifact')}
           </button>
         </div>
@@ -182,14 +184,17 @@ export function CapturePreview({
       {/* Angle selector modal */}
       {showAngleSelector && (
         <div
-          className="fixed inset-0 bg-burnt/60 z-60 flex items-center md:items-center justify-end md:justify-center animate-fade-in"
+          className="fixed inset-0 bg-ink/50 z-60 flex items-end md:items-center justify-center animate-fade-in"
           onClick={() => setShowAngleSelector(false)}
         >
           <div
-            className="glass-parchment w-full md:w-auto md:min-w-[400px] md:rounded-2xl rounded-t-2xl safe-area-bottom animate-slide-up md:animate-fade-in-up"
+            className="bg-parchment-light w-full md:w-auto md:min-w-[360px] md:max-w-md md:rounded-xl rounded-t-xl safe-area-bottom animate-slide-up md:animate-fade-in-up shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="h-px bg-gradient-to-r from-transparent via-sepia/40 to-transparent" />
+            {/* Handle bar for mobile */}
+            <div className="flex justify-center pt-3 pb-1 md:hidden">
+              <div className="w-10 h-1 rounded-full bg-sand" />
+            </div>
             <div className="p-5">
               <h3 className="font-display text-lg font-semibold text-earth mb-4 text-center">
                 {t('capture.selectAngle')}
@@ -199,10 +204,10 @@ export function CapturePreview({
                   <button
                     key={angle}
                     onClick={() => handleAngleChange(angle)}
-                    className={`p-3 rounded text-left transition-all ${
+                    className={`p-3 rounded-lg text-center transition-all font-medium ${
                       selectedImage?.angle === angle
                         ? 'bg-terracotta text-parchment-light shadow-md'
-                        : 'parchment-card text-earth hover:bg-sand'
+                        : 'bg-parchment hover:bg-sand text-earth border border-sand'
                     }`}
                   >
                     {t(`capture.angles.${angle}`)}

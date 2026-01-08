@@ -72,6 +72,11 @@ export const useJobsStore = create<JobsState>()(
     }),
     {
       name: 'save-the-past-jobs',
+      // Don't persist the hydration flag
+      partialize: (state) => ({
+        jobs: state.jobs,
+        notificationPermission: state.notificationPermission,
+      }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
