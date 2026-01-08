@@ -101,6 +101,17 @@
     "english": "English",
     "hebrew": "Hebrew"
   },
+  "wizard": {
+    "metadataTitle": "Artifact Details",
+    "metadataDescription": "Add information about your artifact (optional)",
+    "generateTitle": "Generate 3D Model",
+    "generateDescription": "Choose how to create your 3D reconstruction",
+    "processingTitle": "Creating Your Model",
+    "processingDescription": "This may take a few minutes",
+    "errorTitle": "Generation Failed",
+    "next": "Next",
+    "generate": "Generate 3D Model"
+  },
   "reconstruction": {
     "title": "3D Reconstruction",
     "description": "Generate a 3D model from your photos",
@@ -108,11 +119,11 @@
     "method": {
       "single": {
         "title": "Single Image",
-        "description": "Fast reconstruction from one photo"
+        "description": "AI-generated 3D from one photo"
       },
       "multi": {
         "title": "Multi Image",
-        "description": "Higher quality from multiple angles"
+        "description": "Coming soon - photogrammetry from multiple angles"
       }
     },
     "minImages": "Requires at least {{count}} images",
@@ -198,7 +209,8 @@
     "back": "Back",
     "save": "Save",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "comingSoon": "Coming Soon"
   },
   "pwa": {
     "installTitle": "Install Save The Past",

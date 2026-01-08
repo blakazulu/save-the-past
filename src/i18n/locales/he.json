@@ -101,6 +101,17 @@
     "english": "אנגלית",
     "hebrew": "עברית"
   },
+  "wizard": {
+    "metadataTitle": "פרטי הממצא",
+    "metadataDescription": "הוסף מידע על הממצא שלך (אופציונלי)",
+    "generateTitle": "צור מודל תלת-ממדי",
+    "generateDescription": "בחר כיצד ליצור את השחזור התלת-ממדי",
+    "processingTitle": "יוצר את המודל שלך",
+    "processingDescription": "זה עשוי לקחת מספר דקות",
+    "errorTitle": "היצירה נכשלה",
+    "next": "הבא",
+    "generate": "צור מודל תלת-ממדי"
+  },
   "reconstruction": {
     "title": "שחזור תלת-ממדי",
     "description": "צור מודל תלת-ממדי מהתמונות שלך",
@@ -108,11 +119,11 @@
     "method": {
       "single": {
         "title": "תמונה בודדת",
-        "description": "שחזור מהיר מתמונה אחת"
+        "description": "תלת-ממד מבוסס AI מתמונה אחת"
       },
       "multi": {
         "title": "מספר תמונות",
-        "description": "איכות גבוהה יותר ממספר זוויות"
+        "description": "בקרוב - פוטוגרמטריה ממספר זוויות"
       }
     },
     "minImages": "דורש לפחות {{count}} תמונות",
@@ -198,7 +209,8 @@
     "back": "חזור",
     "save": "שמור",
     "cancel": "ביטול",
-    "delete": "מחק"
+    "delete": "מחק",
+    "comingSoon": "בקרוב"
   },
   "pwa": {
     "installTitle": "התקן שמור את העבר",

@@ -43,7 +43,6 @@ async function apiRequest<T>(
 // 3D Reconstruction API
 export interface ReconstructRequest {
   imageBase64: string;
-  method?: 'stable-fast-3d' | 'hunyuan3d';
   removeBackground?: boolean;
 }
 
@@ -51,10 +50,9 @@ export interface ReconstructResponse {
   success: boolean;
   modelBase64?: string;
   format?: 'glb';
-  method?: 'stable-fast-3d' | 'hunyuan3d';
+  method?: 'meshy';
   processingTimeMs?: number;
   error?: string;
-  retryCount?: number;
 }
 
 export async function reconstruct3D(

@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { ModelViewer } from '@/components/viewer/ModelViewer';
 import { ReconstructionCard } from '@/components/reconstruction/ReconstructionCard';
 import { useReconstruct3D } from '@/hooks/useReconstruct3D';
+import { useSettingsStore } from '@/stores/settingsStore';
 import type { Artifact, Model3D } from '@/types';
 import type { ReconstructionMethod } from '@/components/reconstruction/MethodSelector';
 
@@ -16,6 +17,7 @@ export function Model3DTab({ artifact }: Model3DTabProps) {
   const { t } = useTranslation();
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<ReconstructionMethod>('single');
+  const autoRemoveBackground = useSettingsStore((state) => state.autoRemoveBackground);
 
   // Load the 3D model if it exists
   const model = useLiveQuery(
@@ -60,7 +62,9 @@ export function Model3DTab({ artifact }: Model3DTabProps) {
   const handleStartReconstruction = async () => {
     if (!images || images.length === 0) return;
     const imageBlobs = images.map((img) => img.blob);
-    await reconstruct(artifact.id, imageBlobs, selectedMethod);
+    await reconstruct(artifact.id, imageBlobs, selectedMethod, {
+      removeBackground: autoRemoveBackground,
+    });
   };
 
   // Map hook status to component status

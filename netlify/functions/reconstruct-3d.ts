@@ -1,9 +1,7 @@
 import type { Context } from '@netlify/functions';
-import { Client } from '@gradio/client';
 
 interface ReconstructRequest {
   imageBase64: string;
-  method?: 'stable-fast-3d' | 'hunyuan3d';
   removeBackground?: boolean;
 }
 
@@ -11,25 +9,130 @@ interface ReconstructResponse {
   success: boolean;
   modelBase64?: string;
   format?: 'glb';
-  method?: 'stable-fast-3d' | 'hunyuan3d';
+  method?: 'meshy';
   processingTimeMs?: number;
   error?: string;
-  retryCount?: number;
 }
 
-// Updated to use working HuggingFace Spaces
-const STABLE_FAST_3D_SPACE = 'stabilityai/stable-fast-3d';
-const HUNYUAN3D_SPACE = 'tencent/Hunyuan3D-2';
+interface MeshyTaskResponse {
+  id: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'SUCCEEDED' | 'FAILED' | 'CANCELED';
+  progress: number; // 0-100
+  model_urls?: {
+    glb?: string;
+    fbx?: string;
+    obj?: string;
+    usdz?: string;
+  };
+  texture_urls?: Array<{
+    base_color?: string;
+    metallic?: string;
+    normal?: string;
+    roughness?: string;
+  }>;
+  task_error?: {
+    message: string;
+  };
+}
 
-async function base64ToBlob(base64: string): Promise<Blob> {
-  // Remove data URL prefix if present
-  const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
-  const binaryString = atob(base64Data);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
+const MESHY_API_BASE = 'https://api.meshy.ai/openapi/v1';
+const MAX_POLL_TIME_MS = 5 * 60 * 1000; // 5 minutes max
+const POLL_INTERVAL_MS = 3000; // Poll every 3 seconds
+const MAX_RETRIES = 4; // Meshy Pro gives 4 free retries per task
+
+async function createMeshyTask(
+  imageBase64: string,
+  _removeBackground: boolean
+): Promise<string> {
+  const apiKey = process.env.MESHY_KEY;
+  if (!apiKey) {
+    throw new Error('MESHY_KEY environment variable not set');
   }
-  return new Blob([bytes], { type: 'image/png' });
+
+  // Create data URI from base64
+  const dataUri = `data:image/png;base64,${imageBase64}`;
+
+  const response = await fetch(`${MESHY_API_BASE}/image-to-3d`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      image_url: dataUri,
+      // Use the same image to guide texture generation for better fidelity
+      texture_image_url: dataUri,
+      ai_model: 'meshy-5',
+      topology: 'triangle',
+      target_polycount: 30000,
+      should_remesh: true,
+      should_texture: true,
+      enable_pbr: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Meshy API error: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  // Response can be { result: "task_id" } or { result: { id: "task_id" } }
+  const taskId = typeof data.result === 'string' ? data.result : data.result?.id;
+
+  if (!taskId) {
+    throw new Error(`No task ID in Meshy response: ${JSON.stringify(data)}`);
+  }
+
+  return taskId;
+}
+
+async function pollMeshyTask(taskId: string): Promise<MeshyTaskResponse> {
+  const apiKey = process.env.MESHY_KEY;
+  if (!apiKey) {
+    throw new Error('MESHY_KEY environment variable not set');
+  }
+
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < MAX_POLL_TIME_MS) {
+    const response = await fetch(`${MESHY_API_BASE}/image-to-3d/${taskId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Meshy poll error: ${response.status} - ${errorText}`);
+    }
+
+    const task: MeshyTaskResponse = await response.json();
+    console.log(`Meshy task ${taskId}: ${task.status} (${task.progress}%)`);
+
+    if (task.status === 'SUCCEEDED') {
+      return task;
+    }
+
+    if (task.status === 'FAILED' || task.status === 'CANCELED') {
+      throw new Error(`Meshy task failed: ${task.task_error?.message || task.status}`);
+    }
+
+    // Wait before polling again
+    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
+  }
+
+  throw new Error('Meshy task timed out after 5 minutes');
+}
+
+async function downloadModel(url: string): Promise<Blob> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to download model: ${response.status}`);
+  }
+  return response.blob();
 }
 
 async function blobToBase64(blob: Blob): Promise<string> {
@@ -40,126 +143,6 @@ async function blobToBase64(blob: Blob): Promise<string> {
     binary += String.fromCharCode(bytes[i]);
   }
   return btoa(binary);
-}
-
-// Helper to extract URL from various Gradio response formats
-function extractUrl(item: unknown): string | null {
-  if (!item) return null;
-  if (typeof item === 'string') return item;
-  if (typeof item === 'object') {
-    const obj = item as Record<string, unknown>;
-    // Try common Gradio response properties
-    if (obj.url && typeof obj.url === 'string') return obj.url;
-    if (obj.path && typeof obj.path === 'string') return obj.path;
-    if (obj.value && typeof obj.value === 'string') return obj.value;
-    if (obj.value && typeof obj.value === 'object') {
-      const val = obj.value as Record<string, unknown>;
-      if (val.url && typeof val.url === 'string') return val.url;
-      if (val.path && typeof val.path === 'string') return val.path;
-    }
-    // Check for nested data property
-    if (obj.data && typeof obj.data === 'string') return obj.data;
-  }
-  return null;
-}
-
-async function reconstructWithStableFast3D(
-  imageBlob: Blob,
-  removeBackground: boolean
-): Promise<{ modelBlob: Blob; method: 'stable-fast-3d' }> {
-  const hfToken = process.env.HF_TOKEN;
-  const client = await Client.connect(STABLE_FAST_3D_SPACE, hfToken ? { hf_token: hfToken } : undefined);
-
-  // Stable Fast 3D API: /run_button endpoint
-  const result = await client.predict('/run_button', {
-    input_image: imageBlob,
-    foreground_ratio: 0.85,
-    remesh_option: 'None',
-    vertex_count: -1,
-    texture_size: 1024,
-  });
-
-  const data = result.data as unknown[];
-
-  // The 3D model is the second item (index 1)
-  let glbUrl: string | null = null;
-  if (data.length > 1) {
-    glbUrl = extractUrl(data[1]);
-  }
-
-  // If not found at index 1, try other indices
-  if (!glbUrl) {
-    for (let i = 0; i < data.length; i++) {
-      const url = extractUrl(data[i]);
-      if (url && (url.endsWith('.glb') || url.endsWith('.gltf') || url.includes('file='))) {
-        glbUrl = url;
-        break;
-      }
-    }
-  }
-
-  if (!glbUrl) {
-    throw new Error(`No GLB from Stable Fast 3D. Response: ${JSON.stringify(data).slice(0, 500)}`);
-  }
-
-  const glbResponse = await fetch(glbUrl);
-  if (!glbResponse.ok) {
-    throw new Error(`Failed to fetch GLB from Stable Fast 3D: ${glbResponse.status}`);
-  }
-
-  const modelBlob = await glbResponse.blob();
-  return { modelBlob, method: 'stable-fast-3d' };
-}
-
-async function reconstructWithHunyuan3D(
-  imageBlob: Blob,
-  removeBackground: boolean
-): Promise<{ modelBlob: Blob; method: 'hunyuan3d' }> {
-  const hfToken = process.env.HF_TOKEN;
-  const client = await Client.connect(HUNYUAN3D_SPACE, hfToken ? { hf_token: hfToken } : undefined);
-
-  // Hunyuan3D API: /shape_generation endpoint
-  const result = await client.predict('/shape_generation', {
-    image: imageBlob,
-    check_box_rembg: removeBackground,
-    steps: 30,
-    guidance_scale: 5.0,
-    seed: 1234,
-    octree_resolution: 256,
-    num_chunks: 8000,
-    randomize_seed: true,
-  });
-
-  const data = result.data as unknown[];
-
-  // The 3D model is the first item
-  let modelUrl: string | null = null;
-  if (data.length > 0) {
-    modelUrl = extractUrl(data[0]);
-  }
-
-  // If not found at index 0, try other indices
-  if (!modelUrl) {
-    for (let i = 0; i < data.length; i++) {
-      const url = extractUrl(data[i]);
-      if (url && (url.endsWith('.glb') || url.endsWith('.obj') || url.endsWith('.ply') || url.includes('file='))) {
-        modelUrl = url;
-        break;
-      }
-    }
-  }
-
-  if (!modelUrl) {
-    throw new Error(`No 3D model from Hunyuan3D. Response: ${JSON.stringify(data).slice(0, 500)}`);
-  }
-
-  const modelResponse = await fetch(modelUrl);
-  if (!modelResponse.ok) {
-    throw new Error(`Failed to fetch model from Hunyuan3D: ${modelResponse.status}`);
-  }
-
-  const modelBlob = await modelResponse.blob();
-  return { modelBlob, method: 'hunyuan3d' };
 }
 
 export default async function handler(
@@ -175,7 +158,6 @@ export default async function handler(
   }
 
   const startTime = Date.now();
-  const errors: string[] = [];
 
   try {
     const body: ReconstructRequest = await req.json();
@@ -187,62 +169,72 @@ export default async function handler(
       );
     }
 
-    const imageBlob = await base64ToBlob(body.imageBase64);
+    // Remove data URL prefix if present
+    const imageBase64 = body.imageBase64.replace(/^data:image\/\w+;base64,/, '');
     const removeBackground = body.removeBackground ?? true;
 
-    let modelBlob: Blob | null = null;
-    let usedMethod: 'stable-fast-3d' | 'hunyuan3d' = 'stable-fast-3d';
+    let lastError: string = '';
+    let completedTask: MeshyTaskResponse | null = null;
 
-    // Try Stable Fast 3D first
-    try {
-      console.log('Trying Stable Fast 3D...');
-      const result = await reconstructWithStableFast3D(imageBlob, removeBackground);
-      modelBlob = result.modelBlob;
-      usedMethod = result.method;
-      console.log('Stable Fast 3D succeeded');
-    } catch (error) {
-      const errMsg = `SF3D: ${error instanceof Error ? error.message : String(error)}`;
-      console.error(errMsg);
-      errors.push(errMsg);
-    }
-
-    // If Stable Fast 3D failed, try Hunyuan3D
-    if (!modelBlob) {
+    // Retry loop - initial attempt + up to 4 free retries
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
-        console.log('Trying Hunyuan3D...');
-        const result = await reconstructWithHunyuan3D(imageBlob, removeBackground);
-        modelBlob = result.modelBlob;
-        usedMethod = result.method;
-        console.log('Hunyuan3D succeeded');
-      } catch (error) {
-        const errMsg = `Hunyuan3D: ${error instanceof Error ? error.message : String(error)}`;
-        console.error(errMsg);
-        errors.push(errMsg);
+        if (attempt > 0) {
+          console.log(`Retry attempt ${attempt}/${MAX_RETRIES}...`);
+        }
+
+        console.log('Creating Meshy task...');
+        const taskId = await createMeshyTask(imageBase64, removeBackground);
+        console.log(`Meshy task created: ${taskId}`);
+
+        console.log('Polling for completion...');
+        completedTask = await pollMeshyTask(taskId);
+
+        if (!completedTask.model_urls?.glb) {
+          throw new Error('No GLB model URL in completed task');
+        }
+
+        // Success - break out of retry loop
+        break;
+      } catch (err) {
+        lastError = err instanceof Error ? err.message : String(err);
+        console.error(`Attempt ${attempt + 1} failed: ${lastError}`);
+
+        if (attempt === MAX_RETRIES) {
+          // All retries exhausted, throw the last error
+          throw new Error(lastError);
+        }
+
+        // Wait a bit before retrying
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
 
-    if (!modelBlob) {
-      throw new Error(errors.join(' | '));
+    if (!completedTask?.model_urls?.glb) {
+      throw new Error(lastError || 'No GLB model URL in completed task');
     }
 
-    // Convert model to base64
+    console.log('Downloading GLB model...');
+    const modelBlob = await downloadModel(completedTask.model_urls.glb);
     const modelBase64 = await blobToBase64(modelBlob);
 
     const response: ReconstructResponse = {
       success: true,
       modelBase64,
       format: 'glb',
-      method: usedMethod,
+      method: 'meshy',
       processingTimeMs: Date.now() - startTime,
     };
+
+    console.log(`Meshy reconstruction completed in ${response.processingTimeMs}ms`);
 
     return new Response(JSON.stringify(response), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error('Meshy reconstruction error:', errorMessage);
 
     const response: ReconstructResponse = {
       success: false,

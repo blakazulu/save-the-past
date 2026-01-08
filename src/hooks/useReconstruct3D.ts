@@ -12,6 +12,10 @@ interface UseReconstruct3DOptions {
   onError?: (error: string) => void;
 }
 
+export interface ReconstructOptions {
+  removeBackground?: boolean;
+}
+
 export function useReconstruct3D(options: UseReconstruct3DOptions = {}) {
   const { onComplete, onError } = options;
 
@@ -26,7 +30,8 @@ export function useReconstruct3D(options: UseReconstruct3DOptions = {}) {
     async (
       artifactId: string,
       imageBlobs: Blob[],
-      method: ReconstructionMethod = 'single'
+      method: ReconstructionMethod = 'single',
+      reconstructOptions: ReconstructOptions = {}
     ) => {
       if (imageBlobs.length === 0) {
         setError('No images provided');
@@ -44,22 +49,24 @@ export function useReconstruct3D(options: UseReconstruct3DOptions = {}) {
       abortControllerRef.current = new AbortController();
 
       try {
+        // Get the removeBackground option (defaults to true for backwards compatibility)
+        const removeBackground = reconstructOptions.removeBackground ?? true;
+
         // Select image based on method
         const imageBlob = method === 'single'
           ? imageBlobs[0]
-          : imageBlobs[0]; // For now, use first image; multi-image support can be added later
+          : imageBlobs[0]; // TODO: Multi-view reconstruction not yet supported by current AI services
 
         // Convert blob to base64
         setProgress(10);
         const base64 = await blobToBase64(imageBlob);
         setProgress(30);
 
-        // Call reconstruction API
+        // Call reconstruction API (Meshy)
         setStatus('processing');
         const response = await reconstruct3D({
           imageBase64: base64,
-          method: 'stable-fast-3d', // Use Stable Fast 3D by default
-          removeBackground: true,
+          removeBackground,
         });
 
         if (!response.success || !response.data?.modelBase64) {
