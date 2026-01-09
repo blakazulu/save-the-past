@@ -2,6 +2,7 @@ import { doc, setDoc, getDoc, collection, query, where, orderBy, limit, getDocs,
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirestoreDb, getFirebaseStorage } from './config';
 import { toMuseumInfoCard, type MuseumArtifact } from '@/types/museum';
+import { optimizeModel } from './modelOptimizer';
 import type { Artifact, Model3D, InfoCard } from '@/types';
 
 const DEVICE_ID_KEY = 'save-the-past-device-id';
@@ -76,8 +77,13 @@ export async function uploadToMuseum({
   let modelUrl = '';
   let modelFormat: 'glb' | 'gltf' | 'obj' = 'glb';
   if (model?.blob) {
+    // Optimize GLB models before upload (reduces size by 50-70%)
+    const modelBlob = model.format === 'glb'
+      ? await optimizeModel(model.blob)
+      : model.blob;
+
     const modelRef = ref(storage, `museum/models/${artifactId}.${model.format}`);
-    await uploadBytes(modelRef, model.blob, {
+    await uploadBytes(modelRef, modelBlob, {
       contentType: model.format === 'glb' ? 'model/gltf-binary' : 'model/gltf+json',
     });
     modelUrl = await getDownloadURL(modelRef);

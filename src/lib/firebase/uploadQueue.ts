@@ -137,6 +137,23 @@ export async function retryFailedUploads(): Promise<void> {
   processUploadQueue();
 }
 
+// Force re-upload all completed artifacts (use when Firestore was reset)
+export async function forceResyncAllArtifacts(): Promise<number> {
+  // Reset uploadedToMuseum flag for all completed artifacts
+  const count = await db.artifacts
+    .where('status')
+    .equals('complete')
+    .modify({ uploadedToMuseum: false, museumUploadedAt: undefined });
+
+  console.log(`Reset ${count} artifacts for re-upload`);
+
+  // Clear any failed uploads from queue
+  await db.pendingUploads.clear();
+
+  // Now run migration
+  return migrateExistingArtifacts();
+}
+
 // Migrate existing completed artifacts that haven't been uploaded yet
 export async function migrateExistingArtifacts(): Promise<number> {
   // Get all completed artifacts not yet uploaded to museum
@@ -183,6 +200,11 @@ export async function getUploadStatus(artifactId: string): Promise<PendingMuseum
 export function initUploadQueueProcessor(): void {
   if (isInitialized) return;
   isInitialized = true;
+
+  // Expose resync function to browser console for debugging
+  if (typeof window !== 'undefined') {
+    (window as unknown as Record<string, unknown>).forceResyncAllArtifacts = forceResyncAllArtifacts;
+  }
 
   // Migrate existing artifacts, then process queue
   migrateExistingArtifacts().then(() => {
