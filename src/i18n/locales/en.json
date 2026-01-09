@@ -233,6 +233,17 @@
     "youAreOffline": "You're offline. Some features may be unavailable.",
     "backOnline": "You're back online!"
   },
+  "virtualTour": {
+    "enterTour": "Enter Virtual Tour",
+    "loading": "Loading museum...",
+    "welcome": "Welcome to the Museum",
+    "desktopInstructions": "Click to start. Use WASD or arrow keys to move. Mouse to look around. Shift to sprint.",
+    "mobileInstructions": "Use the joystick on the left to move. Drag on the right side to look around.",
+    "start": "Start Exploring",
+    "exit": "Exit tour",
+    "artifactCount": "{{count}} artifacts",
+    "clickToLook": "Click to enable mouse look"
+  },
   "museum": {
     "title": "Public Museum",
     "subtitle": "Browse artifacts shared by the community",

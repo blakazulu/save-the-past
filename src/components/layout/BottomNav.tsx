@@ -6,6 +6,11 @@ export function BottomNav() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
 
+  // Hide nav on fullscreen pages
+  if (location.pathname === '/virtual-tour') {
+    return null;
+  }
+
   const toggleLanguage = () => {
     const newLang = i18n.language === 'he' ? 'en' : 'he';
     i18n.changeLanguage(newLang);

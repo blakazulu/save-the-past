@@ -22,6 +22,7 @@ const GalleryPage = lazy(() => import('@/pages/GalleryPage'));
 const ArtifactDetailPage = lazy(() => import('@/pages/ArtifactDetailPage'));
 const MuseumPage = lazy(() => import('@/pages/MuseumPage'));
 const MuseumDetailPage = lazy(() => import('@/pages/MuseumDetailPage'));
+const VirtualTourPage = lazy(() => import('@/pages/VirtualTourPage'));
 
 function PageSkeleton() {
   // Maintains layout structure during lazy load to prevent flash/jump
@@ -49,6 +50,7 @@ function AnimatedRoutes() {
         <Route path="/artifact/:id" element={<ArtifactDetailPage />} />
         <Route path="/museum" element={<MuseumPage />} />
         <Route path="/museum/:id" element={<MuseumDetailPage />} />
+        <Route path="/virtual-tour" element={<VirtualTourPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Routes>
     </Suspense>
