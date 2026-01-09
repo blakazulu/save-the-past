@@ -7,6 +7,7 @@
     "home": "בית",
     "capture": "צילום",
     "gallery": "גלריה",
+    "museum": "מוזיאון",
     "settings": "הגדרות",
     "mainNavigation": "ניווט ראשי"
   },
@@ -55,6 +56,7 @@
   "gallery": {
     "title": "גלריה",
     "empty": "אין ממצאים עדיין",
+    "inMuseum": "במוזיאון",
     "emptyDescription": "התחל בצילום הממצא הראשון שלך",
     "searchPlaceholder": "חפש ממצאים...",
     "filters": "סינון",
@@ -230,6 +232,22 @@
   "offline": {
     "youAreOffline": "אתה במצב לא מקוון. חלק מהתכונות עשויות להיות לא זמינות.",
     "backOnline": "אתה שוב מחובר!"
+  },
+  "museum": {
+    "title": "מוזיאון ציבורי",
+    "subtitle": "עיין בממצאים ששותפו על ידי הקהילה",
+    "public": "ציבורי",
+    "noAnalysis": "ניתוח לא זמין",
+    "loading": "טוען...",
+    "errorLoading": "נכשל בטעינת המוזיאון",
+    "emptyTitle": "אין ממצאים עדיין",
+    "emptyDescription": "היה הראשון לתרום! השלם ממצא והוא יופיע כאן אוטומטית.",
+    "createFirst": "צור ממצא",
+    "notFound": "לא נמצא",
+    "artifactNotFound": "הממצא לא נמצא",
+    "noModel": "מודל תלת-ממדי לא זמין",
+    "details": "פרטים",
+    "uploadedAt": "נוסף למוזיאון"
   },
   "dataManagement": {
     "title": "ניהול נתונים",

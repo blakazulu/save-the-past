@@ -41,6 +41,9 @@ export interface Artifact {
   infoCardId?: string;
   metadata: ArtifactMetadata;
   thumbnailBlob?: Blob;
+  // Museum sync status
+  uploadedToMuseum?: boolean;
+  museumUploadedAt?: Date;
 }
 
 export interface ArtifactImage {

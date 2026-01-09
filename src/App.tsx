@@ -7,6 +7,10 @@ import { queryClient } from '@/lib/query';
 import { InstallPrompt, ErrorBoundary, LoadingSpinner, OfflineIndicator, ScribbleBackground } from '@/components/ui';
 import { BottomNav } from '@/components/layout';
 import { JobProcessor } from '@/components/JobProcessor';
+import { initUploadQueueProcessor } from '@/lib/firebase/uploadQueue';
+
+// Initialize museum upload queue processor once at app startup
+initUploadQueueProcessor();
 
 // Eager load lightweight pages
 import HomePage from '@/pages/HomePage';
@@ -16,6 +20,8 @@ import SettingsPage from '@/pages/SettingsPage';
 const CapturePage = lazy(() => import('@/pages/CapturePage'));
 const GalleryPage = lazy(() => import('@/pages/GalleryPage'));
 const ArtifactDetailPage = lazy(() => import('@/pages/ArtifactDetailPage'));
+const MuseumPage = lazy(() => import('@/pages/MuseumPage'));
+const MuseumDetailPage = lazy(() => import('@/pages/MuseumDetailPage'));
 
 function PageSkeleton() {
   // Maintains layout structure during lazy load to prevent flash/jump
@@ -41,6 +47,8 @@ function AnimatedRoutes() {
         <Route path="/capture" element={<CapturePage />} />
         <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/artifact/:id" element={<ArtifactDetailPage />} />
+        <Route path="/museum" element={<MuseumPage />} />
+        <Route path="/museum/:id" element={<MuseumDetailPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Routes>
     </Suspense>

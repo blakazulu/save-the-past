@@ -1,11 +1,13 @@
 import Dexie, { type Table } from 'dexie';
 import type { Artifact, ArtifactImage, Model3D, InfoCard } from '@/types';
+import type { PendingMuseumUpload } from '@/types/museum';
 
 export class SaveThePastDB extends Dexie {
   artifacts!: Table<Artifact>;
   images!: Table<ArtifactImage>;
   models!: Table<Model3D>;
   infoCards!: Table<InfoCard>;
+  pendingUploads!: Table<PendingMuseumUpload>;
 
   constructor() {
     super('SaveThePastDB');
@@ -14,6 +16,15 @@ export class SaveThePastDB extends Dexie {
       images: 'id, artifactId, angle, createdAt',
       models: 'id, artifactId, createdAt',
       infoCards: 'id, artifactId, createdAt',
+    });
+
+    // Version 2: Add museum upload queue and tracking
+    this.version(2).stores({
+      artifacts: 'id, createdAt, updatedAt, status, uploadedToMuseum, [metadata.siteName]',
+      images: 'id, artifactId, angle, createdAt',
+      models: 'id, artifactId, createdAt',
+      infoCards: 'id, artifactId, createdAt',
+      pendingUploads: 'id, artifactId, status, createdAt',
     });
   }
 }
@@ -42,7 +53,7 @@ export async function getArtifactWithRelations(artifactId: string) {
 }
 
 export async function deleteArtifactWithRelations(artifactId: string) {
-  await db.transaction('rw', [db.artifacts, db.images, db.models, db.infoCards], async () => {
+  await db.transaction('rw', [db.artifacts, db.images, db.models, db.infoCards, db.pendingUploads], async () => {
     const artifact = await db.artifacts.get(artifactId);
     if (!artifact) return;
 
@@ -58,6 +69,9 @@ export async function deleteArtifactWithRelations(artifactId: string) {
     if (artifact.infoCardId) {
       await db.infoCards.delete(artifact.infoCardId);
     }
+
+    // Delete any pending museum uploads for this artifact
+    await db.pendingUploads.where('artifactId').equals(artifactId).delete();
 
     // Delete the artifact
     await db.artifacts.delete(artifactId);

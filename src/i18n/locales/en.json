@@ -7,6 +7,7 @@
     "home": "Home",
     "capture": "Capture",
     "gallery": "Gallery",
+    "museum": "Museum",
     "settings": "Settings",
     "mainNavigation": "Main navigation"
   },
@@ -55,6 +56,7 @@
   "gallery": {
     "title": "Gallery",
     "empty": "No artifacts yet",
+    "inMuseum": "In Museum",
     "emptyDescription": "Start by capturing your first artifact",
     "searchPlaceholder": "Search artifacts...",
     "filters": "Filters",
@@ -230,6 +232,22 @@
   "offline": {
     "youAreOffline": "You're offline. Some features may be unavailable.",
     "backOnline": "You're back online!"
+  },
+  "museum": {
+    "title": "Public Museum",
+    "subtitle": "Browse artifacts shared by the community",
+    "public": "Public",
+    "noAnalysis": "Analysis unavailable",
+    "loading": "Loading...",
+    "errorLoading": "Failed to load museum",
+    "emptyTitle": "No artifacts yet",
+    "emptyDescription": "Be the first to contribute! Complete an artifact and it will automatically appear here.",
+    "createFirst": "Create Artifact",
+    "notFound": "Not Found",
+    "artifactNotFound": "This artifact could not be found",
+    "noModel": "3D model not available",
+    "details": "Details",
+    "uploadedAt": "Added to museum"
   },
   "dataManagement": {
     "title": "Data Management",

@@ -141,7 +141,13 @@ export function ArtifactCard({ artifact, variant = 'grid', onDelete }: ArtifactC
           {t(`gallery.status.${artifact.status}`)}
         </span>
 
-        
+        {/* In Museum badge */}
+        {artifact.uploadedToMuseum && (
+          <span className="badge-status badge-complete absolute top-2 left-2 text-xs">
+            {t('gallery.inMuseum')}
+          </span>
+        )}
+
         {/* Processing progress overlay */}
         {isProcessing && (
           <div className="absolute inset-0 bg-burnt/60 flex flex-col items-center justify-center">

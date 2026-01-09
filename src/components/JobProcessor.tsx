@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useJobsStore, useJobsHydrated, type ProcessingJob } from '@/stores/jobsStore';
 import { checkReconstruct3DStatus, generateInfoCard, base64ToBlob } from '@/lib/api/client';
 import { db } from '@/lib/db';
+import { enqueueMuseumUpload } from '@/lib/firebase/uploadQueue';
 import type { Model3D, InfoCard } from '@/types';
 
 // Smart polling intervals
@@ -234,6 +235,11 @@ export function JobProcessor() {
             'Your artifact has been reconstructed. Tap to view.',
             job.artifactId
           );
+
+          // Queue for museum upload (fire-and-forget)
+          enqueueMuseumUpload(job.artifactId).catch((err) => {
+            console.error('Failed to enqueue museum upload:', err);
+          });
 
           // Remove job after a short delay
           setTimeout(() => removeJob(job.id), 2000);

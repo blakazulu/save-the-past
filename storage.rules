@@ -1,0 +1,11 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /museum/{allPaths=**} {
+      // Anyone can read museum files
+      allow read: if true;
+      // Anyone can upload to museum (with size limits)
+      allow write: if request.resource.size < 50 * 1024 * 1024;
+    }
+  }
+}
