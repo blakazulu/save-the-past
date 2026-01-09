@@ -137,6 +137,42 @@ export async function retryFailedUploads(): Promise<void> {
   processUploadQueue();
 }
 
+// Migrate existing completed artifacts that haven't been uploaded yet
+export async function migrateExistingArtifacts(): Promise<number> {
+  // Get all completed artifacts not yet uploaded to museum
+  const artifacts = await db.artifacts
+    .where('status')
+    .equals('complete')
+    .filter((artifact) => !artifact.uploadedToMuseum)
+    .toArray();
+
+  if (artifacts.length === 0) {
+    console.log('No artifacts to migrate to museum');
+    return 0;
+  }
+
+  console.log(`Migrating ${artifacts.length} existing artifacts to museum...`);
+
+  // Check which are already in the pending queue
+  const pendingArtifactIds = new Set(
+    (await db.pendingUploads.toArray()).map((u) => u.artifactId)
+  );
+
+  let enqueued = 0;
+  for (const artifact of artifacts) {
+    // Skip if already in queue
+    if (pendingArtifactIds.has(artifact.id)) {
+      continue;
+    }
+
+    await enqueueMuseumUpload(artifact.id);
+    enqueued++;
+  }
+
+  console.log(`Enqueued ${enqueued} artifacts for museum upload`);
+  return enqueued;
+}
+
 // Get upload status for an artifact
 export async function getUploadStatus(artifactId: string): Promise<PendingMuseumUpload | null> {
   const uploads = await db.pendingUploads.where('artifactId').equals(artifactId).toArray();
@@ -148,8 +184,10 @@ export function initUploadQueueProcessor(): void {
   if (isInitialized) return;
   isInitialized = true;
 
-  // Process queue on startup
-  processUploadQueue();
+  // Migrate existing artifacts, then process queue
+  migrateExistingArtifacts().then(() => {
+    processUploadQueue();
+  });
 
   // Process queue when coming back online
   window.addEventListener('online', () => {
