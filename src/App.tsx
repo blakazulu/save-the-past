@@ -4,7 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { getDirection } from '@/i18n';
 import { queryClient } from '@/lib/query';
-import { InstallPrompt, ErrorBoundary, LoadingSpinner, OfflineIndicator, ScribbleBackground } from '@/components/ui';
+import { InstallPrompt, ErrorBoundary, LoadingSpinner, OfflineIndicator, ScribbleBackground, UploadProgress } from '@/components/ui';
 import { BottomNav } from '@/components/layout';
 import { JobProcessor } from '@/components/JobProcessor';
 import { initUploadQueueProcessor } from '@/lib/firebase/uploadQueue';
@@ -74,6 +74,7 @@ export default function App() {
           <BottomNav />
           <InstallPrompt />
           <OfflineIndicator />
+          <UploadProgress />
           <JobProcessor />
         </BrowserRouter>
       </QueryClientProvider>

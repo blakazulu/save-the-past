@@ -272,5 +272,22 @@
     "clearAllTitle": "לנקות את כל הנתונים?",
     "clearAllDescription": "פעולה זו תמחק לצמיתות את כל הממצאים. לא ניתן לבטל פעולה זו.",
     "clearAll": "נקה את כל הנתונים"
+  },
+  "upload": {
+    "title": "העלאה למוזיאון",
+    "uploading": "מעלה {{count}} ממצא(ים)...",
+    "pending": "{{count}} ממצא(ים) בהמתנה",
+    "complete": "כל {{count}} הממצא(ים) הועלו!",
+    "failed": "{{failed}} מתוך {{total}} נכשלו",
+    "status": {
+      "pending": "בהמתנה",
+      "optimizing": "ממטב...",
+      "uploading": "מעלה...",
+      "completed": "הושלם",
+      "failed": "נכשל"
+    }
+  },
+  "common": {
+    "close": "סגור"
   }
 }

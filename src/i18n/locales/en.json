@@ -272,5 +272,22 @@
     "clearAllTitle": "Clear All Data?",
     "clearAllDescription": "This will permanently delete all artifacts. This action cannot be undone.",
     "clearAll": "Clear All Data"
+  },
+  "upload": {
+    "title": "Museum Upload",
+    "uploading": "Uploading {{count}} artifact(s)...",
+    "pending": "{{count}} artifact(s) pending",
+    "complete": "All {{count}} artifact(s) uploaded!",
+    "failed": "{{failed}} of {{total}} failed",
+    "status": {
+      "pending": "Pending",
+      "optimizing": "Optimizing...",
+      "uploading": "Uploading...",
+      "completed": "Done",
+      "failed": "Failed"
+    }
+  },
+  "common": {
+    "close": "Close"
   }
 }

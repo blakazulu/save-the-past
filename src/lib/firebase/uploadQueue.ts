@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { db, getArtifactWithRelations } from '@/lib/db';
 import { uploadToMuseum } from './museumService';
+import { useUploadStore } from '@/stores';
 import type { PendingMuseumUpload } from '@/types/museum';
 
 const MAX_ATTEMPTS = 5;
@@ -69,6 +70,7 @@ export async function processUploadQueue(): Promise<void> {
 
 async function processUpload(upload: PendingMuseumUpload): Promise<void> {
   const newAttempts = upload.attempts + 1;
+  const store = useUploadStore.getState();
 
   // Update status to uploading and increment attempts
   await db.pendingUploads.update(upload.id, {
@@ -84,8 +86,15 @@ async function processUpload(upload: PendingMuseumUpload): Promise<void> {
     if (!data || !data.artifact) {
       // Artifact was deleted, remove from queue
       await db.pendingUploads.delete(upload.id);
+      store.removeUpload(upload.artifactId);
       return;
     }
+
+    const artifactName = data.artifact.metadata.name || 'Unnamed Artifact';
+
+    // Add to UI progress (or update if exists)
+    store.addUpload(upload.artifactId, artifactName);
+    store.updateUpload(upload.artifactId, 'uploading');
 
     // Get thumbnail source
     const thumbnailSource = data.artifact.thumbnailBlob || data.images[0]?.blob;
@@ -96,7 +105,13 @@ async function processUpload(upload: PendingMuseumUpload): Promise<void> {
         status: 'failed',
         error: 'No thumbnail available',
       });
+      store.updateUpload(upload.artifactId, 'failed', 'No thumbnail available');
       return;
+    }
+
+    // Update to optimizing if there's a model
+    if (data.model?.blob) {
+      store.updateUpload(upload.artifactId, 'optimizing');
     }
 
     // Upload to museum
@@ -115,15 +130,21 @@ async function processUpload(upload: PendingMuseumUpload): Promise<void> {
 
     await db.pendingUploads.delete(upload.id);
 
+    store.updateUpload(upload.artifactId, 'completed');
     console.log(`Successfully uploaded artifact ${upload.artifactId} to museum`);
   } catch (error) {
     console.error(`Failed to upload artifact ${upload.artifactId}:`, error);
 
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    const finalStatus = newAttempts >= MAX_ATTEMPTS ? 'failed' : 'pending';
+
     // Don't re-increment attempts - already done above
     await db.pendingUploads.update(upload.id, {
-      status: newAttempts >= MAX_ATTEMPTS ? 'failed' : 'pending',
-      error: error instanceof Error ? error.message : 'Unknown error',
+      status: finalStatus,
+      error: errorMsg,
     });
+
+    store.updateUpload(upload.artifactId, finalStatus === 'failed' ? 'failed' : 'pending', errorMsg);
   }
 }
 
