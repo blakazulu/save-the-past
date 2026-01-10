@@ -34,9 +34,14 @@ const COLORS = {
 // ============= TEXTURE LOADING =============
 
 function useMuseumTextures() {
-  // Load only essential textures to stay under WebGL limit
+  // Load textures
   const woodFloorTexture = useTexture('/textures/wood_floor_diff.jpg');
   const darkWoodTexture = useTexture('/textures/dark_wood_diff.jpg');
+
+  // Load plaster wall PBR textures (CC0 from Poly Haven)
+  const plasterDiffuse = useTexture('/textures/plaster_diff.jpg');
+  const plasterNormal = useTexture('/textures/plaster_nor.jpg');
+  const plasterRoughness = useTexture('/textures/plaster_rough.jpg');
 
   // Configure texture repeating
   useMemo(() => {
@@ -48,11 +53,23 @@ function useMuseumTextures() {
       darkWoodTexture.wrapS = darkWoodTexture.wrapT = THREE.RepeatWrapping;
       darkWoodTexture.repeat.set(6, 1);
     }
-  }, [woodFloorTexture, darkWoodTexture]);
+    // Configure plaster textures for seamless tiling
+    [plasterDiffuse, plasterNormal, plasterRoughness].forEach(tex => {
+      if (tex) {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(4, 2);
+      }
+    });
+  }, [woodFloorTexture, darkWoodTexture, plasterDiffuse, plasterNormal, plasterRoughness]);
 
   return {
     woodFloor: woodFloorTexture,
     darkWood: darkWoodTexture,
+    wall: {
+      map: plasterDiffuse,
+      normalMap: plasterNormal,
+      roughnessMap: plasterRoughness,
+    },
   };
 }
 
@@ -90,19 +107,29 @@ function Ceiling() {
 
 // ============= WALLS =============
 
+interface WallTextures {
+  map: THREE.Texture;
+  normalMap: THREE.Texture;
+  roughnessMap: THREE.Texture;
+}
+
 interface WallProps {
   position: [number, number, number];
   size: [number, number, number];
   rotation?: [number, number, number];
+  texture?: WallTextures;
 }
 
-function Wall({ position, size, rotation = [0, 0, 0] }: WallProps) {
+function Wall({ position, size, rotation = [0, 0, 0], texture }: WallProps) {
   return (
     <mesh position={position} rotation={rotation} receiveShadow castShadow>
       <boxGeometry args={size} />
       <meshStandardMaterial
-        color="#f8f4eb"
-        roughness={0.9}
+        map={texture?.map}
+        normalMap={texture?.normalMap}
+        roughnessMap={texture?.roughnessMap}
+        color={texture ? '#ffffff' : '#f8f4eb'}
+        roughness={texture ? 1 : 0.85}
         metalness={0}
       />
     </mesh>
@@ -339,7 +366,7 @@ interface MuseumWallsProps {
 }
 
 function MuseumWalls({ textures }: MuseumWallsProps) {
-  const { darkWood } = textures;
+  const { darkWood, wall } = textures;
   const h = GALLERY.height;
   const t = GALLERY.wallThickness;
 
@@ -354,99 +381,99 @@ function MuseumWalls({ textures }: MuseumWallsProps) {
       {/* ===== OUTER WALLS ===== */}
 
       {/* Back wall (solid - no doorways) */}
-      <Wall position={[0, h / 2, -20]} size={[30, h, t]} />
+      <Wall position={[0, h / 2, -20]} size={[30, h, t]} texture={wall} />
 
       {/* Front wall - left section (extends to entrance archway) */}
-      <Wall position={[-8.5, h / 2, 20]} size={[13, h, t]} />
+      <Wall position={[-8.5, h / 2, 20]} size={[13, h, t]} texture={wall} />
 
       {/* Front wall - right section (extends to entrance archway) */}
-      <Wall position={[8.5, h / 2, 20]} size={[13, h, t]} />
+      <Wall position={[8.5, h / 2, 20]} size={[13, h, t]} texture={wall} />
 
       {/* Left outer wall (solid) */}
-      <Wall position={[-15, h / 2, 0]} size={[t, h, 40]} />
+      <Wall position={[-15, h / 2, 0]} size={[t, h, 40]} texture={wall} />
 
       {/* Right outer wall (solid) */}
-      <Wall position={[15, h / 2, 0]} size={[t, h, 40]} />
+      <Wall position={[15, h / 2, 0]} size={[t, h, 40]} texture={wall} />
 
       {/* ===== ROOM A/B/C DIVIDER WALLS ===== */}
 
       {/* Wall between Room A and Room B (extends from back wall to corridor wall) */}
-      <Wall position={[-6, h / 2, -15]} size={[t, h, 10]} />
+      <Wall position={[-6, h / 2, -15]} size={[t, h, 10]} texture={wall} />
 
       {/* Wall between Room B and Room C (extends from back wall to corridor wall) */}
-      <Wall position={[6, h / 2, -15]} size={[t, h, 10]} />
+      <Wall position={[6, h / 2, -15]} size={[t, h, 10]} texture={wall} />
 
       {/* ===== NORTH CORRIDOR BACK WALL (z=-10) - WITH DOORWAY GAPS ===== */}
 
       {/* Section 1: Far left (x=-15 to x=-12.25, left of Room A door) */}
-      <Wall position={[-13.625, h / 2, -10]} size={[2.75, h, t]} />
+      <Wall position={[-13.625, h / 2, -10]} size={[2.75, h, t]} texture={wall} />
 
       {/* Section 2: Between Room A door and Room B arch (x=-9.75 to x=-1.5) */}
-      <Wall position={[-5.625, h / 2, -10]} size={[8.25, h, t]} />
+      <Wall position={[-5.625, h / 2, -10]} size={[8.25, h, t]} texture={wall} />
 
       {/* Section 3: Between Room B arch and Room C door (x=1.5 to x=9.75) */}
-      <Wall position={[5.625, h / 2, -10]} size={[8.25, h, t]} />
+      <Wall position={[5.625, h / 2, -10]} size={[8.25, h, t]} texture={wall} />
 
       {/* Section 4: Far right (x=12.25 to x=15, right of Room C door) */}
-      <Wall position={[13.625, h / 2, -10]} size={[2.75, h, t]} />
+      <Wall position={[13.625, h / 2, -10]} size={[2.75, h, t]} texture={wall} />
 
       {/* ===== NORTH CORRIDOR FRONT WALL (z=-6) - WITH DOORWAY GAPS ===== */}
 
       {/* Section 1: Far left (x=-15 to x=-12.25, left of Room D door) */}
-      <Wall position={[-13.625, h / 2, -6]} size={[2.75, h, t]} />
+      <Wall position={[-13.625, h / 2, -6]} size={[2.75, h, t]} texture={wall} />
 
       {/* Section 2: Between Room D door and Grand Hall arch (x=-9.75 to x=-1.75) */}
-      <Wall position={[-5.75, h / 2, -6]} size={[8, h, t]} />
+      <Wall position={[-5.75, h / 2, -6]} size={[8, h, t]} texture={wall} />
 
       {/* Section 3: Between Grand Hall arch and Room E door (x=1.75 to x=9.75) */}
-      <Wall position={[5.75, h / 2, -6]} size={[8, h, t]} />
+      <Wall position={[5.75, h / 2, -6]} size={[8, h, t]} texture={wall} />
 
       {/* Section 4: Far right (x=12.25 to x=15, right of Room E door) */}
-      <Wall position={[13.625, h / 2, -6]} size={[2.75, h, t]} />
+      <Wall position={[13.625, h / 2, -6]} size={[2.75, h, t]} texture={wall} />
 
       {/* ===== VERTICAL DIVIDER WALLS (Room D/Grand Hall/Room E) ===== */}
 
       {/* Wall between Room D and Grand Hall (x=-6, from z=-6 to z=6) */}
-      <Wall position={[-6, h / 2, 0]} size={[t, h, 12]} />
+      <Wall position={[-6, h / 2, 0]} size={[t, h, 12]} texture={wall} />
 
       {/* Wall between Grand Hall and Room E (x=6, from z=-6 to z=6) */}
-      <Wall position={[6, h / 2, 0]} size={[t, h, 12]} />
+      <Wall position={[6, h / 2, 0]} size={[t, h, 12]} texture={wall} />
 
       {/* ===== SOUTH SIDE WALLS (z=6) ===== */}
 
       {/* South side of Room D (solid wall) */}
-      <Wall position={[-10.5, h / 2, 6]} size={[9, h, t]} />
+      <Wall position={[-10.5, h / 2, 6]} size={[9, h, t]} texture={wall} />
 
       {/* South side of Room E (solid wall) */}
-      <Wall position={[10.5, h / 2, 6]} size={[9, h, t]} />
+      <Wall position={[10.5, h / 2, 6]} size={[9, h, t]} texture={wall} />
 
       {/* ===== GRAND HALL SOUTH WALL (z=10) - WITH ARCHWAY GAP ===== */}
 
       {/* Left section (x=-6 to x=-1.5) */}
-      <Wall position={[-3.75, h / 2, 10]} size={[4.5, h, t]} />
+      <Wall position={[-3.75, h / 2, 10]} size={[4.5, h, t]} texture={wall} />
 
       {/* Right section (x=1.5 to x=6) */}
-      <Wall position={[3.75, h / 2, 10]} size={[4.5, h, t]} />
+      <Wall position={[3.75, h / 2, 10]} size={[4.5, h, t]} texture={wall} />
 
       {/* ===== SOUTH CORRIDOR WALLS (z=10, outside Grand Hall) ===== */}
 
       {/* Left corridor wall (x=-15 to x=-6) */}
-      <Wall position={[-10.5, h / 2, 10]} size={[9, h, t]} />
+      <Wall position={[-10.5, h / 2, 10]} size={[9, h, t]} texture={wall} />
 
       {/* Right corridor wall (x=6 to x=15) */}
-      <Wall position={[10.5, h / 2, 10]} size={[9, h, t]} />
+      <Wall position={[10.5, h / 2, 10]} size={[9, h, t]} texture={wall} />
 
       {/* ===== LOBBY SIDE WALLS - WITH DOORWAY GAPS ===== */}
 
       {/* Left lobby wall - section before doorway (z=10 to z=11) */}
-      <Wall position={[-6, h / 2, 10.5]} size={[t, h, 1]} />
+      <Wall position={[-6, h / 2, 10.5]} size={[t, h, 1]} texture={wall} />
       {/* Left lobby wall - section after doorway to front (z=13 to z=20) */}
-      <Wall position={[-6, h / 2, 16.5]} size={[t, h, 7]} />
+      <Wall position={[-6, h / 2, 16.5]} size={[t, h, 7]} texture={wall} />
 
       {/* Right lobby wall - section before doorway (z=10 to z=11) */}
-      <Wall position={[6, h / 2, 10.5]} size={[t, h, 1]} />
+      <Wall position={[6, h / 2, 10.5]} size={[t, h, 1]} texture={wall} />
       {/* Right lobby wall - section after doorway to front (z=13 to z=20) */}
-      <Wall position={[6, h / 2, 16.5]} size={[t, h, 7]} />
+      <Wall position={[6, h / 2, 16.5]} size={[t, h, 7]} texture={wall} />
 
       {/* ===== DOORWAYS & ARCHWAYS (just decorative frames) ===== */}
 
