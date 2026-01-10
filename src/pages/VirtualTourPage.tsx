@@ -11,6 +11,18 @@ import {
   TouchControls,
   VirtualJoystick,
 } from '@/components/virtual-tour';
+
+// Pedestal order from entrance to back of museum
+// Maps artifact index to pedestal index (artifact 0 goes to pedestal 15 = lobby, etc.)
+const ENTRANCE_TO_BACK_ORDER = [
+  15, 16,           // Entrance Lobby (z=16)
+  13, 14,           // South Corridor (z=12)
+  11,               // Grand Hall back (z=6)
+  9, 10,            // Grand Hall front (z=2)
+  8, 12,            // Room D & E (z=0)
+  4, 5, 6, 7,       // North Corridor (z=-8)
+  0, 1, 2, 3,       // Rooms A, B, C (z=-14)
+];
 import { fetchMuseumArtifacts } from '@/lib/firebase/museumService';
 import { db } from '@/lib/db';
 import type { MuseumArtifact } from '@/types/museum';
@@ -75,7 +87,7 @@ function ProximityDetector({ artifacts, onNearArtifact }: ProximityDetectorProps
   const lastNearIndexRef = useRef<number>(-1);
 
   useFrame(() => {
-    let nearestIndex = -1;
+    let nearestPedestalIndex = -1;
     let nearestDistance = PROXIMITY_THRESHOLD;
 
     // Check distance to each pedestal
@@ -87,15 +99,22 @@ function ProximityDetector({ artifacts, onNearArtifact }: ProximityDetectorProps
 
       if (distance < nearestDistance) {
         nearestDistance = distance;
-        nearestIndex = i;
+        nearestPedestalIndex = i;
       }
     }
 
     // Only update if the nearest pedestal changed
-    if (nearestIndex !== lastNearIndexRef.current) {
-      lastNearIndexRef.current = nearestIndex;
-      if (nearestIndex >= 0 && artifacts[nearestIndex]) {
-        onNearArtifact(artifacts[nearestIndex], nearestIndex);
+    if (nearestPedestalIndex !== lastNearIndexRef.current) {
+      lastNearIndexRef.current = nearestPedestalIndex;
+
+      // Map pedestal index to artifact index using entrance-to-back order
+      const artifactIndex = ENTRANCE_TO_BACK_ORDER.indexOf(nearestPedestalIndex);
+      const artifact = artifactIndex >= 0 && artifactIndex < artifacts.length
+        ? artifacts[artifactIndex]
+        : undefined;
+
+      if (artifact) {
+        onNearArtifact(artifact, nearestPedestalIndex);
       } else {
         onNearArtifact(null, -1);
       }
@@ -309,10 +328,17 @@ export default function VirtualTourPage() {
           }));
 
         if (mounted) {
-          // Shuffle and combine
+          // Combine all artifacts
           const allArtifacts = [...personalWithModels, ...museumWithModels];
+
+          // Shuffle for random selection
           const shuffled = allArtifacts.sort(() => Math.random() - 0.5);
-          setArtifacts(shuffled);
+
+          // Limit to number of pedestals if we have more artifacts
+          const maxPedestals = PEDESTAL_POSITIONS.length;
+          const selected = shuffled.slice(0, maxPedestals);
+
+          setArtifacts(selected);
           setLoading(false);
         }
       } catch (error) {
@@ -427,11 +453,15 @@ export default function VirtualTourPage() {
           {/* Gallery environment */}
           <ProceduralGallery />
 
-          {/* All pedestals - show even without artifacts */}
-          {PEDESTAL_POSITIONS.map((position, index) => {
-            const artifact = artifacts[index];
+          {/* All pedestals - artifacts placed from entrance to back */}
+          {PEDESTAL_POSITIONS.map((position, pedestalIndex) => {
+            // Find which artifact goes on this pedestal based on entrance-to-back order
+            const artifactIndex = ENTRANCE_TO_BACK_ORDER.indexOf(pedestalIndex);
+            const artifact = artifactIndex >= 0 && artifactIndex < artifacts.length
+              ? artifacts[artifactIndex]
+              : undefined;
             return (
-              <Pedestal key={`pedestal-${index}`} position={position}>
+              <Pedestal key={`pedestal-${pedestalIndex}`} position={position}>
                 {artifact?.modelUrl && (
                   <Suspense fallback={<SceneLoader />}>
                     <ArtifactModel url={artifact.modelUrl} />

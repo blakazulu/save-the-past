@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { HomeIcon, CameraIcon, GalleryIcon, MuseumIcon, SettingsIcon, LanguageIcon } from '@/components/icons';
+import { HomeIcon, CameraIcon, GalleryIcon, MuseumIcon, LanguageIcon } from '@/components/icons';
 
 export function BottomNav() {
   const { t, i18n } = useTranslation();
@@ -56,12 +56,6 @@ export function BottomNav() {
               icon={<MuseumIcon />}
               label={t('nav.museum')}
               active={location.pathname === '/museum' || location.pathname.startsWith('/museum/')}
-            />
-            <NavTab
-              to="/settings"
-              icon={<SettingsIcon />}
-              label={t('nav.settings')}
-              active={location.pathname === '/settings'}
             />
             <LanguageToggle
               icon={<LanguageIcon />}
