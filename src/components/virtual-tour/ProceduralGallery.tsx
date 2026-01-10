@@ -438,13 +438,15 @@ function MuseumWalls({ textures }: MuseumWallsProps) {
 
       {/* ===== LOBBY SIDE WALLS - WITH DOORWAY GAPS ===== */}
 
-      {/* Left lobby wall - top section (z=13 to z=11, above door) */}
-      <Wall position={[-6, h / 2, 14]} size={[t, h, 4]} />
-      <Wall position={[-6, h / 2, 11]} size={[t, h, 2]} />
+      {/* Left lobby wall - section before doorway (z=10 to z=11) */}
+      <Wall position={[-6, h / 2, 10.5]} size={[t, h, 1]} />
+      {/* Left lobby wall - section after doorway to front (z=13 to z=20) */}
+      <Wall position={[-6, h / 2, 16.5]} size={[t, h, 7]} />
 
-      {/* Right lobby wall - top section */}
-      <Wall position={[6, h / 2, 14]} size={[t, h, 4]} />
-      <Wall position={[6, h / 2, 11]} size={[t, h, 2]} />
+      {/* Right lobby wall - section before doorway (z=10 to z=11) */}
+      <Wall position={[6, h / 2, 10.5]} size={[t, h, 1]} />
+      {/* Right lobby wall - section after doorway to front (z=13 to z=20) */}
+      <Wall position={[6, h / 2, 16.5]} size={[t, h, 7]} />
 
       {/* ===== DOORWAYS & ARCHWAYS (just decorative frames) ===== */}
 

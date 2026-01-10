@@ -216,32 +216,32 @@ export function getCollisionBoundaries(): CollisionBoundary[] {
 
   // ===== LOBBY SIDE WALLS - WITH DOORWAY GAPS =====
 
-  // Left lobby wall - upper section (z=12 to z=16)
+  // Left lobby wall - section before doorway (z=10 to z=11)
   boundaries.push({
     type: 'box',
-    center: [-6, 0, 14],
-    size: [t, 6, 4],
+    center: [-6, 0, 10.5],
+    size: [t, 6, 1],
   });
 
-  // Left lobby wall - lower section (z=10 to z=12)
+  // Left lobby wall - section after doorway to front (z=13 to z=20)
   boundaries.push({
     type: 'box',
-    center: [-6, 0, 11],
-    size: [t, 6, 2],
+    center: [-6, 0, 16.5],
+    size: [t, 6, 7],
   });
 
-  // Right lobby wall - upper section
+  // Right lobby wall - section before doorway (z=10 to z=11)
   boundaries.push({
     type: 'box',
-    center: [6, 0, 14],
-    size: [t, 6, 4],
+    center: [6, 0, 10.5],
+    size: [t, 6, 1],
   });
 
-  // Right lobby wall - lower section
+  // Right lobby wall - section after doorway to front (z=13 to z=20)
   boundaries.push({
     type: 'box',
-    center: [6, 0, 11],
-    size: [t, 6, 2],
+    center: [6, 0, 16.5],
+    size: [t, 6, 7],
   });
 
   // ===== ARCHWAY PILLARS (small collision for decorative pillars) =====
