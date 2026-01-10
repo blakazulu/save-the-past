@@ -440,18 +440,23 @@ export default function VirtualTourPage() {
     <div ref={containerRef} className="fixed inset-0 bg-black">
       {/* 3D Canvas */}
       <Canvas
-        shadows
+        shadows={!isMobile}
+        dpr={isMobile ? [1, 1] : [1, 2]}
         camera={{
           fov: 75,
           near: 0.1,
-          far: 1000,
+          far: isMobile ? 100 : 1000,
           position: [0, 1.7, 17],
         }}
         onClick={handleCanvasClick}
+        gl={{
+          antialias: !isMobile,
+          powerPreference: isMobile ? 'low-power' : 'high-performance',
+        }}
       >
         <Suspense fallback={<SceneLoader />}>
           {/* Gallery environment */}
-          <ProceduralGallery />
+          <ProceduralGallery isMobile={isMobile} />
 
           {/* All pedestals - artifacts placed from entrance to back */}
           {PEDESTAL_POSITIONS.map((position, pedestalIndex) => {
@@ -461,7 +466,7 @@ export default function VirtualTourPage() {
               ? artifacts[artifactIndex]
               : undefined;
             return (
-              <Pedestal key={`pedestal-${pedestalIndex}`} position={position}>
+              <Pedestal key={`pedestal-${pedestalIndex}`} position={position} isMobile={isMobile}>
                 {artifact?.modelUrl && (
                   <Suspense fallback={<SceneLoader />}>
                     <ArtifactModel url={artifact.modelUrl} />

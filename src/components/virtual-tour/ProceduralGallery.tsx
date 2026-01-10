@@ -425,10 +425,14 @@ function Wainscoting({ position, width, rotation = [0, 0, 0], texture }: Wainsco
 
 interface MuseumWallsProps {
   textures: ReturnType<typeof useMuseumTextures>;
+  isMobile?: boolean;
 }
 
-function MuseumWalls({ textures }: MuseumWallsProps) {
+function MuseumWalls({ textures, isMobile = false }: MuseumWallsProps) {
   const { darkWood, wall, doorframe } = textures;
+  // On mobile, skip PBR textures for walls to improve performance
+  const wallTexture = isMobile ? undefined : wall;
+  const frameTexture = isMobile ? undefined : doorframe;
   const h = GALLERY.height;
   const t = GALLERY.wallThickness;
 
@@ -443,116 +447,116 @@ function MuseumWalls({ textures }: MuseumWallsProps) {
       {/* ===== OUTER WALLS ===== */}
 
       {/* Back wall (solid - no doorways) */}
-      <Wall position={[0, h / 2, -20]} size={[30, h, t]} texture={wall} />
+      <Wall position={[0, h / 2, -20]} size={[30, h, t]} texture={wallTexture} />
 
       {/* Front wall - left section (extends to entrance archway) */}
-      <Wall position={[-8.5, h / 2, 20]} size={[13, h, t]} texture={wall} />
+      <Wall position={[-8.5, h / 2, 20]} size={[13, h, t]} texture={wallTexture} />
 
       {/* Front wall - right section (extends to entrance archway) */}
-      <Wall position={[8.5, h / 2, 20]} size={[13, h, t]} texture={wall} />
+      <Wall position={[8.5, h / 2, 20]} size={[13, h, t]} texture={wallTexture} />
 
       {/* Left outer wall (solid) */}
-      <Wall position={[-15, h / 2, 0]} size={[t, h, 40]} texture={wall} />
+      <Wall position={[-15, h / 2, 0]} size={[t, h, 40]} texture={wallTexture} />
 
       {/* Right outer wall (solid) */}
-      <Wall position={[15, h / 2, 0]} size={[t, h, 40]} texture={wall} />
+      <Wall position={[15, h / 2, 0]} size={[t, h, 40]} texture={wallTexture} />
 
       {/* ===== ROOM A/B/C DIVIDER WALLS ===== */}
 
       {/* Wall between Room A and Room B (extends from back wall to corridor wall) */}
-      <Wall position={[-6, h / 2, -15]} size={[t, h, 10]} texture={wall} />
+      <Wall position={[-6, h / 2, -15]} size={[t, h, 10]} texture={wallTexture} />
 
       {/* Wall between Room B and Room C (extends from back wall to corridor wall) */}
-      <Wall position={[6, h / 2, -15]} size={[t, h, 10]} texture={wall} />
+      <Wall position={[6, h / 2, -15]} size={[t, h, 10]} texture={wallTexture} />
 
       {/* ===== NORTH CORRIDOR BACK WALL (z=-10) - WITH DOORWAY GAPS ===== */}
 
       {/* Section 1: Far left (x=-15 to x=-12.25, left of Room A door) */}
-      <Wall position={[-13.625, h / 2, -10]} size={[2.75, h, t]} texture={wall} />
+      <Wall position={[-13.625, h / 2, -10]} size={[2.75, h, t]} texture={wallTexture} />
 
       {/* Section 2: Between Room A door and Room B arch (x=-9.75 to x=-1.5) */}
-      <Wall position={[-5.625, h / 2, -10]} size={[8.25, h, t]} texture={wall} />
+      <Wall position={[-5.625, h / 2, -10]} size={[8.25, h, t]} texture={wallTexture} />
 
       {/* Section 3: Between Room B arch and Room C door (x=1.5 to x=9.75) */}
-      <Wall position={[5.625, h / 2, -10]} size={[8.25, h, t]} texture={wall} />
+      <Wall position={[5.625, h / 2, -10]} size={[8.25, h, t]} texture={wallTexture} />
 
       {/* Section 4: Far right (x=12.25 to x=15, right of Room C door) */}
-      <Wall position={[13.625, h / 2, -10]} size={[2.75, h, t]} texture={wall} />
+      <Wall position={[13.625, h / 2, -10]} size={[2.75, h, t]} texture={wallTexture} />
 
       {/* ===== NORTH CORRIDOR FRONT WALL (z=-6) - WITH DOORWAY GAPS ===== */}
 
       {/* Section 1: Far left (x=-15 to x=-12.25, left of Room D door) */}
-      <Wall position={[-13.625, h / 2, -6]} size={[2.75, h, t]} texture={wall} />
+      <Wall position={[-13.625, h / 2, -6]} size={[2.75, h, t]} texture={wallTexture} />
 
       {/* Section 2: Between Room D door and Grand Hall arch (x=-9.75 to x=-1.75) */}
-      <Wall position={[-5.75, h / 2, -6]} size={[8, h, t]} texture={wall} />
+      <Wall position={[-5.75, h / 2, -6]} size={[8, h, t]} texture={wallTexture} />
 
       {/* Section 3: Between Grand Hall arch and Room E door (x=1.75 to x=9.75) */}
-      <Wall position={[5.75, h / 2, -6]} size={[8, h, t]} texture={wall} />
+      <Wall position={[5.75, h / 2, -6]} size={[8, h, t]} texture={wallTexture} />
 
       {/* Section 4: Far right (x=12.25 to x=15, right of Room E door) */}
-      <Wall position={[13.625, h / 2, -6]} size={[2.75, h, t]} texture={wall} />
+      <Wall position={[13.625, h / 2, -6]} size={[2.75, h, t]} texture={wallTexture} />
 
       {/* ===== VERTICAL DIVIDER WALLS (Room D/Grand Hall/Room E) ===== */}
 
       {/* Wall between Room D and Grand Hall (x=-6, from z=-6 to z=6) */}
-      <Wall position={[-6, h / 2, 0]} size={[t, h, 12]} texture={wall} />
+      <Wall position={[-6, h / 2, 0]} size={[t, h, 12]} texture={wallTexture} />
 
       {/* Wall between Grand Hall and Room E (x=6, from z=-6 to z=6) */}
-      <Wall position={[6, h / 2, 0]} size={[t, h, 12]} texture={wall} />
+      <Wall position={[6, h / 2, 0]} size={[t, h, 12]} texture={wallTexture} />
 
       {/* ===== SOUTH SIDE WALLS (z=6) ===== */}
 
       {/* South side of Room D (solid wall) */}
-      <Wall position={[-10.5, h / 2, 6]} size={[9, h, t]} texture={wall} />
+      <Wall position={[-10.5, h / 2, 6]} size={[9, h, t]} texture={wallTexture} />
 
       {/* South side of Room E (solid wall) */}
-      <Wall position={[10.5, h / 2, 6]} size={[9, h, t]} texture={wall} />
+      <Wall position={[10.5, h / 2, 6]} size={[9, h, t]} texture={wallTexture} />
 
       {/* ===== GRAND HALL SOUTH WALL (z=10) - WITH ARCHWAY GAP ===== */}
 
       {/* Left section (x=-6 to x=-1.5) */}
-      <Wall position={[-3.75, h / 2, 10]} size={[4.5, h, t]} texture={wall} />
+      <Wall position={[-3.75, h / 2, 10]} size={[4.5, h, t]} texture={wallTexture} />
 
       {/* Right section (x=1.5 to x=6) */}
-      <Wall position={[3.75, h / 2, 10]} size={[4.5, h, t]} texture={wall} />
+      <Wall position={[3.75, h / 2, 10]} size={[4.5, h, t]} texture={wallTexture} />
 
       {/* ===== SOUTH CORRIDOR WALLS (z=10, outside Grand Hall) ===== */}
 
       {/* Left corridor wall (x=-15 to x=-6) */}
-      <Wall position={[-10.5, h / 2, 10]} size={[9, h, t]} texture={wall} />
+      <Wall position={[-10.5, h / 2, 10]} size={[9, h, t]} texture={wallTexture} />
 
       {/* Right corridor wall (x=6 to x=15) */}
-      <Wall position={[10.5, h / 2, 10]} size={[9, h, t]} texture={wall} />
+      <Wall position={[10.5, h / 2, 10]} size={[9, h, t]} texture={wallTexture} />
 
       {/* ===== LOBBY SIDE WALLS - WITH DOORWAY GAPS ===== */}
 
       {/* Left lobby wall - section before doorway (z=10 to z=11) */}
-      <Wall position={[-6, h / 2, 10.5]} size={[t, h, 1]} texture={wall} />
+      <Wall position={[-6, h / 2, 10.5]} size={[t, h, 1]} texture={wallTexture} />
       {/* Left lobby wall - section after doorway to front (z=13 to z=20) */}
-      <Wall position={[-6, h / 2, 16.5]} size={[t, h, 7]} texture={wall} />
+      <Wall position={[-6, h / 2, 16.5]} size={[t, h, 7]} texture={wallTexture} />
 
       {/* Right lobby wall - section before doorway (z=10 to z=11) */}
-      <Wall position={[6, h / 2, 10.5]} size={[t, h, 1]} texture={wall} />
+      <Wall position={[6, h / 2, 10.5]} size={[t, h, 1]} texture={wallTexture} />
       {/* Right lobby wall - section after doorway to front (z=13 to z=20) */}
-      <Wall position={[6, h / 2, 16.5]} size={[t, h, 7]} texture={wall} />
+      <Wall position={[6, h / 2, 16.5]} size={[t, h, 7]} texture={wallTexture} />
 
       {/* ===== DOORWAYS & ARCHWAYS (just decorative frames) ===== */}
 
       {/* Room A doorway frame */}
-      <Doorway position={[-11, 0, -10]} width={DOOR_WIDTH} frameTexture={doorframe} />
+      <Doorway position={[-11, 0, -10]} width={DOOR_WIDTH} frameTexture={frameTexture} />
 
       {/* Room B archway frame */}
       <Archway position={[0, 0, -10]} width={ARCH_WIDTH_SMALL} />
 
       {/* Room C doorway frame */}
-      <Doorway position={[11, 0, -10]} width={DOOR_WIDTH} frameTexture={doorframe} />
+      <Doorway position={[11, 0, -10]} width={DOOR_WIDTH} frameTexture={frameTexture} />
 
       {/* Room D doorway frame */}
-      <Doorway position={[-11, 0, -6]} width={DOOR_WIDTH} frameTexture={doorframe} />
+      <Doorway position={[-11, 0, -6]} width={DOOR_WIDTH} frameTexture={frameTexture} />
 
       {/* Room E doorway frame */}
-      <Doorway position={[11, 0, -6]} width={DOOR_WIDTH} frameTexture={doorframe} />
+      <Doorway position={[11, 0, -6]} width={DOOR_WIDTH} frameTexture={frameTexture} />
 
       {/* Grand Hall north archway frame */}
       <Archway position={[0, 0, -6]} width={ARCH_WIDTH_LARGE} />
@@ -561,8 +565,8 @@ function MuseumWalls({ textures }: MuseumWallsProps) {
       <Archway position={[0, 0, 10]} width={ARCH_WIDTH_SMALL} />
 
       {/* Lobby to south corridor doorways */}
-      <Doorway position={[-6, 0, 12]} rotation={[0, Math.PI / 2, 0]} width={2} frameTexture={doorframe} />
-      <Doorway position={[6, 0, 12]} rotation={[0, Math.PI / 2, 0]} width={2} frameTexture={doorframe} />
+      <Doorway position={[-6, 0, 12]} rotation={[0, Math.PI / 2, 0]} width={2} frameTexture={frameTexture} />
+      <Doorway position={[6, 0, 12]} rotation={[0, Math.PI / 2, 0]} width={2} frameTexture={frameTexture} />
 
       {/* Main entrance archway frame */}
       <Archway position={[0, 0, 20]} width={ARCH_WIDTH_ENTRANCE} />
@@ -583,8 +587,25 @@ function MuseumWalls({ textures }: MuseumWallsProps) {
 
 // ============= WINDOWS =============
 
-function MuseumWindows() {
+interface MuseumWindowsProps {
+  isMobile?: boolean;
+}
+
+function MuseumWindows({ isMobile = false }: MuseumWindowsProps) {
   const windowHeight = 3;
+
+  // On mobile, only render half the windows to reduce point lights
+  if (isMobile) {
+    return (
+      <group>
+        {/* Reduced windows on mobile - only 4 instead of 10 */}
+        <FrostedWindow position={[-14.8, windowHeight, -5]} rotation={[0, Math.PI / 2, 0]} />
+        <FrostedWindow position={[-14.8, windowHeight, 10]} rotation={[0, Math.PI / 2, 0]} />
+        <FrostedWindow position={[14.8, windowHeight, -5]} rotation={[0, -Math.PI / 2, 0]} />
+        <FrostedWindow position={[14.8, windowHeight, 10]} rotation={[0, -Math.PI / 2, 0]} />
+      </group>
+    );
+  }
 
   return (
     <group>
@@ -1039,7 +1060,23 @@ function WallDecorations() {
 
 // ============= SKYLIGHTS =============
 
-function MuseumSkylights() {
+interface MuseumSkylightsProps {
+  isMobile?: boolean;
+}
+
+function MuseumSkylights({ isMobile = false }: MuseumSkylightsProps) {
+  // On mobile, only render 2 key skylights to reduce spotlights
+  if (isMobile) {
+    return (
+      <group>
+        {/* Grand Hall skylight only - most important */}
+        <Skylight position={[0, GALLERY.height, 2]} width={3} length={5} />
+        {/* Lobby skylight */}
+        <Skylight position={[0, GALLERY.height, 16]} width={4} length={3} />
+      </group>
+    );
+  }
+
   return (
     <group>
       {/* Room skylights */}
@@ -1062,7 +1099,50 @@ function MuseumSkylights() {
 
 // ============= LIGHTING =============
 
-function MuseumLighting() {
+interface MuseumLightingProps {
+  isMobile?: boolean;
+}
+
+function MuseumLighting({ isMobile = false }: MuseumLightingProps) {
+  // Mobile: Simplified lighting - no shadows, fewer lights
+  if (isMobile) {
+    return (
+      <>
+        {/* Stronger ambient to compensate for fewer lights */}
+        <ambientLight intensity={1.0} color="#fffcf5" />
+
+        {/* Hemisphere light for natural lighting */}
+        <hemisphereLight
+          color="#fffff0"
+          groundColor="#e8d4b8"
+          intensity={0.8}
+        />
+
+        {/* Single directional light - NO shadows on mobile */}
+        <directionalLight
+          position={[10, GALLERY.height + 15, 5]}
+          intensity={1.8}
+          color="#fffaf0"
+        />
+
+        {/* Only 2 key point lights for room illumination */}
+        <pointLight
+          position={[0, GALLERY.height - 0.5, 2]}
+          intensity={1.5}
+          color="#fffaf0"
+          distance={30}
+        />
+        <pointLight
+          position={[0, GALLERY.height - 0.5, 16]}
+          intensity={1.5}
+          color="#fffaf0"
+          distance={30}
+        />
+      </>
+    );
+  }
+
+  // Desktop: Full lighting with shadows
   return (
     <>
       {/* Strong ambient for bright museum feel */}
@@ -1134,25 +1214,26 @@ function MuseumLighting() {
 interface PedestalProps {
   position: [number, number, number];
   children?: React.ReactNode;
+  isMobile?: boolean;
 }
 
-function PedestalComponent({ position, children }: PedestalProps) {
+function PedestalComponent({ position, children, isMobile = false }: PedestalProps) {
   return (
     <group position={position}>
       {/* Base - white marble look */}
-      <mesh position={[0, 0.08, 0]} receiveShadow>
+      <mesh position={[0, 0.08, 0]} receiveShadow={!isMobile}>
         <boxGeometry args={[1.1, 0.16, 1.1]} />
         <meshStandardMaterial color="#f0ebe0" roughness={0.2} metalness={0.1} />
       </mesh>
 
       {/* Middle section */}
-      <mesh position={[0, 0.5, 0]} receiveShadow>
+      <mesh position={[0, 0.5, 0]} receiveShadow={!isMobile}>
         <boxGeometry args={[0.9, 0.68, 0.9]} />
         <meshStandardMaterial color="#f5f0e8" roughness={0.15} metalness={0.1} />
       </mesh>
 
       {/* Top trim */}
-      <mesh position={[0, 0.9, 0]} receiveShadow>
+      <mesh position={[0, 0.9, 0]} receiveShadow={!isMobile}>
         <boxGeometry args={[1.0, 0.1, 1.0]} />
         <meshStandardMaterial color="#f0ebe0" roughness={0.2} metalness={0.1} />
       </mesh>
@@ -1163,29 +1244,34 @@ function PedestalComponent({ position, children }: PedestalProps) {
         <meshStandardMaterial
           color="#fff8f0"
           emissive="#fff5e6"
-          emissiveIntensity={0.4}
+          emissiveIntensity={isMobile ? 0.6 : 0.4}
           roughness={0.9}
         />
       </mesh>
 
-      {/* Soft uplight from display surface */}
-      <pointLight
-        position={[0, 1.0, 0]}
-        intensity={0.5}
-        color="#fff5e6"
-        distance={3}
-        decay={2}
-      />
+      {/* Lights - skip on mobile for major performance boost */}
+      {!isMobile && (
+        <>
+          {/* Soft uplight from display surface */}
+          <pointLight
+            position={[0, 1.0, 0]}
+            intensity={0.5}
+            color="#fff5e6"
+            distance={3}
+            decay={2}
+          />
 
-      {/* Spotlight */}
-      <spotLight
-        position={[0, 4, 0]}
-        angle={0.35}
-        penumbra={0.7}
-        intensity={2.0}
-        color="#fff5e6"
-        distance={8}
-      />
+          {/* Spotlight */}
+          <spotLight
+            position={[0, 4, 0]}
+            angle={0.35}
+            penumbra={0.7}
+            intensity={2.0}
+            color="#fff5e6"
+            distance={8}
+          />
+        </>
+      )}
 
       {/* Artifact placement - raised to account for model center origin */}
       <group position={[0, 1.6, 0]}>
@@ -1197,17 +1283,21 @@ function PedestalComponent({ position, children }: PedestalProps) {
 
 // ============= MAIN GALLERY COMPONENT =============
 
-export function ProceduralGallery() {
+interface ProceduralGalleryProps {
+  isMobile?: boolean;
+}
+
+export function ProceduralGallery({ isMobile = false }: ProceduralGalleryProps) {
   const textures = useMuseumTextures();
 
   return (
     <group>
-      {/* Light atmospheric fog */}
-      <fog attach="fog" args={['#fefcf8', 25, 80]} />
+      {/* Light atmospheric fog - closer on mobile for better culling */}
+      <fog attach="fog" args={['#fefcf8', isMobile ? 15 : 25, isMobile ? 50 : 80]} />
 
-      {/* Sky backdrop */}
+      {/* Sky backdrop - lower poly on mobile */}
       <mesh position={[0, 20, 0]}>
-        <sphereGeometry args={[100, 32, 16]} />
+        <sphereGeometry args={[100, isMobile ? 16 : 32, isMobile ? 8 : 16]} />
         <meshBasicMaterial color="#d4e5f7" side={THREE.BackSide} />
       </mesh>
 
@@ -1215,30 +1305,30 @@ export function ProceduralGallery() {
       <Floor texture={textures.woodFloor} />
 
       {/* Ceiling */}
-      <Ceiling texture={textures.ceiling} />
+      <Ceiling texture={isMobile ? undefined : textures.ceiling} />
 
       {/* Walls */}
-      <MuseumWalls textures={textures} />
+      <MuseumWalls textures={textures} isMobile={isMobile} />
 
-      {/* Windows */}
-      <MuseumWindows />
+      {/* Windows - simplified on mobile */}
+      <MuseumWindows isMobile={isMobile} />
 
-      {/* Skylights */}
-      <MuseumSkylights />
+      {/* Skylights - reduced on mobile */}
+      <MuseumSkylights isMobile={isMobile} />
 
-      {/* Wall decorations */}
-      <WallDecorations />
+      {/* Wall decorations - skip on mobile for performance */}
+      {!isMobile && <WallDecorations />}
 
       {/* Lighting */}
-      <MuseumLighting />
+      <MuseumLighting isMobile={isMobile} />
     </group>
   );
 }
 
 // ============= PEDESTAL COMPONENT EXPORT =============
 
-export function Pedestal({ position, children }: { position: [number, number, number]; children?: React.ReactNode }) {
-  return <PedestalComponent position={position}>{children}</PedestalComponent>;
+export function Pedestal({ position, children, isMobile }: { position: [number, number, number]; children?: React.ReactNode; isMobile?: boolean }) {
+  return <PedestalComponent position={position} isMobile={isMobile}>{children}</PedestalComponent>;
 }
 
 // ============= PEDESTAL POSITIONS =============
