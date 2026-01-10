@@ -219,7 +219,7 @@ function FrostedWindow({ position, rotation = [0, 0, 0], width = 2, height = 2.5
 
   return (
     <group position={position} rotation={rotation}>
-      {/* Frosted glass - softer daylight */}
+      {/* Frosted glass */}
       <mesh position={[0, 0, 0]}>
         <planeGeometry args={[width - frameWidth * 2, height - frameWidth * 2]} />
         <meshStandardMaterial
@@ -232,7 +232,7 @@ function FrostedWindow({ position, rotation = [0, 0, 0], width = 2, height = 2.5
         />
       </mesh>
 
-      {/* Softer light coming through */}
+      {/* Light coming through */}
       <pointLight position={[0, 0, 1]} intensity={0.6} color="#fff8f0" distance={8} decay={2} />
 
       {/* Frame */}
@@ -272,7 +272,7 @@ interface SkylightProps {
 function Skylight({ position, width = 2.5, length = 4 }: SkylightProps) {
   return (
     <group position={position}>
-      {/* Sky/light panel - bright sunny sky */}
+      {/* Sky/light panel */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
         <planeGeometry args={[width, length]} />
         <meshStandardMaterial
@@ -282,7 +282,7 @@ function Skylight({ position, width = 2.5, length = 4 }: SkylightProps) {
         />
       </mesh>
 
-      {/* Bright sunlight beam - no shadow to save texture units */}
+      {/* Sunlight beam */}
       <spotLight
         position={[0, 0, 0]}
         angle={0.5}
@@ -1088,7 +1088,7 @@ function PedestalComponent({ position, children }: PedestalProps) {
         decay={2}
       />
 
-      {/* Spotlight - no shadow casting to save texture units */}
+      {/* Spotlight */}
       <spotLight
         position={[0, 4, 0]}
         angle={0.35}
