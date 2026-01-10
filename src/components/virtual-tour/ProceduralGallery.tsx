@@ -516,6 +516,436 @@ function MuseumWindows() {
   );
 }
 
+// ============= WALL SCONCE =============
+
+interface WallSconceProps {
+  position: [number, number, number];
+  rotation?: [number, number, number];
+}
+
+function WallSconce({ position, rotation = [0, 0, 0] }: WallSconceProps) {
+  return (
+    <group position={position} rotation={rotation}>
+      {/* Backplate */}
+      <mesh position={[0, 0, 0.02]}>
+        <boxGeometry args={[0.15, 0.25, 0.03]} />
+        <meshStandardMaterial color={COLORS.brass} roughness={0.3} metalness={0.8} />
+      </mesh>
+
+      {/* Arm */}
+      <mesh position={[0, -0.05, 0.12]}>
+        <boxGeometry args={[0.04, 0.04, 0.2]} />
+        <meshStandardMaterial color={COLORS.brass} roughness={0.3} metalness={0.8} />
+      </mesh>
+
+      {/* Lamp shade holder */}
+      <mesh position={[0, 0, 0.22]}>
+        <cylinderGeometry args={[0.03, 0.04, 0.08, 8]} />
+        <meshStandardMaterial color={COLORS.brass} roughness={0.3} metalness={0.8} />
+      </mesh>
+
+      {/* Glass shade */}
+      <mesh position={[0, 0.08, 0.22]}>
+        <cylinderGeometry args={[0.06, 0.1, 0.15, 8, 1, true]} />
+        <meshStandardMaterial
+          color="#fff8e0"
+          transparent
+          opacity={0.6}
+          roughness={0.2}
+          emissive="#fff0c0"
+          emissiveIntensity={0.3}
+        />
+      </mesh>
+
+      {/* Light */}
+      <pointLight
+        position={[0, 0.1, 0.25]}
+        intensity={0.5}
+        color="#fff5e0"
+        distance={6}
+        decay={2}
+      />
+    </group>
+  );
+}
+
+// ============= FRAMED ARTWORK =============
+
+// Available artwork textures
+const ARTWORK_PATHS = [
+  '/textures/artwork/mona_lisa.webp',
+  '/textures/artwork/venus.webp',
+  '/textures/artwork/classical1.webp',
+  '/textures/artwork/classical2.webp',
+  '/textures/artwork/classical3.webp',
+  '/textures/artwork/renaissance1.webp',
+  '/textures/artwork/renaissance2.webp',
+];
+
+interface FramedArtworkProps {
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  width?: number;
+  height?: number;
+  frameColor?: string;
+  artworkIndex?: number;
+}
+
+function FramedArtwork({
+  position,
+  rotation = [0, 0, 0],
+  width = 1.5,
+  height = 1.2,
+  frameColor = '#5c4033',
+  artworkIndex = 0,
+}: FramedArtworkProps) {
+  const frameThickness = 0.08;
+  const frameDepth = 0.05;
+
+  // Load the artwork texture
+  const artworkPath = ARTWORK_PATHS[artworkIndex % ARTWORK_PATHS.length];
+  const texture = useTexture(artworkPath);
+
+  return (
+    <group position={position} rotation={rotation}>
+      {/* Canvas/artwork with texture */}
+      <mesh position={[0, 0, 0.01]}>
+        <planeGeometry args={[width - frameThickness * 2, height - frameThickness * 2]} />
+        <meshStandardMaterial map={texture} roughness={0.8} />
+      </mesh>
+
+      {/* Frame - top */}
+      <mesh position={[0, height / 2 - frameThickness / 2, frameDepth / 2]}>
+        <boxGeometry args={[width, frameThickness, frameDepth]} />
+        <meshStandardMaterial color={frameColor} roughness={0.5} metalness={0.1} />
+      </mesh>
+
+      {/* Frame - bottom */}
+      <mesh position={[0, -height / 2 + frameThickness / 2, frameDepth / 2]}>
+        <boxGeometry args={[width, frameThickness, frameDepth]} />
+        <meshStandardMaterial color={frameColor} roughness={0.5} metalness={0.1} />
+      </mesh>
+
+      {/* Frame - left */}
+      <mesh position={[-width / 2 + frameThickness / 2, 0, frameDepth / 2]}>
+        <boxGeometry args={[frameThickness, height - frameThickness * 2, frameDepth]} />
+        <meshStandardMaterial color={frameColor} roughness={0.5} metalness={0.1} />
+      </mesh>
+
+      {/* Frame - right */}
+      <mesh position={[width / 2 - frameThickness / 2, 0, frameDepth / 2]}>
+        <boxGeometry args={[frameThickness, height - frameThickness * 2, frameDepth]} />
+        <meshStandardMaterial color={frameColor} roughness={0.5} metalness={0.1} />
+      </mesh>
+
+      {/* Inner gold trim */}
+      {[
+        [0, height / 2 - frameThickness - 0.01, 0.025] as [number, number, number],
+        [0, -height / 2 + frameThickness + 0.01, 0.025] as [number, number, number],
+      ].map((pos, i) => (
+        <mesh key={i} position={pos}>
+          <boxGeometry args={[width - frameThickness * 2, 0.02, 0.02]} />
+          <meshStandardMaterial color={COLORS.brass} roughness={0.3} metalness={0.7} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// ============= WALL ALCOVE =============
+
+interface WallAlcoveProps {
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  width?: number;
+  height?: number;
+  depth?: number;
+}
+
+function WallAlcove({
+  position,
+  rotation = [0, 0, 0],
+  width = 1.2,
+  height = 1.5,
+  depth = 0.3,
+}: WallAlcoveProps) {
+  return (
+    <group position={position} rotation={rotation}>
+      {/* Back of alcove */}
+      <mesh position={[0, 0, -depth / 2]}>
+        <planeGeometry args={[width, height]} />
+        <meshStandardMaterial color="#e8e0d5" roughness={0.9} />
+      </mesh>
+
+      {/* Top of alcove */}
+      <mesh position={[0, height / 2, -depth / 4]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[width, depth / 2]} />
+        <meshStandardMaterial color="#ddd5c8" roughness={0.9} />
+      </mesh>
+
+      {/* Bottom shelf */}
+      <mesh position={[0, -height / 2 + 0.05, -depth / 4]}>
+        <boxGeometry args={[width, 0.05, depth / 2]} />
+        <meshStandardMaterial color="#f0ebe0" roughness={0.3} metalness={0.05} />
+      </mesh>
+
+      {/* Side walls */}
+      {[-1, 1].map((side) => (
+        <mesh key={side} position={[side * width / 2, 0, -depth / 4]} rotation={[0, side * Math.PI / 2, 0]}>
+          <planeGeometry args={[depth / 2, height]} />
+          <meshStandardMaterial color="#e0d8cc" roughness={0.9} />
+        </mesh>
+      ))}
+
+      {/* Decorative arch top */}
+      <mesh position={[0, height / 2 + 0.08, 0.02]}>
+        <boxGeometry args={[width + 0.15, 0.12, 0.04]} />
+        <meshStandardMaterial color={COLORS.trim} roughness={0.5} />
+      </mesh>
+
+      {/* Spotlight */}
+      <spotLight
+        position={[0, height / 2 - 0.1, 0.1]}
+        angle={0.6}
+        penumbra={0.8}
+        intensity={1.0}
+        color="#fff8e0"
+        distance={3}
+        target-position={[0, -height / 2, -depth / 2]}
+      />
+    </group>
+  );
+}
+
+// ============= BANNER/TAPESTRY =============
+
+interface BannerProps {
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  width?: number;
+  height?: number;
+  color?: string;
+  accentColor?: string;
+}
+
+function Banner({
+  position,
+  rotation = [0, 0, 0],
+  width = 0.8,
+  height = 2.5,
+  color = '#8B4513',
+  accentColor = '#DAA520',
+}: BannerProps) {
+  return (
+    <group position={position} rotation={rotation}>
+      {/* Hanging rod */}
+      <mesh position={[0, height / 2 + 0.05, 0.03]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.03, 0.03, width + 0.2, 8]} />
+        <meshStandardMaterial color={COLORS.brass} roughness={0.3} metalness={0.8} />
+      </mesh>
+
+      {/* Rod end caps */}
+      {[-1, 1].map((side) => (
+        <mesh key={side} position={[side * (width / 2 + 0.12), height / 2 + 0.05, 0.03]}>
+          <sphereGeometry args={[0.05, 8, 8]} />
+          <meshStandardMaterial color={COLORS.brass} roughness={0.3} metalness={0.8} />
+        </mesh>
+      ))}
+
+      {/* Main banner fabric */}
+      <mesh position={[0, 0, 0.02]}>
+        <planeGeometry args={[width, height]} />
+        <meshStandardMaterial color={color} roughness={0.9} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* Center decorative stripe */}
+      <mesh position={[0, 0, 0.025]}>
+        <planeGeometry args={[width * 0.15, height * 0.85]} />
+        <meshStandardMaterial color={accentColor} roughness={0.7} />
+      </mesh>
+
+      {/* Top decorative band */}
+      <mesh position={[0, height / 2 - 0.15, 0.025]}>
+        <planeGeometry args={[width * 0.9, 0.12]} />
+        <meshStandardMaterial color={accentColor} roughness={0.7} />
+      </mesh>
+
+      {/* Bottom decorative band */}
+      <mesh position={[0, -height / 2 + 0.15, 0.025]}>
+        <planeGeometry args={[width * 0.9, 0.12]} />
+        <meshStandardMaterial color={accentColor} roughness={0.7} />
+      </mesh>
+
+      {/* Bottom fringe/tassels */}
+      {[-0.25, 0, 0.25].map((offset, i) => (
+        <mesh key={i} position={[offset * width, -height / 2 - 0.1, 0.02]}>
+          <coneGeometry args={[0.04, 0.15, 4]} />
+          <meshStandardMaterial color={accentColor} roughness={0.5} metalness={0.3} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// ============= WALL PANEL =============
+
+interface WallPanelProps {
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  width?: number;
+  height?: number;
+}
+
+function WallPanel({
+  position,
+  rotation = [0, 0, 0],
+  width = 2,
+  height = 2.5,
+}: WallPanelProps) {
+  const borderWidth = 0.06;
+
+  return (
+    <group position={position} rotation={rotation}>
+      {/* Outer raised border */}
+      <mesh position={[0, 0, 0.02]}>
+        <boxGeometry args={[width, height, 0.02]} />
+        <meshStandardMaterial color="#f0ebe0" roughness={0.7} />
+      </mesh>
+
+      {/* Inner recessed panel */}
+      <mesh position={[0, 0, 0.015]}>
+        <boxGeometry args={[width - borderWidth * 4, height - borderWidth * 4, 0.015]} />
+        <meshStandardMaterial color="#f5f0e8" roughness={0.8} />
+      </mesh>
+
+      {/* Decorative molding - top */}
+      <mesh position={[0, height / 2 - borderWidth, 0.035]}>
+        <boxGeometry args={[width - borderWidth * 2, borderWidth, 0.02]} />
+        <meshStandardMaterial color={COLORS.trim} roughness={0.5} />
+      </mesh>
+
+      {/* Decorative molding - bottom */}
+      <mesh position={[0, -height / 2 + borderWidth, 0.035]}>
+        <boxGeometry args={[width - borderWidth * 2, borderWidth, 0.02]} />
+        <meshStandardMaterial color={COLORS.trim} roughness={0.5} />
+      </mesh>
+
+      {/* Decorative molding - left */}
+      <mesh position={[-width / 2 + borderWidth, 0, 0.035]}>
+        <boxGeometry args={[borderWidth, height - borderWidth * 4, 0.02]} />
+        <meshStandardMaterial color={COLORS.trim} roughness={0.5} />
+      </mesh>
+
+      {/* Decorative molding - right */}
+      <mesh position={[width / 2 - borderWidth, 0, 0.035]}>
+        <boxGeometry args={[borderWidth, height - borderWidth * 4, 0.02]} />
+        <meshStandardMaterial color={COLORS.trim} roughness={0.5} />
+      </mesh>
+    </group>
+  );
+}
+
+// ============= WALL DECORATIONS =============
+
+function WallDecorations() {
+  const artworkHeight = 2.8;
+  const sconceHeight = 2.5;
+  const alcoveHeight = 2.2;
+  const bannerHeight = 3.2;
+  const panelHeight = 2.8;
+
+  return (
+    <group>
+      {/* ===== WALL SCONCES ===== */}
+
+      {/* Left wall sconces */}
+      {[-16, -6, 4, 14].map((z, i) => (
+        <WallSconce key={`left-sconce-${i}`} position={[-14.7, sconceHeight, z]} rotation={[0, Math.PI / 2, 0]} />
+      ))}
+
+      {/* Right wall sconces */}
+      {[-16, -6, 4, 14].map((z, i) => (
+        <WallSconce key={`right-sconce-${i}`} position={[14.7, sconceHeight, z]} rotation={[0, -Math.PI / 2, 0]} />
+      ))}
+
+      {/* Back wall sconces */}
+      <WallSconce position={[-5, sconceHeight, -19.7]} rotation={[0, 0, 0]} />
+      <WallSconce position={[5, sconceHeight, -19.7]} rotation={[0, 0, 0]} />
+
+      {/* ===== FRAMED ARTWORK ===== */}
+
+      {/* Back wall artwork - large piece (Mona Lisa) */}
+      <FramedArtwork position={[0, artworkHeight, -19.7]} width={2.5} height={1.8} artworkIndex={0} />
+
+      {/* Left wall artwork */}
+      <FramedArtwork position={[-14.7, artworkHeight, -11]} rotation={[0, Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={1} />
+      <FramedArtwork position={[-14.7, artworkHeight, 0]} rotation={[0, Math.PI / 2, 0]} width={2} height={1.5} artworkIndex={2} />
+      <FramedArtwork position={[-14.7, artworkHeight, 11]} rotation={[0, Math.PI / 2, 0]} width={1.6} height={1.3} artworkIndex={3} />
+
+      {/* Right wall artwork */}
+      <FramedArtwork position={[14.7, artworkHeight, -11]} rotation={[0, -Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={4} />
+      <FramedArtwork position={[14.7, artworkHeight, 0]} rotation={[0, -Math.PI / 2, 0]} width={2} height={1.5} artworkIndex={5} />
+      <FramedArtwork position={[14.7, artworkHeight, 11]} rotation={[0, -Math.PI / 2, 0]} width={1.6} height={1.3} artworkIndex={6} />
+
+      {/* Room divider wall artwork */}
+      <FramedArtwork position={[-5.7, artworkHeight, -14]} rotation={[0, -Math.PI / 2, 0]} width={1.4} height={1.2} artworkIndex={2} />
+      <FramedArtwork position={[5.7, artworkHeight, -14]} rotation={[0, Math.PI / 2, 0]} width={1.4} height={1.2} artworkIndex={5} />
+
+      {/* Grand Hall side walls */}
+      <FramedArtwork position={[-5.7, artworkHeight, 2]} rotation={[0, -Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={3} />
+      <FramedArtwork position={[5.7, artworkHeight, 2]} rotation={[0, Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={4} />
+
+      {/* ===== WALL ALCOVES ===== */}
+
+      {/* Room A alcove */}
+      <WallAlcove position={[-14.6, alcoveHeight, -17]} rotation={[0, Math.PI / 2, 0]} />
+
+      {/* Room C alcove */}
+      <WallAlcove position={[14.6, alcoveHeight, -17]} rotation={[0, -Math.PI / 2, 0]} />
+
+      {/* Room D alcove */}
+      <WallAlcove position={[-14.6, alcoveHeight, 3]} rotation={[0, Math.PI / 2, 0]} />
+
+      {/* Room E alcove */}
+      <WallAlcove position={[14.6, alcoveHeight, 3]} rotation={[0, -Math.PI / 2, 0]} />
+
+      {/* ===== BANNERS ===== */}
+
+      {/* Grand Hall banners - archaeological theme colors */}
+      <Banner position={[-5.7, bannerHeight, -2]} rotation={[0, -Math.PI / 2, 0]} color="#8B4513" accentColor="#DAA520" />
+      <Banner position={[5.7, bannerHeight, -2]} rotation={[0, Math.PI / 2, 0]} color="#8B4513" accentColor="#DAA520" />
+
+      {/* Lobby entrance banners */}
+      <Banner position={[-5.7, bannerHeight, 15]} rotation={[0, -Math.PI / 2, 0]} color="#654321" accentColor="#C17F59" />
+      <Banner position={[5.7, bannerHeight, 15]} rotation={[0, Math.PI / 2, 0]} color="#654321" accentColor="#C17F59" />
+
+      {/* Back room accent banners */}
+      <Banner position={[-5.7, bannerHeight, -16]} rotation={[0, -Math.PI / 2, 0]} width={0.6} height={2} color="#5C4033" accentColor="#B8860B" />
+      <Banner position={[5.7, bannerHeight, -16]} rotation={[0, Math.PI / 2, 0]} width={0.6} height={2} color="#5C4033" accentColor="#B8860B" />
+
+      {/* ===== WALL PANELS ===== */}
+
+      {/* Back wall panels */}
+      <WallPanel position={[-7, panelHeight, -19.7]} width={2.2} height={2.2} />
+      <WallPanel position={[7, panelHeight, -19.7]} width={2.2} height={2.2} />
+
+      {/* Grand Hall south wall panels */}
+      <WallPanel position={[-3.5, panelHeight, 9.7]} width={1.8} height={2} />
+      <WallPanel position={[3.5, panelHeight, 9.7]} width={1.8} height={2} />
+
+      {/* Corridor wall panels */}
+      <WallPanel position={[-9, panelHeight, 9.7]} width={2} height={2} />
+      <WallPanel position={[9, panelHeight, 9.7]} width={2} height={2} />
+
+      {/* Room D south wall panels */}
+      <WallPanel position={[-10, panelHeight, 5.7]} width={2.2} height={2.2} />
+
+      {/* Room E south wall panels */}
+      <WallPanel position={[10, panelHeight, 5.7]} width={2.2} height={2.2} />
+    </group>
+  );
+}
+
 // ============= SKYLIGHTS =============
 
 function MuseumSkylights() {
@@ -690,6 +1120,9 @@ export function ProceduralGallery() {
 
       {/* Skylights */}
       <MuseumSkylights />
+
+      {/* Wall decorations */}
+      <WallDecorations />
 
       {/* Lighting */}
       <MuseumLighting />
