@@ -1068,11 +1068,25 @@ function PedestalComponent({ position, children }: PedestalProps) {
         <meshStandardMaterial color="#f0ebe0" roughness={0.2} metalness={0.1} />
       </mesh>
 
-      {/* Display surface */}
-      <mesh position={[0, 0.96, 0]} receiveShadow>
+      {/* Display surface - glowing diffused light */}
+      <mesh position={[0, 0.96, 0]}>
         <boxGeometry args={[0.85, 0.02, 0.85]} />
-        <meshStandardMaterial color={COLORS.pedestalDark} roughness={0.1} metalness={0.3} />
+        <meshStandardMaterial
+          color="#fff8f0"
+          emissive="#fff5e6"
+          emissiveIntensity={0.4}
+          roughness={0.9}
+        />
       </mesh>
+
+      {/* Soft uplight from display surface */}
+      <pointLight
+        position={[0, 1.0, 0]}
+        intensity={0.5}
+        color="#fff5e6"
+        distance={3}
+        decay={2}
+      />
 
       {/* Spotlight - no shadow casting to save texture units */}
       <spotLight
@@ -1084,8 +1098,8 @@ function PedestalComponent({ position, children }: PedestalProps) {
         distance={8}
       />
 
-      {/* Artifact placement */}
-      <group position={[0, 1.1, 0]}>
+      {/* Artifact placement - raised to account for model center origin */}
+      <group position={[0, 1.6, 0]}>
         {children}
       </group>
     </group>
