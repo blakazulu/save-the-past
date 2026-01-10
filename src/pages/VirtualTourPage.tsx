@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
+import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import { useTranslation } from 'react-i18next';
@@ -75,7 +76,7 @@ function SceneLoader() {
 }
 
 // Proximity detection - checks camera distance to pedestals
-const PROXIMITY_THRESHOLD = 3.5; // Distance to trigger info card
+const PROXIMITY_THRESHOLD = 2.5; // Distance to trigger info card (closer than before)
 
 interface ProximityDetectorProps {
   artifacts: DisplayArtifact[];
@@ -85,10 +86,12 @@ interface ProximityDetectorProps {
 function ProximityDetector({ artifacts, onNearArtifact }: ProximityDetectorProps) {
   const { camera } = useThree();
   const lastNearIndexRef = useRef<number>(-1);
+  const lastFacingRef = useRef<boolean>(true);
 
   useFrame(() => {
     let nearestPedestalIndex = -1;
     let nearestDistance = PROXIMITY_THRESHOLD;
+    let nearestPedestalPos: [number, number, number] | null = null;
 
     // Check distance to each pedestal
     for (let i = 0; i < PEDESTAL_POSITIONS.length; i++) {
@@ -100,21 +103,52 @@ function ProximityDetector({ artifacts, onNearArtifact }: ProximityDetectorProps
       if (distance < nearestDistance) {
         nearestDistance = distance;
         nearestPedestalIndex = i;
+        nearestPedestalPos = PEDESTAL_POSITIONS[i];
       }
     }
 
-    // Only update if the nearest pedestal changed
-    if (nearestPedestalIndex !== lastNearIndexRef.current) {
+    // Check if facing the pedestal (using dot product)
+    let isFacingPedestal = false;
+    if (nearestPedestalPos) {
+      // Get camera forward direction (negative Z in camera space)
+      const forward = new THREE.Vector3(0, 0, -1);
+      forward.applyQuaternion(camera.quaternion);
+      forward.y = 0; // Ignore vertical component
+      forward.normalize();
+
+      // Get direction from camera to pedestal
+      const toPedestal = new THREE.Vector3(
+        nearestPedestalPos[0] - camera.position.x,
+        0,
+        nearestPedestalPos[2] - camera.position.z
+      ).normalize();
+
+      // Dot product > 0 means we're facing toward the pedestal
+      const dot = forward.dot(toPedestal);
+      isFacingPedestal = dot > 0.3; // Roughly within ~70 degree cone
+    }
+
+    // Update if pedestal changed OR facing direction changed
+    const stateChanged = nearestPedestalIndex !== lastNearIndexRef.current ||
+                         isFacingPedestal !== lastFacingRef.current;
+
+    if (stateChanged) {
       lastNearIndexRef.current = nearestPedestalIndex;
+      lastFacingRef.current = isFacingPedestal;
 
-      // Map pedestal index to artifact index using entrance-to-back order
-      const artifactIndex = ENTRANCE_TO_BACK_ORDER.indexOf(nearestPedestalIndex);
-      const artifact = artifactIndex >= 0 && artifactIndex < artifacts.length
-        ? artifacts[artifactIndex]
-        : undefined;
+      // Only show artifact if close AND facing it
+      if (nearestPedestalIndex >= 0 && isFacingPedestal) {
+        // Map pedestal index to artifact index using entrance-to-back order
+        const artifactIndex = ENTRANCE_TO_BACK_ORDER.indexOf(nearestPedestalIndex);
+        const artifact = artifactIndex >= 0 && artifactIndex < artifacts.length
+          ? artifacts[artifactIndex]
+          : undefined;
 
-      if (artifact) {
-        onNearArtifact(artifact, nearestPedestalIndex);
+        if (artifact) {
+          onNearArtifact(artifact, nearestPedestalIndex);
+        } else {
+          onNearArtifact(null, -1);
+        }
       } else {
         onNearArtifact(null, -1);
       }
