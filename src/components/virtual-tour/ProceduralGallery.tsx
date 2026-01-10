@@ -43,6 +43,16 @@ function useMuseumTextures() {
   const plasterNormal = useTexture('/textures/plaster_nor.jpg');
   const plasterRoughness = useTexture('/textures/plaster_rough.jpg');
 
+  // Load door frame PBR textures (CC0 from Poly Haven - Dark Wood)
+  const doorframeDiffuse = useTexture('/textures/doorframe_diff.jpg');
+  const doorframeNormal = useTexture('/textures/doorframe_nor.jpg');
+  const doorframeRoughness = useTexture('/textures/doorframe_rough.jpg');
+
+  // Load ceiling PBR textures (CC0 from Poly Haven - White Plaster)
+  const ceilingDiffuse = useTexture('/textures/ceiling_diff.jpg');
+  const ceilingNormal = useTexture('/textures/ceiling_nor.jpg');
+  const ceilingRoughness = useTexture('/textures/ceiling_rough.jpg');
+
   // Configure texture repeating
   useMemo(() => {
     if (woodFloorTexture) {
@@ -60,7 +70,21 @@ function useMuseumTextures() {
         tex.repeat.set(4, 2);
       }
     });
-  }, [woodFloorTexture, darkWoodTexture, plasterDiffuse, plasterNormal, plasterRoughness]);
+    // Configure door frame textures
+    [doorframeDiffuse, doorframeNormal, doorframeRoughness].forEach(tex => {
+      if (tex) {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(1, 2);
+      }
+    });
+    // Configure ceiling textures
+    [ceilingDiffuse, ceilingNormal, ceilingRoughness].forEach(tex => {
+      if (tex) {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(8, 10);
+      }
+    });
+  }, [woodFloorTexture, darkWoodTexture, plasterDiffuse, plasterNormal, plasterRoughness, doorframeDiffuse, doorframeNormal, doorframeRoughness, ceilingDiffuse, ceilingNormal, ceilingRoughness]);
 
   return {
     woodFloor: woodFloorTexture,
@@ -69,6 +93,16 @@ function useMuseumTextures() {
       map: plasterDiffuse,
       normalMap: plasterNormal,
       roughnessMap: plasterRoughness,
+    },
+    doorframe: {
+      map: doorframeDiffuse,
+      normalMap: doorframeNormal,
+      roughnessMap: doorframeRoughness,
+    },
+    ceiling: {
+      map: ceilingDiffuse,
+      normalMap: ceilingNormal,
+      roughnessMap: ceilingRoughness,
     },
   };
 }
@@ -92,13 +126,24 @@ function Floor({ texture }: FloorProps) {
   );
 }
 
-function Ceiling() {
+interface CeilingProps {
+  texture?: {
+    map: THREE.Texture;
+    normalMap: THREE.Texture;
+    roughnessMap: THREE.Texture;
+  };
+}
+
+function Ceiling({ texture }: CeilingProps) {
   return (
     <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, GALLERY.height, 0]}>
       <planeGeometry args={[GALLERY.width, GALLERY.depth]} />
       <meshStandardMaterial
-        color="#faf8f5"
-        roughness={0.9}
+        map={texture?.map}
+        normalMap={texture?.normalMap}
+        roughnessMap={texture?.roughnessMap}
+        color={texture ? '#ffffff' : '#faf8f5'}
+        roughness={texture ? 1 : 0.9}
         metalness={0}
       />
     </mesh>
@@ -143,9 +188,14 @@ interface DoorwayProps {
   rotation?: [number, number, number];
   width?: number;
   height?: number;
+  frameTexture?: {
+    map: THREE.Texture;
+    normalMap: THREE.Texture;
+    roughnessMap: THREE.Texture;
+  };
 }
 
-function Doorway({ position, rotation = [0, 0, 0], width = 2.5, height = 3.5 }: DoorwayProps) {
+function Doorway({ position, rotation = [0, 0, 0], width = 2.5, height = 3.5, frameTexture }: DoorwayProps) {
   const wallHeight = GALLERY.height;
   const thickness = GALLERY.wallThickness;
   const aboveHeight = wallHeight - height;
@@ -170,13 +220,25 @@ function Doorway({ position, rotation = [0, 0, 0], width = 2.5, height = 3.5 }: 
       {/* Trim around doorway */}
       <mesh position={[0, height, 0]}>
         <boxGeometry args={[width + 0.2, 0.15, thickness * 2 + 0.1]} />
-        <meshStandardMaterial color={COLORS.trim} roughness={0.5} />
+        <meshStandardMaterial
+          map={frameTexture?.map}
+          normalMap={frameTexture?.normalMap}
+          roughnessMap={frameTexture?.roughnessMap}
+          color={frameTexture ? '#ffffff' : COLORS.trim}
+          roughness={frameTexture ? 1 : 0.5}
+        />
       </mesh>
       {/* Side trims */}
       {[-1, 1].map((side) => (
         <mesh key={side} position={[side * (width / 2 + 0.05), height / 2, 0]}>
           <boxGeometry args={[0.1, height, thickness * 2 + 0.1]} />
-          <meshStandardMaterial color={COLORS.trim} roughness={0.5} />
+          <meshStandardMaterial
+            map={frameTexture?.map}
+            normalMap={frameTexture?.normalMap}
+            roughnessMap={frameTexture?.roughnessMap}
+            color={frameTexture ? '#ffffff' : COLORS.trim}
+            roughness={frameTexture ? 1 : 0.5}
+          />
         </mesh>
       ))}
     </group>
@@ -366,7 +428,7 @@ interface MuseumWallsProps {
 }
 
 function MuseumWalls({ textures }: MuseumWallsProps) {
-  const { darkWood, wall } = textures;
+  const { darkWood, wall, doorframe } = textures;
   const h = GALLERY.height;
   const t = GALLERY.wallThickness;
 
@@ -478,19 +540,19 @@ function MuseumWalls({ textures }: MuseumWallsProps) {
       {/* ===== DOORWAYS & ARCHWAYS (just decorative frames) ===== */}
 
       {/* Room A doorway frame */}
-      <Doorway position={[-11, 0, -10]} width={DOOR_WIDTH} />
+      <Doorway position={[-11, 0, -10]} width={DOOR_WIDTH} frameTexture={doorframe} />
 
       {/* Room B archway frame */}
       <Archway position={[0, 0, -10]} width={ARCH_WIDTH_SMALL} />
 
       {/* Room C doorway frame */}
-      <Doorway position={[11, 0, -10]} width={DOOR_WIDTH} />
+      <Doorway position={[11, 0, -10]} width={DOOR_WIDTH} frameTexture={doorframe} />
 
       {/* Room D doorway frame */}
-      <Doorway position={[-11, 0, -6]} width={DOOR_WIDTH} />
+      <Doorway position={[-11, 0, -6]} width={DOOR_WIDTH} frameTexture={doorframe} />
 
       {/* Room E doorway frame */}
-      <Doorway position={[11, 0, -6]} width={DOOR_WIDTH} />
+      <Doorway position={[11, 0, -6]} width={DOOR_WIDTH} frameTexture={doorframe} />
 
       {/* Grand Hall north archway frame */}
       <Archway position={[0, 0, -6]} width={ARCH_WIDTH_LARGE} />
@@ -499,8 +561,8 @@ function MuseumWalls({ textures }: MuseumWallsProps) {
       <Archway position={[0, 0, 10]} width={ARCH_WIDTH_SMALL} />
 
       {/* Lobby to south corridor doorways */}
-      <Doorway position={[-6, 0, 12]} rotation={[0, Math.PI / 2, 0]} width={2} />
-      <Doorway position={[6, 0, 12]} rotation={[0, Math.PI / 2, 0]} width={2} />
+      <Doorway position={[-6, 0, 12]} rotation={[0, Math.PI / 2, 0]} width={2} frameTexture={doorframe} />
+      <Doorway position={[6, 0, 12]} rotation={[0, Math.PI / 2, 0]} width={2} frameTexture={doorframe} />
 
       {/* Main entrance archway frame */}
       <Archway position={[0, 0, 20]} width={ARCH_WIDTH_ENTRANCE} />
@@ -1153,7 +1215,7 @@ export function ProceduralGallery() {
       <Floor texture={textures.woodFloor} />
 
       {/* Ceiling */}
-      <Ceiling />
+      <Ceiling texture={textures.ceiling} />
 
       {/* Walls */}
       <MuseumWalls textures={textures} />
