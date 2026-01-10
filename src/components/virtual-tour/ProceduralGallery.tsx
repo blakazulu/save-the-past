@@ -219,21 +219,21 @@ function FrostedWindow({ position, rotation = [0, 0, 0], width = 2, height = 2.5
 
   return (
     <group position={position} rotation={rotation}>
-      {/* Frosted glass - bright daylight */}
+      {/* Frosted glass - softer daylight */}
       <mesh position={[0, 0, 0]}>
         <planeGeometry args={[width - frameWidth * 2, height - frameWidth * 2]} />
         <meshStandardMaterial
-          color="#f0f8ff"
-          emissive="#e8f4ff"
-          emissiveIntensity={0.8}
-          roughness={0.8}
+          color="#d8e8f0"
+          emissive="#c8d8e8"
+          emissiveIntensity={0.3}
+          roughness={0.9}
           transparent
-          opacity={0.9}
+          opacity={0.85}
         />
       </mesh>
 
-      {/* Bright light coming through */}
-      <pointLight position={[0, 0, 1]} intensity={1.5} color="#fffaf0" distance={12} decay={2} />
+      {/* Softer light coming through */}
+      <pointLight position={[0, 0, 1]} intensity={0.6} color="#fff8f0" distance={8} decay={2} />
 
       {/* Frame */}
       {[
@@ -356,11 +356,11 @@ function MuseumWalls({ textures }: MuseumWallsProps) {
       {/* Back wall (solid - no doorways) */}
       <Wall position={[0, h / 2, -20]} size={[30, h, t]} />
 
-      {/* Front wall - left section (left of entrance) */}
-      <Wall position={[-11, h / 2, 20]} size={[8, h, t]} />
+      {/* Front wall - left section (extends to entrance archway) */}
+      <Wall position={[-8.5, h / 2, 20]} size={[13, h, t]} />
 
-      {/* Front wall - right section (right of entrance) */}
-      <Wall position={[11, h / 2, 20]} size={[8, h, t]} />
+      {/* Front wall - right section (extends to entrance archway) */}
+      <Wall position={[8.5, h / 2, 20]} size={[13, h, t]} />
 
       {/* Left outer wall (solid) */}
       <Wall position={[-15, h / 2, 0]} size={[t, h, 40]} />

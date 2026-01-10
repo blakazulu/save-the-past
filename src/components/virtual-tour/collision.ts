@@ -30,41 +30,48 @@ export function getCollisionBoundaries(): CollisionBoundary[] {
   const boundaries: CollisionBoundary[] = [];
   const t = GALLERY.wallThickness;
 
-  // ===== OUTER WALLS =====
+  // ===== OUTER WALLS (thicker boundaries to prevent walking through) =====
 
-  // Back wall (solid)
+  // Back wall (solid) - thicker collision
   boundaries.push({
     type: 'box',
     center: [0, 0, -20],
-    size: [30, 6, t],
+    size: [32, 6, 1],
   });
 
-  // Front wall - left section (left of entrance)
+  // Front wall - left section (extends to entrance archway)
   boundaries.push({
     type: 'box',
-    center: [-11, 0, 20],
-    size: [8, 6, t],
+    center: [-8.5, 0, 20],
+    size: [13, 6, 1],
   });
 
-  // Front wall - right section (right of entrance)
+  // Front wall - right section (extends to entrance archway)
   boundaries.push({
     type: 'box',
-    center: [11, 0, 20],
-    size: [8, 6, t],
+    center: [8.5, 0, 20],
+    size: [13, 6, 1],
   });
 
-  // Left outer wall (solid)
+  // Entrance barrier (closes the doorway)
+  boundaries.push({
+    type: 'box',
+    center: [0, 0, 20],
+    size: [4, 6, 1],
+  });
+
+  // Left outer wall (solid) - thicker collision
   boundaries.push({
     type: 'box',
     center: [-15, 0, 0],
-    size: [t, 6, 40],
+    size: [1, 6, 42],
   });
 
-  // Right outer wall (solid)
+  // Right outer wall (solid) - thicker collision
   boundaries.push({
     type: 'box',
     center: [15, 0, 0],
-    size: [t, 6, 40],
+    size: [1, 6, 42],
   });
 
   // ===== ROOM A/B/C DIVIDER WALLS =====
