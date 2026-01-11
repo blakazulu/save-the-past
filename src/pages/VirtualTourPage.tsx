@@ -66,6 +66,64 @@ function ArtifactModel({ url }: { url: string }) {
   );
 }
 
+// Camera teleporter - moves camera to artifact positions
+interface CameraTeleporterProps {
+  targetArtifactIndex: number | null;
+  onTeleportComplete: () => void;
+}
+
+function CameraTeleporter({ targetArtifactIndex, onTeleportComplete }: CameraTeleporterProps) {
+  const { camera } = useThree();
+  const isAnimating = useRef(false);
+  const startPos = useRef(new THREE.Vector3());
+  const targetPos = useRef(new THREE.Vector3());
+  const progress = useRef(0);
+
+  useEffect(() => {
+    if (targetArtifactIndex === null || targetArtifactIndex < 0) return;
+
+    // Get the pedestal index for this artifact
+    const pedestalIndex = ENTRANCE_TO_BACK_ORDER[targetArtifactIndex];
+    if (pedestalIndex === undefined) return;
+
+    const pedestalPos = PEDESTAL_POSITIONS[pedestalIndex];
+    if (!pedestalPos) return;
+
+    // Start animation
+    startPos.current.copy(camera.position);
+    // Position camera 2 units away from pedestal, at eye height
+    targetPos.current.set(pedestalPos[0], 1.7, pedestalPos[2] + 2);
+    progress.current = 0;
+    isAnimating.current = true;
+  }, [targetArtifactIndex, camera]);
+
+  useFrame((_, delta) => {
+    if (!isAnimating.current) return;
+
+    // Smooth animation over ~0.5 seconds
+    progress.current += delta * 2;
+
+    if (progress.current >= 1) {
+      progress.current = 1;
+      isAnimating.current = false;
+      camera.position.copy(targetPos.current);
+      // Look at the pedestal
+      const pedestalIndex = ENTRANCE_TO_BACK_ORDER[targetArtifactIndex!];
+      const pedestalPos = PEDESTAL_POSITIONS[pedestalIndex];
+      if (pedestalPos) {
+        camera.lookAt(pedestalPos[0], 1.5, pedestalPos[2]);
+      }
+      onTeleportComplete();
+    } else {
+      // Ease out cubic for smooth deceleration
+      const t = 1 - Math.pow(1 - progress.current, 3);
+      camera.position.lerpVectors(startPos.current, targetPos.current, t);
+    }
+  });
+
+  return null;
+}
+
 // Proximity detection - checks camera distance to pedestals
 const PROXIMITY_THRESHOLD = 2.5; // Distance to trigger info card (closer than before)
 
@@ -287,6 +345,10 @@ export default function VirtualTourPage() {
   // Texture loading progress
   const [textureProgress, setTextureProgress] = useState(0);
 
+  // Artifact teleportation
+  const [currentArtifactIndex, setCurrentArtifactIndex] = useState(0);
+  const [teleportTarget, setTeleportTarget] = useState<number | null>(null);
+
   const joystickRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -453,6 +515,20 @@ export default function VirtualTourPage() {
     setShowInfoCard(false);
   }, []);
 
+  // Handle teleport to next artifact
+  const handleTeleportToNextArtifact = useCallback(() => {
+    if (artifacts.length === 0) return;
+    const nextIndex = (currentArtifactIndex + 1) % artifacts.length;
+    setCurrentArtifactIndex(nextIndex);
+    setTeleportTarget(nextIndex);
+    setShowInfoCard(false); // Close any open info card
+  }, [artifacts.length, currentArtifactIndex]);
+
+  // Handle teleport complete
+  const handleTeleportComplete = useCallback(() => {
+    setTeleportTarget(null);
+  }, []);
+
   // Callback for texture loading progress (must be before early return to respect Rules of Hooks)
   const handleTextureProgress = useCallback((progress: number) => {
     setTextureProgress(progress);
@@ -520,6 +596,12 @@ export default function VirtualTourPage() {
 
         {/* Proximity detection for info cards */}
         <ProximityDetector artifacts={artifacts} onNearArtifact={handleNearArtifact} />
+
+        {/* Camera teleporter for jumping between artifacts */}
+        <CameraTeleporter
+          targetArtifactIndex={teleportTarget}
+          onTeleportComplete={handleTeleportComplete}
+        />
       </Canvas>
 
       {/* Texture loading progress overlay */}
@@ -626,10 +708,19 @@ export default function VirtualTourPage() {
         </svg>
       </button>
 
-      {/* Artifact count indicator */}
-      <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-black/50 text-white text-sm rounded-full">
-        {t('virtualTour.artifactCount', '{{count}} artifacts', { count: artifacts.length })}
-      </div>
+      {/* Artifact teleport button */}
+      {artifacts.length > 0 && (
+        <button
+          onClick={handleTeleportToNextArtifact}
+          className="absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2 bg-black/50 hover:bg-black/70 active:bg-terracotta text-white text-sm rounded-full transition-colors z-10"
+          aria-label={t('virtualTour.nextArtifact', 'Go to next artifact')}
+        >
+          <span>{currentArtifactIndex + 1}/{artifacts.length}</span>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </button>
+      )}
 
       {/* Pointer lock hint for desktop */}
       {!isMobile && !isLocked && !showInstructions && (
