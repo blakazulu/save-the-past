@@ -78,6 +78,7 @@ function Floor({ texture, fallbackColor = FALLBACK_COLORS.woodFloor }: FloorProp
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
       <planeGeometry args={[GALLERY.width, GALLERY.depth]} />
       <meshStandardMaterial
+        key={texture ? 'textured' : 'fallback'}
         map={texture}
         color={texture ? '#ffffff' : fallbackColor}
         roughness={0.7}
@@ -102,6 +103,7 @@ function Ceiling({ texture, fallbackColor = FALLBACK_COLORS.ceiling }: CeilingPr
     <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, GALLERY.height, 0]}>
       <planeGeometry args={[GALLERY.width, GALLERY.depth]} />
       <meshStandardMaterial
+        key={hasMap ? 'textured' : 'fallback'}
         map={texture?.map}
         normalMap={texture?.normalMap}
         roughnessMap={texture?.roughnessMap}
@@ -135,6 +137,7 @@ function Wall({ position, size, rotation = [0, 0, 0], texture, fallbackColor = F
     <mesh position={position} rotation={rotation} receiveShadow castShadow>
       <boxGeometry args={size} />
       <meshStandardMaterial
+        key={hasMap ? 'textured' : 'fallback'}
         map={texture?.map}
         normalMap={texture?.normalMap}
         roughnessMap={texture?.roughnessMap}
@@ -380,6 +383,7 @@ function Wainscoting({ position, width, rotation = [0, 0, 0], texture, fallbackC
     <mesh position={[position[0], height / 2, position[2]]} rotation={rotation}>
       <boxGeometry args={[width, height, 0.05]} />
       <meshStandardMaterial
+        key={texture ? 'textured' : 'fallback'}
         map={texture}
         color={texture ? '#ffffff' : fallbackColor}
         roughness={0.6}
