@@ -151,6 +151,9 @@ export function useProgressiveTextures(isMobile: boolean): ProgressiveTexturesRe
         break;
     }
 
+    // Mark texture as needing update after configuration changes
+    texture.needsUpdate = true;
+
     return texture;
   }, []);
 
@@ -168,8 +171,10 @@ export function useProgressiveTextures(isMobile: boolean): ProgressiveTexturesRe
 
       const totalTextures = texturesToLoad.length;
       let loadedCount = 0;
-      let essentialCount = 0;
-      const essentialKeys = keys.filter((key) => TEXTURE_PRIORITIES[key] === 1);
+      let essentialSuccessCount = 0;
+      let essentialAttemptCount = 0;
+      const essentialKeys = texturesToLoad.filter((key) => TEXTURE_PRIORITIES[key] === 1);
+      const totalEssentials = essentialKeys.length;
 
       // Sort by priority (load essential textures first)
       const sortedKeys = [...texturesToLoad].sort(
@@ -179,6 +184,8 @@ export function useProgressiveTextures(isMobile: boolean): ProgressiveTexturesRe
       // Load textures one by one (or in small batches) to show progress
       for (const key of sortedKeys) {
         if (!mounted) break;
+
+        const isEssential = TEXTURE_PRIORITIES[key] === 1;
 
         try {
           const path = TEXTURE_PATHS[key];
@@ -196,10 +203,12 @@ export function useProgressiveTextures(isMobile: boolean): ProgressiveTexturesRe
           loadedCount++;
           setProgress(Math.round((loadedCount / totalTextures) * 100));
 
-          // Check if essential textures are loaded
-          if (essentialKeys.includes(key)) {
-            essentialCount++;
-            if (essentialCount === essentialKeys.length) {
+          // Track essential texture success
+          if (isEssential) {
+            essentialSuccessCount++;
+            essentialAttemptCount++;
+            // Mark essentials as loaded when all essential textures have loaded successfully
+            if (essentialSuccessCount === totalEssentials) {
               setEssentialsLoaded(true);
             }
           }
@@ -207,11 +216,17 @@ export function useProgressiveTextures(isMobile: boolean): ProgressiveTexturesRe
           console.warn(`Failed to load texture: ${key}`, error);
           loadedCount++;
           setProgress(Math.round((loadedCount / totalTextures) * 100));
+
+          // Track essential texture failures
+          if (isEssential) {
+            essentialAttemptCount++;
+          }
         }
       }
 
-      // Mark essentials as loaded even if some failed
-      if (mounted && !essentialsLoaded) {
+      // After all attempts, mark essentials as "loaded" so scene can render
+      // (even if some failed - we'll use fallback colors)
+      if (mounted && essentialAttemptCount === totalEssentials && !essentialsLoaded) {
         setEssentialsLoaded(true);
       }
     }
@@ -221,7 +236,7 @@ export function useProgressiveTextures(isMobile: boolean): ProgressiveTexturesRe
     return () => {
       mounted = false;
     };
-  }, [isMobile, configureTexture]);
+  }, [isMobile, configureTexture, essentialsLoaded]);
 
   // Memoize the result object
   const result = useMemo<ProgressiveTexturesResult>(() => ({
