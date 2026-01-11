@@ -500,7 +500,7 @@ export default function VirtualTourPage() {
               ? artifacts[artifactIndex]
               : undefined;
             return (
-              <Pedestal key={`pedestal-${pedestalIndex}`} position={position} isMobile={isMobile}>
+              <Pedestal key={`pedestal-${pedestalIndex}`} position={position}>
                 {artifact?.modelUrl && (
                   <Suspense fallback={<SceneLoader />}>
                     <ArtifactModel url={artifact.modelUrl} />

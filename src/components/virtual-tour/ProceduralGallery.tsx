@@ -425,14 +425,12 @@ function Wainscoting({ position, width, rotation = [0, 0, 0], texture }: Wainsco
 
 interface MuseumWallsProps {
   textures: ReturnType<typeof useMuseumTextures>;
-  isMobile?: boolean;
 }
 
-function MuseumWalls({ textures, isMobile = false }: MuseumWallsProps) {
+function MuseumWalls({ textures }: MuseumWallsProps) {
   const { darkWood, wall, doorframe } = textures;
-  // On mobile, skip PBR textures for walls to improve performance
-  const wallTexture = isMobile ? undefined : wall;
-  const frameTexture = isMobile ? undefined : doorframe;
+  const wallTexture = wall;
+  const frameTexture = doorframe;
   const h = GALLERY.height;
   const t = GALLERY.wallThickness;
 
@@ -587,25 +585,8 @@ function MuseumWalls({ textures, isMobile = false }: MuseumWallsProps) {
 
 // ============= WINDOWS =============
 
-interface MuseumWindowsProps {
-  isMobile?: boolean;
-}
-
-function MuseumWindows({ isMobile = false }: MuseumWindowsProps) {
+function MuseumWindows() {
   const windowHeight = 3;
-
-  // On mobile, only render half the windows to reduce point lights
-  if (isMobile) {
-    return (
-      <group>
-        {/* Reduced windows on mobile - only 4 instead of 10 */}
-        <FrostedWindow position={[-14.8, windowHeight, -5]} rotation={[0, Math.PI / 2, 0]} />
-        <FrostedWindow position={[-14.8, windowHeight, 10]} rotation={[0, Math.PI / 2, 0]} />
-        <FrostedWindow position={[14.8, windowHeight, -5]} rotation={[0, -Math.PI / 2, 0]} />
-        <FrostedWindow position={[14.8, windowHeight, 10]} rotation={[0, -Math.PI / 2, 0]} />
-      </group>
-    );
-  }
 
   return (
     <group>
@@ -1214,26 +1195,25 @@ function MuseumLighting({ isMobile = false }: MuseumLightingProps) {
 interface PedestalProps {
   position: [number, number, number];
   children?: React.ReactNode;
-  isMobile?: boolean;
 }
 
-function PedestalComponent({ position, children, isMobile = false }: PedestalProps) {
+function PedestalComponent({ position, children }: PedestalProps) {
   return (
     <group position={position}>
       {/* Base - white marble look */}
-      <mesh position={[0, 0.08, 0]} receiveShadow={!isMobile}>
+      <mesh position={[0, 0.08, 0]} receiveShadow>
         <boxGeometry args={[1.1, 0.16, 1.1]} />
         <meshStandardMaterial color="#f0ebe0" roughness={0.2} metalness={0.1} />
       </mesh>
 
       {/* Middle section */}
-      <mesh position={[0, 0.5, 0]} receiveShadow={!isMobile}>
+      <mesh position={[0, 0.5, 0]} receiveShadow>
         <boxGeometry args={[0.9, 0.68, 0.9]} />
         <meshStandardMaterial color="#f5f0e8" roughness={0.15} metalness={0.1} />
       </mesh>
 
       {/* Top trim */}
-      <mesh position={[0, 0.9, 0]} receiveShadow={!isMobile}>
+      <mesh position={[0, 0.9, 0]} receiveShadow>
         <boxGeometry args={[1.0, 0.1, 1.0]} />
         <meshStandardMaterial color="#f0ebe0" roughness={0.2} metalness={0.1} />
       </mesh>
@@ -1244,34 +1224,29 @@ function PedestalComponent({ position, children, isMobile = false }: PedestalPro
         <meshStandardMaterial
           color="#fff8f0"
           emissive="#fff5e6"
-          emissiveIntensity={isMobile ? 0.6 : 0.4}
+          emissiveIntensity={0.4}
           roughness={0.9}
         />
       </mesh>
 
-      {/* Lights - skip on mobile for major performance boost */}
-      {!isMobile && (
-        <>
-          {/* Soft uplight from display surface */}
-          <pointLight
-            position={[0, 1.0, 0]}
-            intensity={0.5}
-            color="#fff5e6"
-            distance={3}
-            decay={2}
-          />
+      {/* Soft uplight from display surface */}
+      <pointLight
+        position={[0, 1.0, 0]}
+        intensity={0.5}
+        color="#fff5e6"
+        distance={3}
+        decay={2}
+      />
 
-          {/* Spotlight */}
-          <spotLight
-            position={[0, 4, 0]}
-            angle={0.35}
-            penumbra={0.7}
-            intensity={2.0}
-            color="#fff5e6"
-            distance={8}
-          />
-        </>
-      )}
+      {/* Spotlight */}
+      <spotLight
+        position={[0, 4, 0]}
+        angle={0.35}
+        penumbra={0.7}
+        intensity={2.0}
+        color="#fff5e6"
+        distance={8}
+      />
 
       {/* Artifact placement - raised to account for model center origin */}
       <group position={[0, 1.6, 0]}>
@@ -1305,19 +1280,19 @@ export function ProceduralGallery({ isMobile = false }: ProceduralGalleryProps) 
       <Floor texture={textures.woodFloor} />
 
       {/* Ceiling */}
-      <Ceiling texture={isMobile ? undefined : textures.ceiling} />
+      <Ceiling texture={textures.ceiling} />
 
       {/* Walls */}
-      <MuseumWalls textures={textures} isMobile={isMobile} />
+      <MuseumWalls textures={textures} />
 
-      {/* Windows - simplified on mobile */}
-      <MuseumWindows isMobile={isMobile} />
+      {/* Windows */}
+      <MuseumWindows />
 
       {/* Skylights - reduced on mobile */}
       <MuseumSkylights isMobile={isMobile} />
 
-      {/* Wall decorations - skip on mobile for performance */}
-      {!isMobile && <WallDecorations />}
+      {/* Wall decorations */}
+      <WallDecorations />
 
       {/* Lighting */}
       <MuseumLighting isMobile={isMobile} />
@@ -1327,8 +1302,8 @@ export function ProceduralGallery({ isMobile = false }: ProceduralGalleryProps) 
 
 // ============= PEDESTAL COMPONENT EXPORT =============
 
-export function Pedestal({ position, children, isMobile }: { position: [number, number, number]; children?: React.ReactNode; isMobile?: boolean }) {
-  return <PedestalComponent position={position} isMobile={isMobile}>{children}</PedestalComponent>;
+export function Pedestal({ position, children }: { position: [number, number, number]; children?: React.ReactNode }) {
+  return <PedestalComponent position={position}>{children}</PedestalComponent>;
 }
 
 // ============= PEDESTAL POSITIONS =============
