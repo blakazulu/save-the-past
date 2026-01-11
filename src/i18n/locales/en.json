@@ -55,6 +55,10 @@
   },
   "gallery": {
     "title": "Gallery",
+    "tabs": {
+      "my": "My Artifacts",
+      "public": "Public Artifacts"
+    },
     "empty": "No artifacts yet",
     "inMuseum": "In Museum",
     "emptyDescription": "Start by capturing your first artifact",
@@ -246,6 +250,9 @@
   },
   "museum": {
     "title": "Public Museum",
+    "virtualMuseum": "Virtual Museum",
+    "heroDescription": "Explore artifacts in an immersive 3D museum environment. Walk through galleries and discover archaeological treasures from around the world.",
+    "tourHint": "Best experienced on desktop with keyboard and mouse",
     "subtitle": "Browse artifacts shared by the community",
     "public": "Public",
     "noAnalysis": "Analysis unavailable",
