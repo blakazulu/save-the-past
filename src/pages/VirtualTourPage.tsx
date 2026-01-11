@@ -453,6 +453,11 @@ export default function VirtualTourPage() {
     setShowInfoCard(false);
   }, []);
 
+  // Callback for texture loading progress (must be before early return to respect Rules of Hooks)
+  const handleTextureProgress = useCallback((progress: number) => {
+    setTextureProgress(progress);
+  }, []);
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-earth flex items-center justify-center">
@@ -463,11 +468,6 @@ export default function VirtualTourPage() {
       </div>
     );
   }
-
-  // Callback for texture loading progress
-  const handleTextureProgress = useCallback((progress: number) => {
-    setTextureProgress(progress);
-  }, []);
 
   return (
     <div ref={containerRef} className="fixed inset-0 bg-black">
