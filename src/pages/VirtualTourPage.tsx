@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
@@ -57,11 +57,17 @@ interface DisplayArtifact {
 function ArtifactModel({ url }: { url: string }) {
   const { scene } = useGLTF(url);
 
+  // Memoize the cloned scene and random rotation so they don't change on re-render
+  const { clonedScene, rotation } = useMemo(() => ({
+    clonedScene: scene.clone(),
+    rotation: [0, Math.random() * Math.PI * 2, 0] as [number, number, number],
+  }), [scene]);
+
   return (
     <primitive
-      object={scene.clone()}
+      object={clonedScene}
       scale={0.5}
-      rotation={[0, Math.random() * Math.PI * 2, 0]}
+      rotation={rotation}
     />
   );
 }
