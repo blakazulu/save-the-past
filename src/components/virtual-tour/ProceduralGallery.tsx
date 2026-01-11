@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useEffect } from 'react';
 import * as THREE from 'three';
-import { useTexture } from '@react-three/drei';
+import { useProgressiveTextures, useArtworkTexture } from './useProgressiveTextures';
 
 // ============= GALLERY DIMENSIONS =============
 
@@ -31,94 +31,55 @@ const COLORS = {
   doorFrame: '#5c4033',
 };
 
-// ============= TEXTURE LOADING =============
+// Fallback colors for when textures haven't loaded yet
+const FALLBACK_COLORS = {
+  woodFloor: '#8B6914',
+  darkWood: '#3D2914',
+  plaster: '#f8f4eb',
+  doorframe: '#5c4033',
+  ceiling: '#faf8f5',
+};
 
-function useMuseumTextures() {
-  // Load textures
-  const woodFloorTexture = useTexture('/textures/wood_floor_diff.jpg');
-  const darkWoodTexture = useTexture('/textures/dark_wood_diff.jpg');
+// ============= PROGRESSIVE TEXTURE TYPES =============
 
-  // Load plaster wall PBR textures (CC0 from Poly Haven)
-  const plasterDiffuse = useTexture('/textures/plaster_diff.jpg');
-  const plasterNormal = useTexture('/textures/plaster_nor.jpg');
-  const plasterRoughness = useTexture('/textures/plaster_rough.jpg');
-
-  // Load door frame PBR textures (CC0 from Poly Haven - Dark Wood)
-  const doorframeDiffuse = useTexture('/textures/doorframe_diff.jpg');
-  const doorframeNormal = useTexture('/textures/doorframe_nor.jpg');
-  const doorframeRoughness = useTexture('/textures/doorframe_rough.jpg');
-
-  // Load ceiling PBR textures (CC0 from Poly Haven - White Plaster)
-  const ceilingDiffuse = useTexture('/textures/ceiling_diff.jpg');
-  const ceilingNormal = useTexture('/textures/ceiling_nor.jpg');
-  const ceilingRoughness = useTexture('/textures/ceiling_rough.jpg');
-
-  // Configure texture repeating
-  useMemo(() => {
-    if (woodFloorTexture) {
-      woodFloorTexture.wrapS = woodFloorTexture.wrapT = THREE.RepeatWrapping;
-      woodFloorTexture.repeat.set(10, 12);
-    }
-    if (darkWoodTexture) {
-      darkWoodTexture.wrapS = darkWoodTexture.wrapT = THREE.RepeatWrapping;
-      darkWoodTexture.repeat.set(6, 1);
-    }
-    // Configure plaster textures for seamless tiling
-    [plasterDiffuse, plasterNormal, plasterRoughness].forEach(tex => {
-      if (tex) {
-        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(4, 2);
-      }
-    });
-    // Configure door frame textures
-    [doorframeDiffuse, doorframeNormal, doorframeRoughness].forEach(tex => {
-      if (tex) {
-        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(1, 2);
-      }
-    });
-    // Configure ceiling textures
-    [ceilingDiffuse, ceilingNormal, ceilingRoughness].forEach(tex => {
-      if (tex) {
-        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(8, 10);
-      }
-    });
-  }, [woodFloorTexture, darkWoodTexture, plasterDiffuse, plasterNormal, plasterRoughness, doorframeDiffuse, doorframeNormal, doorframeRoughness, ceilingDiffuse, ceilingNormal, ceilingRoughness]);
-
-  return {
-    woodFloor: woodFloorTexture,
-    darkWood: darkWoodTexture,
-    wall: {
-      map: plasterDiffuse,
-      normalMap: plasterNormal,
-      roughnessMap: plasterRoughness,
-    },
-    doorframe: {
-      map: doorframeDiffuse,
-      normalMap: doorframeNormal,
-      roughnessMap: doorframeRoughness,
-    },
-    ceiling: {
-      map: ceilingDiffuse,
-      normalMap: ceilingNormal,
-      roughnessMap: ceilingRoughness,
-    },
+export interface ProgressiveTextures {
+  woodFloor: THREE.Texture | null;
+  darkWood: THREE.Texture | null;
+  wall: {
+    map: THREE.Texture | null;
+    normalMap: THREE.Texture | null;
+    roughnessMap: THREE.Texture | null;
   };
+  doorframe: {
+    map: THREE.Texture | null;
+    normalMap: THREE.Texture | null;
+    roughnessMap: THREE.Texture | null;
+  };
+  ceiling: {
+    map: THREE.Texture | null;
+    normalMap: THREE.Texture | null;
+    roughnessMap: THREE.Texture | null;
+  };
+  progress: number;
+  isLoading: boolean;
+  essentialsLoaded: boolean;
+  fallbackColors: typeof FALLBACK_COLORS;
 }
 
 // ============= FLOOR & CEILING =============
 
 interface FloorProps {
-  texture: THREE.Texture;
+  texture: THREE.Texture | null;
+  fallbackColor?: string;
 }
 
-function Floor({ texture }: FloorProps) {
+function Floor({ texture, fallbackColor = FALLBACK_COLORS.woodFloor }: FloorProps) {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
       <planeGeometry args={[GALLERY.width, GALLERY.depth]} />
       <meshStandardMaterial
         map={texture}
+        color={texture ? '#ffffff' : fallbackColor}
         roughness={0.7}
         metalness={0.05}
       />
@@ -128,13 +89,15 @@ function Floor({ texture }: FloorProps) {
 
 interface CeilingProps {
   texture?: {
-    map: THREE.Texture;
-    normalMap: THREE.Texture;
-    roughnessMap: THREE.Texture;
+    map: THREE.Texture | null;
+    normalMap: THREE.Texture | null;
+    roughnessMap: THREE.Texture | null;
   };
+  fallbackColor?: string;
 }
 
-function Ceiling({ texture }: CeilingProps) {
+function Ceiling({ texture, fallbackColor = FALLBACK_COLORS.ceiling }: CeilingProps) {
+  const hasMap = texture?.map != null;
   return (
     <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, GALLERY.height, 0]}>
       <planeGeometry args={[GALLERY.width, GALLERY.depth]} />
@@ -142,8 +105,8 @@ function Ceiling({ texture }: CeilingProps) {
         map={texture?.map}
         normalMap={texture?.normalMap}
         roughnessMap={texture?.roughnessMap}
-        color={texture ? '#ffffff' : '#faf8f5'}
-        roughness={texture ? 1 : 0.9}
+        color={hasMap ? '#ffffff' : fallbackColor}
+        roughness={hasMap ? 1 : 0.9}
         metalness={0}
       />
     </mesh>
@@ -153,9 +116,9 @@ function Ceiling({ texture }: CeilingProps) {
 // ============= WALLS =============
 
 interface WallTextures {
-  map: THREE.Texture;
-  normalMap: THREE.Texture;
-  roughnessMap: THREE.Texture;
+  map: THREE.Texture | null;
+  normalMap: THREE.Texture | null;
+  roughnessMap: THREE.Texture | null;
 }
 
 interface WallProps {
@@ -163,9 +126,11 @@ interface WallProps {
   size: [number, number, number];
   rotation?: [number, number, number];
   texture?: WallTextures;
+  fallbackColor?: string;
 }
 
-function Wall({ position, size, rotation = [0, 0, 0], texture }: WallProps) {
+function Wall({ position, size, rotation = [0, 0, 0], texture, fallbackColor = FALLBACK_COLORS.plaster }: WallProps) {
+  const hasMap = texture?.map != null;
   return (
     <mesh position={position} rotation={rotation} receiveShadow castShadow>
       <boxGeometry args={size} />
@@ -173,8 +138,8 @@ function Wall({ position, size, rotation = [0, 0, 0], texture }: WallProps) {
         map={texture?.map}
         normalMap={texture?.normalMap}
         roughnessMap={texture?.roughnessMap}
-        color={texture ? '#ffffff' : '#f8f4eb'}
-        roughness={texture ? 1 : 0.85}
+        color={hasMap ? '#ffffff' : fallbackColor}
+        roughness={hasMap ? 1 : 0.85}
         metalness={0}
       />
     </mesh>
@@ -189,9 +154,9 @@ interface DoorwayProps {
   width?: number;
   height?: number;
   frameTexture?: {
-    map: THREE.Texture;
-    normalMap: THREE.Texture;
-    roughnessMap: THREE.Texture;
+    map: THREE.Texture | null;
+    normalMap: THREE.Texture | null;
+    roughnessMap: THREE.Texture | null;
   };
 }
 
@@ -199,6 +164,7 @@ function Doorway({ position, rotation = [0, 0, 0], width = 2.5, height = 3.5, fr
   const wallHeight = GALLERY.height;
   const thickness = GALLERY.wallThickness;
   const aboveHeight = wallHeight - height;
+  const hasFrameMap = frameTexture?.map != null;
 
   return (
     <group position={position} rotation={rotation}>
@@ -224,8 +190,8 @@ function Doorway({ position, rotation = [0, 0, 0], width = 2.5, height = 3.5, fr
           map={frameTexture?.map}
           normalMap={frameTexture?.normalMap}
           roughnessMap={frameTexture?.roughnessMap}
-          color={frameTexture ? '#ffffff' : COLORS.trim}
-          roughness={frameTexture ? 1 : 0.5}
+          color={hasFrameMap ? '#ffffff' : COLORS.trim}
+          roughness={hasFrameMap ? 1 : 0.5}
         />
       </mesh>
       {/* Side trims */}
@@ -236,8 +202,8 @@ function Doorway({ position, rotation = [0, 0, 0], width = 2.5, height = 3.5, fr
             map={frameTexture?.map}
             normalMap={frameTexture?.normalMap}
             roughnessMap={frameTexture?.roughnessMap}
-            color={frameTexture ? '#ffffff' : COLORS.trim}
-            roughness={frameTexture ? 1 : 0.5}
+            color={hasFrameMap ? '#ffffff' : COLORS.trim}
+            roughness={hasFrameMap ? 1 : 0.5}
           />
         </mesh>
       ))}
@@ -403,10 +369,11 @@ interface WainscotingProps {
   position: [number, number, number];
   width: number;
   rotation?: [number, number, number];
-  texture: THREE.Texture;
+  texture: THREE.Texture | null;
+  fallbackColor?: string;
 }
 
-function Wainscoting({ position, width, rotation = [0, 0, 0], texture }: WainscotingProps) {
+function Wainscoting({ position, width, rotation = [0, 0, 0], texture, fallbackColor = FALLBACK_COLORS.darkWood }: WainscotingProps) {
   const height = 1.2;
 
   return (
@@ -414,6 +381,7 @@ function Wainscoting({ position, width, rotation = [0, 0, 0], texture }: Wainsco
       <boxGeometry args={[width, height, 0.05]} />
       <meshStandardMaterial
         map={texture}
+        color={texture ? '#ffffff' : fallbackColor}
         roughness={0.6}
         metalness={0.05}
       />
@@ -424,7 +392,7 @@ function Wainscoting({ position, width, rotation = [0, 0, 0], texture }: Wainsco
 // ============= MUSEUM WALLS LAYOUT =============
 
 interface MuseumWallsProps {
-  textures: ReturnType<typeof useMuseumTextures>;
+  textures: ProgressiveTextures;
 }
 
 function MuseumWalls({ textures }: MuseumWallsProps) {
@@ -664,17 +632,6 @@ function WallSconce({ position, rotation = [0, 0, 0] }: WallSconceProps) {
 
 // ============= FRAMED ARTWORK =============
 
-// Available artwork textures
-const ARTWORK_PATHS = [
-  '/textures/artwork/mona_lisa.webp',
-  '/textures/artwork/venus.webp',
-  '/textures/artwork/classical1.webp',
-  '/textures/artwork/classical2.webp',
-  '/textures/artwork/classical3.webp',
-  '/textures/artwork/renaissance1.webp',
-  '/textures/artwork/renaissance2.webp',
-];
-
 interface FramedArtworkProps {
   position: [number, number, number];
   rotation?: [number, number, number];
@@ -682,6 +639,7 @@ interface FramedArtworkProps {
   height?: number;
   frameColor?: string;
   artworkIndex?: number;
+  loadArtwork?: boolean; // Whether to load the artwork texture (for progressive loading)
 }
 
 function FramedArtwork({
@@ -691,20 +649,24 @@ function FramedArtwork({
   height = 1.2,
   frameColor = '#5c4033',
   artworkIndex = 0,
+  loadArtwork = true,
 }: FramedArtworkProps) {
   const frameThickness = 0.08;
   const frameDepth = 0.05;
 
-  // Load the artwork texture
-  const artworkPath = ARTWORK_PATHS[artworkIndex % ARTWORK_PATHS.length];
-  const texture = useTexture(artworkPath);
+  // Load the artwork texture lazily
+  const texture = useArtworkTexture(artworkIndex, loadArtwork);
 
   return (
     <group position={position} rotation={rotation}>
-      {/* Canvas/artwork with texture */}
+      {/* Canvas/artwork with texture or placeholder */}
       <mesh position={[0, 0, 0.01]}>
         <planeGeometry args={[width - frameThickness * 2, height - frameThickness * 2]} />
-        <meshStandardMaterial map={texture} roughness={0.8} />
+        <meshStandardMaterial
+          map={texture}
+          color={texture ? '#ffffff' : '#d4cfc5'}
+          roughness={0.8}
+        />
       </mesh>
 
       {/* Frame - top */}
@@ -940,7 +902,11 @@ function WallPanel({
 
 // ============= WALL DECORATIONS =============
 
-function WallDecorations() {
+interface WallDecorationsProps {
+  loadArtwork?: boolean;
+}
+
+function WallDecorations({ loadArtwork = true }: WallDecorationsProps) {
   const artworkHeight = 2.8;
   const sconceHeight = 2.5;
   const alcoveHeight = 2.2;
@@ -968,25 +934,25 @@ function WallDecorations() {
       {/* ===== FRAMED ARTWORK ===== */}
 
       {/* Back wall artwork - large piece (Mona Lisa) */}
-      <FramedArtwork position={[0, artworkHeight, -19.7]} width={2.5} height={1.8} artworkIndex={0} />
+      <FramedArtwork position={[0, artworkHeight, -19.7]} width={2.5} height={1.8} artworkIndex={0} loadArtwork={loadArtwork} />
 
       {/* Left wall artwork */}
-      <FramedArtwork position={[-14.7, artworkHeight, -11]} rotation={[0, Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={1} />
-      <FramedArtwork position={[-14.7, artworkHeight, 0]} rotation={[0, Math.PI / 2, 0]} width={2} height={1.5} artworkIndex={2} />
-      <FramedArtwork position={[-14.7, artworkHeight, 11]} rotation={[0, Math.PI / 2, 0]} width={1.6} height={1.3} artworkIndex={3} />
+      <FramedArtwork position={[-14.7, artworkHeight, -11]} rotation={[0, Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={1} loadArtwork={loadArtwork} />
+      <FramedArtwork position={[-14.7, artworkHeight, 0]} rotation={[0, Math.PI / 2, 0]} width={2} height={1.5} artworkIndex={2} loadArtwork={loadArtwork} />
+      <FramedArtwork position={[-14.7, artworkHeight, 11]} rotation={[0, Math.PI / 2, 0]} width={1.6} height={1.3} artworkIndex={3} loadArtwork={loadArtwork} />
 
       {/* Right wall artwork */}
-      <FramedArtwork position={[14.7, artworkHeight, -11]} rotation={[0, -Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={4} />
-      <FramedArtwork position={[14.7, artworkHeight, 0]} rotation={[0, -Math.PI / 2, 0]} width={2} height={1.5} artworkIndex={5} />
-      <FramedArtwork position={[14.7, artworkHeight, 11]} rotation={[0, -Math.PI / 2, 0]} width={1.6} height={1.3} artworkIndex={6} />
+      <FramedArtwork position={[14.7, artworkHeight, -11]} rotation={[0, -Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={4} loadArtwork={loadArtwork} />
+      <FramedArtwork position={[14.7, artworkHeight, 0]} rotation={[0, -Math.PI / 2, 0]} width={2} height={1.5} artworkIndex={5} loadArtwork={loadArtwork} />
+      <FramedArtwork position={[14.7, artworkHeight, 11]} rotation={[0, -Math.PI / 2, 0]} width={1.6} height={1.3} artworkIndex={6} loadArtwork={loadArtwork} />
 
       {/* Room divider wall artwork */}
-      <FramedArtwork position={[-5.7, artworkHeight, -14]} rotation={[0, -Math.PI / 2, 0]} width={1.4} height={1.2} artworkIndex={2} />
-      <FramedArtwork position={[5.7, artworkHeight, -14]} rotation={[0, Math.PI / 2, 0]} width={1.4} height={1.2} artworkIndex={5} />
+      <FramedArtwork position={[-5.7, artworkHeight, -14]} rotation={[0, -Math.PI / 2, 0]} width={1.4} height={1.2} artworkIndex={2} loadArtwork={loadArtwork} />
+      <FramedArtwork position={[5.7, artworkHeight, -14]} rotation={[0, Math.PI / 2, 0]} width={1.4} height={1.2} artworkIndex={5} loadArtwork={loadArtwork} />
 
       {/* Grand Hall side walls */}
-      <FramedArtwork position={[-5.7, artworkHeight, 2]} rotation={[0, -Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={3} />
-      <FramedArtwork position={[5.7, artworkHeight, 2]} rotation={[0, Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={4} />
+      <FramedArtwork position={[-5.7, artworkHeight, 2]} rotation={[0, -Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={3} loadArtwork={loadArtwork} />
+      <FramedArtwork position={[5.7, artworkHeight, 2]} rotation={[0, Math.PI / 2, 0]} width={1.8} height={1.4} artworkIndex={4} loadArtwork={loadArtwork} />
 
       {/* ===== WALL ALCOVES ===== */}
 
@@ -1260,10 +1226,28 @@ function PedestalComponent({ position, children }: PedestalProps) {
 
 interface ProceduralGalleryProps {
   isMobile?: boolean;
+  onProgress?: (progress: number) => void;
+  onEssentialsLoaded?: () => void;
 }
 
-export function ProceduralGallery({ isMobile = false }: ProceduralGalleryProps) {
-  const textures = useMuseumTextures();
+export function ProceduralGallery({ isMobile = false, onProgress, onEssentialsLoaded }: ProceduralGalleryProps) {
+  // Use progressive texture loading - no Suspense, no blocking
+  const textures = useProgressiveTextures(isMobile);
+
+  // Report progress to parent
+  useEffect(() => {
+    onProgress?.(textures.progress);
+  }, [textures.progress, onProgress]);
+
+  // Report when essentials are loaded
+  useEffect(() => {
+    if (textures.essentialsLoaded) {
+      onEssentialsLoaded?.();
+    }
+  }, [textures.essentialsLoaded, onEssentialsLoaded]);
+
+  // Only load artwork after main textures are loaded
+  const loadArtwork = textures.progress >= 50;
 
   return (
     <group>
@@ -1291,8 +1275,8 @@ export function ProceduralGallery({ isMobile = false }: ProceduralGalleryProps) 
       {/* Skylights - reduced on mobile */}
       <MuseumSkylights isMobile={isMobile} />
 
-      {/* Wall decorations */}
-      <WallDecorations />
+      {/* Wall decorations - pass loadArtwork to defer artwork loading */}
+      <WallDecorations loadArtwork={loadArtwork} />
 
       {/* Lighting */}
       <MuseumLighting isMobile={isMobile} />

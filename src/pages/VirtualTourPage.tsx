@@ -11,6 +11,7 @@ import {
   FirstPersonControls,
   TouchControls,
   VirtualJoystick,
+  SimpleLoader,
 } from '@/components/virtual-tour';
 
 // Pedestal order from entrance to back of museum
@@ -62,16 +63,6 @@ function ArtifactModel({ url }: { url: string }) {
       scale={0.5}
       rotation={[0, Math.random() * Math.PI * 2, 0]}
     />
-  );
-}
-
-// Loading indicator for 3D scene
-function SceneLoader() {
-  return (
-    <mesh>
-      <sphereGeometry args={[0.2, 16, 16]} />
-      <meshStandardMaterial color="#C17F59" wireframe />
-    </mesh>
   );
 }
 
@@ -293,6 +284,9 @@ export default function VirtualTourPage() {
   const [nearArtifact, setNearArtifact] = useState<DisplayArtifact | null>(null);
   const [showInfoCard, setShowInfoCard] = useState(false);
 
+  // Texture loading progress
+  const [textureProgress, setTextureProgress] = useState(0);
+
   const joystickRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -470,6 +464,11 @@ export default function VirtualTourPage() {
     );
   }
 
+  // Callback for texture loading progress
+  const handleTextureProgress = useCallback((progress: number) => {
+    setTextureProgress(progress);
+  }, []);
+
   return (
     <div ref={containerRef} className="fixed inset-0 bg-black">
       {/* 3D Canvas */}
@@ -488,39 +487,83 @@ export default function VirtualTourPage() {
           powerPreference: isMobile ? 'low-power' : 'high-performance',
         }}
       >
-        <Suspense fallback={<SceneLoader />}>
-          {/* Gallery environment */}
-          <ProceduralGallery isMobile={isMobile} />
+        {/* Gallery environment - renders immediately with fallback colors, then loads textures progressively */}
+        <ProceduralGallery
+          isMobile={isMobile}
+          onProgress={handleTextureProgress}
+        />
 
-          {/* All pedestals - artifacts placed from entrance to back */}
-          {PEDESTAL_POSITIONS.map((position, pedestalIndex) => {
-            // Find which artifact goes on this pedestal based on entrance-to-back order
-            const artifactIndex = ENTRANCE_TO_BACK_ORDER.indexOf(pedestalIndex);
-            const artifact = artifactIndex >= 0 && artifactIndex < artifacts.length
-              ? artifacts[artifactIndex]
-              : undefined;
-            return (
-              <Pedestal key={`pedestal-${pedestalIndex}`} position={position}>
-                {artifact?.modelUrl && (
-                  <Suspense fallback={<SceneLoader />}>
-                    <ArtifactModel url={artifact.modelUrl} />
-                  </Suspense>
-                )}
-              </Pedestal>
-            );
-          })}
+        {/* All pedestals - artifacts placed from entrance to back */}
+        {PEDESTAL_POSITIONS.map((position, pedestalIndex) => {
+          // Find which artifact goes on this pedestal based on entrance-to-back order
+          const artifactIndex = ENTRANCE_TO_BACK_ORDER.indexOf(pedestalIndex);
+          const artifact = artifactIndex >= 0 && artifactIndex < artifacts.length
+            ? artifacts[artifactIndex]
+            : undefined;
+          return (
+            <Pedestal key={`pedestal-${pedestalIndex}`} position={position}>
+              {artifact?.modelUrl && (
+                <Suspense fallback={<SimpleLoader />}>
+                  <ArtifactModel url={artifact.modelUrl} />
+                </Suspense>
+              )}
+            </Pedestal>
+          );
+        })}
 
-          {/* Controls */}
-          {isMobile ? (
-            <TouchControls enabled={true} joystickRef={joystickRef} />
-          ) : (
-            <FirstPersonControls enabled={true} onLockChange={setIsLocked} />
-          )}
+        {/* Controls */}
+        {isMobile ? (
+          <TouchControls enabled={true} joystickRef={joystickRef} />
+        ) : (
+          <FirstPersonControls enabled={true} onLockChange={setIsLocked} />
+        )}
 
-          {/* Proximity detection for info cards */}
-          <ProximityDetector artifacts={artifacts} onNearArtifact={handleNearArtifact} />
-        </Suspense>
+        {/* Proximity detection for info cards */}
+        <ProximityDetector artifacts={artifacts} onNearArtifact={handleNearArtifact} />
       </Canvas>
+
+      {/* Texture loading progress overlay */}
+      {textureProgress < 100 && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60 pointer-events-none z-10">
+          <div className="text-center">
+            {/* Progress ring */}
+            <div className="relative w-24 h-24 mx-auto mb-4">
+              {/* Background ring */}
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  fill="none"
+                  stroke="#3D2914"
+                  strokeWidth="6"
+                  opacity="0.3"
+                />
+                {/* Progress ring */}
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  fill="none"
+                  stroke="#C17F59"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 40}`}
+                  strokeDashoffset={`${2 * Math.PI * 40 * (1 - textureProgress / 100)}`}
+                  className="transition-all duration-300"
+                />
+              </svg>
+              {/* Percentage text */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xl font-bold text-sand">{Math.round(textureProgress)}%</span>
+              </div>
+            </div>
+            <p className="text-sand text-sm">
+              {t('virtualTour.loadingTextures', 'Loading museum textures...')}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Info card overlay */}
       {showInfoCard && nearArtifact && (
