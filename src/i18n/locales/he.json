@@ -105,7 +105,27 @@
     "title": "הגדרות",
     "language": "שפה",
     "english": "אנגלית",
-    "hebrew": "עברית"
+    "hebrew": "עברית",
+    "museum": {
+      "title": "סנכרון מוזיאון",
+      "uploading": "מעלה {{count}} ממצא(ים)...",
+      "pending": "{{count}} ממצא(ים) ממתינים להעלאה",
+      "failed": "{{count}} העלאות נכשלו",
+      "notUploaded": "{{count}} ממצא(ים) טרם הועלו",
+      "allSynced": "כל הממצאים מסונכרנים למוזיאון",
+      "syncNow": "סנכרן למוזיאון",
+      "syncing": "מסנכרן...",
+      "syncQueued": "{{count}} ממצא(ים) בתור להעלאה",
+      "retryFailed": "נסה שוב העלאות שנכשלו",
+      "retrying": "מנסה שוב...",
+      "retryStarted": "מנסה שוב העלאות שנכשלו...",
+      "forceResync": "סנכרן מחדש הכל",
+      "resyncing": "מסנכרן מחדש...",
+      "forceResyncQueued": "{{count}} ממצא(ים) בתור להעלאה מחדש",
+      "forceResyncConfirm": "פעולה זו תעלה מחדש את כל הממצאים למוזיאון. להמשיך?",
+      "forceResyncDesc": "מעלה מחדש את כל הממצאים למוזיאון (השתמש אם נתוני המוזיאון אבדו)",
+      "offline": "אתה לא מחובר לאינטרנט. אנא התחבר ונסה שוב."
+    }
   },
   "wizard": {
     "metadataTitle": "פרטי הממצא",
@@ -225,6 +245,7 @@
     "save": "שמור",
     "cancel": "ביטול",
     "delete": "מחק",
+    "close": "סגור",
     "comingSoon": "בקרוב"
   },
   "pwa": {
@@ -297,6 +318,12 @@
     "pending": "{{count}} ממצא(ים) בהמתנה",
     "complete": "כל {{count}} הממצא(ים) הועלו!",
     "failed": "{{failed}} מתוך {{total}} נכשלו",
+    "failedCount": "{{failed}} העלאות נכשלו",
+    "errorDetails": "פרטי שגיאה:",
+    "retry": "נסה שוב העלאות שנכשלו",
+    "retrying": "מנסה שוב...",
+    "hideDetails": "הסתר פרטים",
+    "showDetails": "הצג פרטים",
     "status": {
       "pending": "בהמתנה",
       "optimizing": "ממטב...",
@@ -304,8 +331,5 @@
       "completed": "הושלם",
       "failed": "נכשל"
     }
-  },
-  "common": {
-    "close": "סגור"
   }
 }

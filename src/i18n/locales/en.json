@@ -105,7 +105,27 @@
     "title": "Settings",
     "language": "Language",
     "english": "English",
-    "hebrew": "Hebrew"
+    "hebrew": "Hebrew",
+    "museum": {
+      "title": "Museum Sync",
+      "uploading": "Uploading {{count}} artifact(s)...",
+      "pending": "{{count}} artifact(s) pending upload",
+      "failed": "{{count}} upload(s) failed",
+      "notUploaded": "{{count}} artifact(s) not yet uploaded",
+      "allSynced": "All artifacts synced to museum",
+      "syncNow": "Sync to Museum",
+      "syncing": "Syncing...",
+      "syncQueued": "Queued {{count}} artifact(s) for upload",
+      "retryFailed": "Retry Failed Uploads",
+      "retrying": "Retrying...",
+      "retryStarted": "Retrying failed uploads...",
+      "forceResync": "Force Re-sync All",
+      "resyncing": "Re-syncing...",
+      "forceResyncQueued": "Queued {{count}} artifact(s) for re-upload",
+      "forceResyncConfirm": "This will re-upload all your artifacts to the museum. Continue?",
+      "forceResyncDesc": "Re-uploads all artifacts to museum (use if museum data was lost)",
+      "offline": "You are offline. Please connect to the internet and try again."
+    }
   },
   "wizard": {
     "metadataTitle": "Artifact Details",
@@ -225,6 +245,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
+    "close": "Close",
     "comingSoon": "Coming Soon"
   },
   "pwa": {
@@ -297,6 +318,12 @@
     "pending": "{{count}} artifact(s) pending",
     "complete": "All {{count}} artifact(s) uploaded!",
     "failed": "{{failed}} of {{total}} failed",
+    "failedCount": "{{failed}} upload(s) failed",
+    "errorDetails": "Error details:",
+    "retry": "Retry Failed Uploads",
+    "retrying": "Retrying...",
+    "hideDetails": "Hide details",
+    "showDetails": "Show details",
     "status": {
       "pending": "Pending",
       "optimizing": "Optimizing...",
@@ -304,8 +331,5 @@
       "completed": "Done",
       "failed": "Failed"
     }
-  },
-  "common": {
-    "close": "Close"
   }
 }

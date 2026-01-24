@@ -16,6 +16,7 @@ interface UploadState {
   updateUpload: (artifactId: string, status: UploadProgress['status'], error?: string) => void;
   removeUpload: (artifactId: string) => void;
   clearCompleted: () => void;
+  clearFailed: () => void;
   setVisible: (visible: boolean) => void;
 }
 
@@ -52,6 +53,12 @@ export const useUploadStore = create<UploadState>((set) => ({
     set((state) => ({
       uploads: state.uploads.filter((u) => u.status !== 'completed'),
       isVisible: state.uploads.some((u) => u.status !== 'completed'),
+    })),
+
+  clearFailed: () =>
+    set((state) => ({
+      uploads: state.uploads.filter((u) => u.status !== 'failed'),
+      isVisible: state.uploads.some((u) => u.status !== 'failed'),
     })),
 
   setVisible: (visible) => set({ isVisible: visible }),

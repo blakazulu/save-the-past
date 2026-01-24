@@ -1,18 +1,114 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/layout';
-import { CheckIcon, DownloadIcon, UploadIcon, TrashIcon } from '@/components/icons';
+import { CheckIcon, DownloadIcon, UploadIcon, TrashIcon, MuseumIcon, RefreshIcon, WarningIcon } from '@/components/icons';
 import { ExportDialog, ImportDialog, DeleteConfirmDialog } from '@/components/data-management';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
+import { migrateExistingArtifacts, retryFailedUploads, forceResyncAllArtifacts } from '@/lib/firebase/uploadQueue';
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
   const [showExport, setShowExport] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showClearAll, setShowClearAll] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [isForceResyncing, setIsForceResyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const artifacts = useLiveQuery(() => db.artifacts.toArray());
+  const pendingUploads = useLiveQuery(() => db.pendingUploads.toArray());
+
+  // Count artifacts that need syncing
+  const completedArtifacts = artifacts?.filter(a => a.status === 'complete') || [];
+  const notUploadedCount = completedArtifacts.filter(a => !a.uploadedToMuseum).length;
+  const pendingCount = pendingUploads?.filter(u => u.status === 'pending').length || 0;
+  const failedCount = pendingUploads?.filter(u => u.status === 'failed').length || 0;
+  const uploadingCount = pendingUploads?.filter(u => u.status === 'uploading').length || 0;
+
+  const handleSyncToMuseum = async () => {
+    if (!navigator.onLine) {
+      setSyncResult({
+        type: 'error',
+        message: t('settings.museum.offline', 'You are offline. Please connect to the internet and try again.')
+      });
+      return;
+    }
+    setIsSyncing(true);
+    setSyncResult(null);
+    try {
+      const count = await migrateExistingArtifacts();
+      setSyncResult({
+        type: 'success',
+        message: count > 0
+          ? t('settings.museum.syncQueued', 'Queued {{count}} artifact(s) for upload', { count })
+          : t('settings.museum.allSynced', 'All artifacts are already synced')
+      });
+    } catch (err) {
+      setSyncResult({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Unknown error'
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleRetryFailed = async () => {
+    if (!navigator.onLine) {
+      setSyncResult({
+        type: 'error',
+        message: t('settings.museum.offline', 'You are offline. Please connect to the internet and try again.')
+      });
+      return;
+    }
+    setIsRetrying(true);
+    setSyncResult(null);
+    try {
+      await retryFailedUploads();
+      setSyncResult({
+        type: 'success',
+        message: t('settings.museum.retryStarted', 'Retrying failed uploads...')
+      });
+    } catch (err) {
+      setSyncResult({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Unknown error'
+      });
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
+  const handleForceResync = async () => {
+    if (!navigator.onLine) {
+      setSyncResult({
+        type: 'error',
+        message: t('settings.museum.offline', 'You are offline. Please connect to the internet and try again.')
+      });
+      return;
+    }
+    if (!confirm(t('settings.museum.forceResyncConfirm', 'This will re-upload all your artifacts to the museum. Continue?'))) {
+      return;
+    }
+    setIsForceResyncing(true);
+    setSyncResult(null);
+    try {
+      const count = await forceResyncAllArtifacts();
+      setSyncResult({
+        type: 'success',
+        message: t('settings.museum.forceResyncQueued', 'Queued {{count}} artifact(s) for re-upload', { count })
+      });
+    } catch (err) {
+      setSyncResult({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Unknown error'
+      });
+    } finally {
+      setIsForceResyncing(false);
+    }
+  };
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -47,6 +143,95 @@ export default function SettingsPage() {
                 selected={currentLang === 'he'}
                 onChange={changeLanguage}
               />
+            </div>
+          </section>
+
+          {/* Museum Sync */}
+          <section className="parchment-card p-5">
+            <h2 className="font-display text-lg font-semibold text-earth mb-4 flex items-center gap-2">
+              <span className="text-terracotta">❧</span>
+              {t('settings.museum.title', 'Museum Sync')}
+            </h2>
+
+            {/* Status indicators */}
+            <div className="mb-4 space-y-2 text-sm">
+              {uploadingCount > 0 && (
+                <div className="flex items-center gap-2 text-terracotta">
+                  <span className="w-2 h-2 bg-terracotta rounded-full animate-pulse" />
+                  {t('settings.museum.uploading', 'Uploading {{count}} artifact(s)...', { count: uploadingCount })}
+                </div>
+              )}
+              {pendingCount > 0 && (
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <span className="w-2 h-2 bg-amber rounded-full" />
+                  {t('settings.museum.pending', '{{count}} artifact(s) pending upload', { count: pendingCount })}
+                </div>
+              )}
+              {failedCount > 0 && (
+                <div className="flex items-center gap-2 text-error">
+                  <WarningIcon className="w-4 h-4" />
+                  {t('settings.museum.failed', '{{count}} upload(s) failed', { count: failedCount })}
+                </div>
+              )}
+              {notUploadedCount > 0 && uploadingCount === 0 && pendingCount === 0 && (
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <span className="w-2 h-2 bg-text-muted rounded-full" />
+                  {t('settings.museum.notUploaded', '{{count}} artifact(s) not yet uploaded', { count: notUploadedCount })}
+                </div>
+              )}
+              {notUploadedCount === 0 && failedCount === 0 && pendingCount === 0 && uploadingCount === 0 && completedArtifacts.length > 0 && (
+                <div className="flex items-center gap-2 text-success">
+                  <CheckIcon className="w-4 h-4" />
+                  {t('settings.museum.allSynced', 'All artifacts synced to museum')}
+                </div>
+              )}
+            </div>
+
+            {/* Sync result message */}
+            {syncResult && (
+              <div className={`mb-4 p-3 rounded-lg text-sm ${
+                syncResult.type === 'success' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'
+              }`}>
+                {syncResult.message}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <DataButton
+                icon={<MuseumIcon className="w-5 h-5" />}
+                label={isSyncing
+                  ? t('settings.museum.syncing', 'Syncing...')
+                  : t('settings.museum.syncNow', 'Sync to Museum')}
+                onClick={handleSyncToMuseum}
+                disabled={isSyncing || notUploadedCount === 0}
+                count={notUploadedCount > 0 ? notUploadedCount : undefined}
+              />
+
+              {failedCount > 0 && (
+                <DataButton
+                  icon={<RefreshIcon className={`w-5 h-5 ${isRetrying ? 'animate-spin' : ''}`} />}
+                  label={isRetrying
+                    ? t('settings.museum.retrying', 'Retrying...')
+                    : t('settings.museum.retryFailed', 'Retry Failed Uploads')}
+                  onClick={handleRetryFailed}
+                  disabled={isRetrying}
+                  count={failedCount}
+                />
+              )}
+
+              <div className="my-3 border-t border-sepia/15" />
+
+              <DataButton
+                icon={<RefreshIcon className={`w-5 h-5 ${isForceResyncing ? 'animate-spin' : ''}`} />}
+                label={isForceResyncing
+                  ? t('settings.museum.resyncing', 'Re-syncing...')
+                  : t('settings.museum.forceResync', 'Force Re-sync All')}
+                onClick={handleForceResync}
+                disabled={isForceResyncing || completedArtifacts.length === 0}
+              />
+              <p className="text-xs text-text-muted px-3">
+                {t('settings.museum.forceResyncDesc', 'Re-uploads all artifacts to museum (use if museum data was lost)')}
+              </p>
             </div>
           </section>
 
