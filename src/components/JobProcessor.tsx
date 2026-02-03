@@ -5,6 +5,8 @@ import { useJobsStore, useJobsHydrated, type ProcessingJob } from '@/stores/jobs
 import { checkReconstruct3DStatus, generateInfoCard, base64ToBlob } from '@/lib/api/client';
 import { db } from '@/lib/db';
 import { enqueueMuseumUpload } from '@/lib/firebase/uploadQueue';
+import { optimizeModel } from '@/lib/firebase/modelOptimizer';
+import { logger } from '@/lib/utils/logger';
 import type { Model3D, InfoCard } from '@/types';
 
 // Smart polling intervals
@@ -65,7 +67,7 @@ export function JobProcessor() {
             if (retryCount < MAX_RETRIES) {
               // Increment retry count and try again on next poll
               retryCountRef.current.set(job.id, retryCount + 1);
-              console.log(`Network error for job ${job.id}, retry ${retryCount + 1}/${MAX_RETRIES}`);
+              logger.log(`Network error for job ${job.id}, retry ${retryCount + 1}/${MAX_RETRIES}`);
               return; // Don't mark as failed yet, will retry on next poll
             }
             // Clear retry count after max retries
@@ -109,7 +111,11 @@ export function JobProcessor() {
           }
 
           // Save model to database
-          const modelBlob = base64ToBlob(status.modelBase64, 'model/gltf-binary');
+          const rawModelBlob = base64ToBlob(status.modelBase64, 'model/gltf-binary');
+
+          // Optimize model before storing (reduces size by 50-70%)
+          const modelBlob = await optimizeModel(rawModelBlob);
+
           const modelId = uuidv4();
           const now = new Date();
 
@@ -238,7 +244,7 @@ export function JobProcessor() {
 
           // Queue for museum upload (fire-and-forget)
           enqueueMuseumUpload(job.artifactId).catch((err) => {
-            console.error('Failed to enqueue museum upload:', err);
+            logger.error('Failed to enqueue museum upload:', err);
           });
 
           // Remove job after a short delay
@@ -266,7 +272,7 @@ export function JobProcessor() {
           }
         }
       } catch (err) {
-        console.error('Job processing error:', err);
+        logger.error('Job processing error:', err);
         // Clear retry count for this job
         retryCountRef.current.delete(job.id);
 

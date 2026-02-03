@@ -1,5 +1,6 @@
 import type { Context } from '@netlify/functions';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { AI_MODELS } from '../../src/config/ai-models';
 
 interface ArtifactMetadata {
   name?: string;
@@ -196,7 +197,7 @@ function parseAnalysisResponse(responseText: string): InfoCardAnalysis {
       'No specific preservation notes',
       'אין הערות שימור ספציפיות'
     ),
-    aiModel: 'gemini-2.5-flash',
+    aiModel: AI_MODELS.GEMINI_INFO_CARD,
     aiConfidence: typeof parsed.aiConfidence === 'number'
       ? Math.max(0, Math.min(1, parsed.aiConfidence))
       : 0.5,
@@ -248,7 +249,7 @@ export default async function handler(
 
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: AI_MODELS.GEMINI_INFO_CARD });
 
     // Prepare the prompt with metadata context
     const metadataContext = formatMetadata(body.metadata);

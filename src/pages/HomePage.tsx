@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { SettingsIcon, CameraIcon, GalleryIcon } from '@/components/icons';
+import { SettingsIcon, CameraIcon, GalleryIcon, PlayIcon, CloseIcon } from '@/components/icons';
 
 export default function HomePage() {
   const { t } = useTranslation();
+  const [showVideo, setShowVideo] = useState(false);
 
   return (
     <div className="min-h-dvh flex flex-col">
@@ -76,6 +78,15 @@ export default function HomePage() {
               <GalleryIcon className="w-5 h-5" />
               <span>{t('nav.gallery')}</span>
             </Link>
+
+            {/* Video Demo Button */}
+            <button
+              onClick={() => setShowVideo(true)}
+              className="btn-parchment w-full flex items-center justify-center gap-3 text-base"
+            >
+              <PlayIcon className="w-5 h-5" />
+              <span>{t('home.watchDemo')}</span>
+            </button>
           </div>
 
           {/* Decorative footer element */}
@@ -90,6 +101,36 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {/* Video Modal - Only renders when showVideo is true for lazy loading */}
+      {showVideo && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowVideo(false)}
+        >
+          <div className="relative w-full max-w-5xl aspect-video">
+            {/* Close button */}
+            <button
+              onClick={() => setShowVideo(false)}
+              className="absolute -top-12 right-0 p-2 rounded-full glass-parchment hover:bg-parchment-light transition-all duration-200 group"
+              aria-label={t('home.closeDemo')}
+            >
+              <CloseIcon className="w-6 h-6 text-sand group-hover:text-terracotta transition-colors" />
+            </button>
+
+            {/* Video player */}
+            <video
+              className="w-full h-full rounded-lg shadow-2xl"
+              controls
+              autoPlay
+              onClick={(e) => e.stopPropagation()}
+            >
+              <source src="/PromoVideoAudio.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

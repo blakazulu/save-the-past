@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, Billboard, Image as DreiImage, Text } from '@react-three/drei';
 import { useTranslation } from 'react-i18next';
+import { logger } from '@/lib/utils/logger';
 import {
   ProceduralGallery,
   Pedestal,
@@ -89,7 +90,7 @@ function LazyArtifact({ artifact }: { artifact: DisplayArtifact }) {
             setLocalModelUrl(url);
           }
         } catch (e) {
-          console.error("Failed to load local model blob", e);
+          logger.error("Failed to load local model blob", e);
         }
       };
       loadBlob();
@@ -562,7 +563,7 @@ export default function VirtualTourPage() {
           setTextureProgress(100);
         }
       } catch (error) {
-        console.error('Failed to load artifacts:', error);
+        logger.error('Failed to load artifacts:', error);
         if (mounted) {
           setLoading(false);
         }

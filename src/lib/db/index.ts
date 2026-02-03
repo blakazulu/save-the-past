@@ -1,6 +1,14 @@
 import Dexie, { type Table } from 'dexie';
 import type { Artifact, ArtifactImage, Model3D, InfoCard } from '@/types';
 import type { PendingMuseumUpload } from '@/types/museum';
+import { optimizeModel, ModelOptimizationError } from '@/lib/firebase/modelOptimizer';
+import { logger } from '@/lib/utils/logger';
+
+export interface ModelOptimizationFailure {
+  modelId: string;
+  error: string;
+  phase?: string;
+}
 
 export class SaveThePastDB extends Dexie {
   artifacts!: Table<Artifact>;
@@ -84,4 +92,123 @@ export async function getAllArtifactsSorted(
 ) {
   const artifacts = await db.artifacts.orderBy(sortBy).toArray();
   return order === 'desc' ? artifacts.reverse() : artifacts;
+}
+
+/**
+ * Optimize all existing GLB models in the database.
+ * This is a one-time migration function that:
+ * - Reads all models from the database
+ * - Optimizes GLB models (dedup, quantize, prune)
+ * - Updates them in place (same ID, so no re-upload triggered)
+ * - Reports progress via callback
+ * - Falls back to original model if optimization fails
+ */
+export async function optimizeAllExistingModels(
+  onProgress?: (current: number, total: number, modelId: string, saved: number, originalSize: number, newSize: number) => void
+): Promise<{
+  optimized: number;
+  skipped: number;
+  failed: number;
+  totalSaved: number;
+  failures: ModelOptimizationFailure[];
+}> {
+  const allModels = await db.models.toArray();
+  const stats = {
+    optimized: 0,
+    skipped: 0,
+    failed: 0,
+    totalSaved: 0,
+    failures: [] as ModelOptimizationFailure[],
+  };
+
+  for (let i = 0; i < allModels.length; i++) {
+    const model = allModels[i];
+
+    try {
+      // Only optimize GLB models
+      if (model.format !== 'glb') {
+        stats.skipped++;
+        continue;
+      }
+
+      // Skip if already optimized recently (within last 7 days)
+      if (model.metadata?.optimizedAt) {
+        const daysSinceOptimization = (Date.now() - new Date(model.metadata.optimizedAt).getTime()) / (1000 * 60 * 60 * 24);
+        if (daysSinceOptimization < 7) {
+          stats.skipped++;
+          continue;
+        }
+      }
+
+      const originalSize = model.blob.size;
+
+      // Optimize the model
+      let optimizedBlob: Blob;
+      try {
+        optimizedBlob = await optimizeModel(model.blob);
+      } catch (error) {
+        // Track detailed failure information
+        if (error instanceof ModelOptimizationError) {
+          stats.failures.push({
+            modelId: model.id,
+            error: error.message,
+            phase: error.phase,
+          });
+          logger.error(`Failed to optimize model ${model.id} at ${error.phase}:`, error.message);
+        } else {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          stats.failures.push({
+            modelId: model.id,
+            error: errorMessage,
+          });
+          logger.error(`Failed to optimize model ${model.id}:`, errorMessage);
+        }
+        stats.failed++;
+        continue;
+      }
+
+      const newSize = optimizedBlob.size;
+
+      // Only update if optimization actually reduced size
+      if (newSize < originalSize) {
+        const saved = originalSize - newSize;
+        stats.totalSaved += saved;
+
+        // Update the model in place (same ID)
+        await db.models.update(model.id, {
+          blob: optimizedBlob,
+          metadata: {
+            ...model.metadata,
+            fileSize: newSize,
+            optimizedAt: new Date(),
+            originalSize,
+          },
+        });
+
+        stats.optimized++;
+        onProgress?.(i + 1, allModels.length, model.id, saved, originalSize, newSize);
+      } else {
+        // Optimization didn't help or made it bigger - skip but mark as optimized
+        await db.models.update(model.id, {
+          metadata: {
+            ...model.metadata,
+            optimizedAt: new Date(),
+            originalSize,
+          },
+        });
+        stats.skipped++;
+      }
+    } catch (error) {
+      // Catch any unexpected errors (DB errors, etc.)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      stats.failures.push({
+        modelId: model.id,
+        error: `Unexpected error: ${errorMessage}`,
+      });
+      logger.error(`Unexpected error while processing model ${model.id}:`, error);
+      stats.failed++;
+    }
+  }
+
+  return stats;
 }

@@ -15,7 +15,9 @@
     "title": "Save The Past",
     "subtitle": "Transform archaeological artifacts into 3D models",
     "description": "Capture photos of artifacts from multiple angles and use AI to generate 3D reconstructions and detailed information cards.",
-    "cta": "Start Capturing"
+    "cta": "Start Capturing",
+    "watchDemo": "Watch Demo",
+    "closeDemo": "Close Video"
   },
   "capture": {
     "title": "Capture Artifact",

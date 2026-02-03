@@ -13,6 +13,7 @@ export interface MuseumArtifact {
   thumbnailUrl: string;
   modelUrl: string;
   modelFormat: 'glb' | 'gltf' | 'obj';
+  modelSize?: number; // Size in bytes
 
   // Embedded info card (denormalized for fast reads)
   infoCard?: {

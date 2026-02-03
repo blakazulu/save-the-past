@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import JSZip from 'jszip';
 import { db } from '@/lib/db';
 import { UploadIcon } from '@/components/icons';
+import { logger } from '@/lib/utils/logger';
 import type { Artifact, ArtifactImage, Model3D, InfoCard } from '@/types';
 
 interface ImportDialogProps {
@@ -129,7 +130,7 @@ export function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
 
       onClose();
     } catch (error) {
-      console.error('Import failed:', error);
+      logger.error('Import failed:', error);
       alert(t('dataManagement.importError', 'Import failed. Please check the file and try again.'));
     } finally {
       setIsImporting(false);

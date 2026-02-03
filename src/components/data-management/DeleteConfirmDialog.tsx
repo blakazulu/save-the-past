@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { db } from '@/lib/db';
 import { TrashIcon } from '@/components/icons';
+import { logger } from '@/lib/utils/logger';
 import type { Artifact } from '@/types';
 
 interface DeleteConfirmDialogProps {
@@ -47,7 +48,7 @@ export function DeleteConfirmDialog({
       onDeleted();
       onClose();
     } catch (error) {
-      console.error('Delete failed:', error);
+      logger.error('Delete failed:', error);
       alert(t('dataManagement.deleteError', 'Delete failed. Please try again.'));
     } finally {
       setIsDeleting(false);

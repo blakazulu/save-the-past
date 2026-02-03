@@ -67,6 +67,8 @@ export interface Model3D {
     vertices?: number;
     faces?: number;
     fileSize?: number;
+    optimizedAt?: Date;
+    originalSize?: number;
   };
 }
 

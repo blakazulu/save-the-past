@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { db, getArtifactWithRelations } from '@/lib/db';
 import { uploadToMuseum } from './museumService';
 import { useUploadStore } from '@/stores';
+import { logger } from '@/lib/utils/logger';
 import type { PendingMuseumUpload } from '@/types/museum';
 
 const MAX_ATTEMPTS = 5;
@@ -26,7 +27,7 @@ export async function enqueueMuseumUpload(artifactId: string): Promise<string> {
   };
 
   await db.pendingUploads.add(upload);
-  console.log(`[Museum Upload] Enqueued artifact ${artifactId} for upload (uploadId: ${uploadId})`);
+  logger.log(`[Museum Upload] Enqueued artifact ${artifactId} for upload (uploadId: ${uploadId})`);
 
   // Try to process immediately
   processUploadQueue();
@@ -37,7 +38,7 @@ export async function enqueueMuseumUpload(artifactId: string): Promise<string> {
 export async function processUploadQueue(): Promise<void> {
   // Prevent concurrent processing
   if (isProcessing) {
-    console.log('[Museum Upload] Queue already processing, skipping');
+    logger.log('[Museum Upload] Queue already processing, skipping');
     return;
   }
   isProcessing = true;
@@ -49,12 +50,12 @@ export async function processUploadQueue(): Promise<void> {
       .equals('pending')
       .toArray();
 
-    console.log(`[Museum Upload] Processing queue: ${pendingUploads.length} pending uploads`);
+    logger.log(`[Museum Upload] Processing queue: ${pendingUploads.length} pending uploads`);
 
     for (const upload of pendingUploads) {
       // Skip if too many attempts
       if (upload.attempts >= MAX_ATTEMPTS) {
-        console.log(`[Museum Upload] Max attempts reached for ${upload.artifactId}, marking as failed`);
+        logger.log(`[Museum Upload] Max attempts reached for ${upload.artifactId}, marking as failed`);
         await db.pendingUploads.update(upload.id, { status: 'failed' });
         continue;
       }
@@ -64,7 +65,7 @@ export async function processUploadQueue(): Promise<void> {
         const delay = RETRY_DELAYS[Math.min(upload.attempts, RETRY_DELAYS.length - 1)];
         const timeSinceLastAttempt = Date.now() - upload.lastAttempt.getTime();
         if (timeSinceLastAttempt < delay) {
-          console.log(`[Museum Upload] Waiting for retry delay for ${upload.artifactId}`);
+          logger.log(`[Museum Upload] Waiting for retry delay for ${upload.artifactId}`);
           continue;
         }
       }
@@ -80,7 +81,7 @@ async function processUpload(upload: PendingMuseumUpload): Promise<void> {
   const newAttempts = upload.attempts + 1;
   const store = useUploadStore.getState();
 
-  console.log(`[Museum Upload] Starting upload for artifact ${upload.artifactId} (attempt ${newAttempts})`);
+  logger.log(`[Museum Upload] Starting upload for artifact ${upload.artifactId} (attempt ${newAttempts})`);
 
   // Update status to uploading and increment attempts
   await db.pendingUploads.update(upload.id, {
@@ -95,14 +96,14 @@ async function processUpload(upload: PendingMuseumUpload): Promise<void> {
 
     if (!data || !data.artifact) {
       // Artifact was deleted, remove from queue
-      console.log(`[Museum Upload] Artifact ${upload.artifactId} was deleted, removing from queue`);
+      logger.log(`[Museum Upload] Artifact ${upload.artifactId} was deleted, removing from queue`);
       await db.pendingUploads.delete(upload.id);
       store.removeUpload(upload.artifactId);
       return;
     }
 
     const artifactName = data.artifact.metadata.name || 'Unnamed Artifact';
-    console.log(`[Museum Upload] Uploading "${artifactName}" - has model: ${!!data.model}, has infoCard: ${!!data.infoCard}`);
+    logger.log(`[Museum Upload] Uploading "${artifactName}" - has model: ${!!data.model}, has infoCard: ${!!data.infoCard}`);
 
     // Add to UI progress (or update if exists)
     store.addUpload(upload.artifactId, artifactName);
@@ -113,7 +114,7 @@ async function processUpload(upload: PendingMuseumUpload): Promise<void> {
 
     if (!thumbnailSource) {
       // No thumbnail, mark as failed
-      console.log(`[Museum Upload] No thumbnail available for ${upload.artifactId}`);
+      logger.log(`[Museum Upload] No thumbnail available for ${upload.artifactId}`);
       await db.pendingUploads.update(upload.id, {
         status: 'failed',
         error: 'No thumbnail available',
@@ -124,12 +125,12 @@ async function processUpload(upload: PendingMuseumUpload): Promise<void> {
 
     // Update to optimizing if there's a model
     if (data.model?.blob) {
-      console.log(`[Museum Upload] Optimizing model for ${upload.artifactId} (${(data.model.blob.size / 1024).toFixed(1)} KB)`);
+      logger.log(`[Museum Upload] Optimizing model for ${upload.artifactId} (${(data.model.blob.size / 1024).toFixed(1)} KB)`);
       store.updateUpload(upload.artifactId, 'optimizing');
     }
 
     // Upload to museum
-    console.log(`[Museum Upload] Uploading to Firebase for ${upload.artifactId}...`);
+    logger.log(`[Museum Upload] Uploading to Firebase for ${upload.artifactId}...`);
     await uploadToMuseum({
       artifact: data.artifact,
       model: data.model,
@@ -146,9 +147,9 @@ async function processUpload(upload: PendingMuseumUpload): Promise<void> {
     await db.pendingUploads.delete(upload.id);
 
     store.updateUpload(upload.artifactId, 'completed');
-    console.log(`[Museum Upload] Successfully uploaded artifact ${upload.artifactId} to museum`);
+    logger.log(`[Museum Upload] Successfully uploaded artifact ${upload.artifactId} to museum`);
   } catch (error) {
-    console.error(`[Museum Upload] Failed to upload artifact ${upload.artifactId}:`, error);
+    logger.error(`[Museum Upload] Failed to upload artifact ${upload.artifactId}:`, error);
 
     const errorMsg = error instanceof Error ? error.message : 'Unknown error';
     const finalStatus = newAttempts >= MAX_ATTEMPTS ? 'failed' : 'pending';
@@ -181,7 +182,7 @@ export async function forceResyncAllArtifacts(): Promise<number> {
     .equals('complete')
     .modify({ uploadedToMuseum: false, museumUploadedAt: undefined });
 
-  console.log(`[Museum Upload] Reset ${count} artifacts for re-upload`);
+  logger.log(`[Museum Upload] Reset ${count} artifacts for re-upload`);
 
   // Clear only failed uploads from queue (leave pending/uploading intact)
   await db.pendingUploads.where('status').equals('failed').delete();
@@ -200,11 +201,11 @@ export async function migrateExistingArtifacts(): Promise<number> {
     .toArray();
 
   if (artifacts.length === 0) {
-    console.log('No artifacts to migrate to museum');
+    logger.log('No artifacts to migrate to museum');
     return 0;
   }
 
-  console.log(`Migrating ${artifacts.length} existing artifacts to museum...`);
+  logger.log(`Migrating ${artifacts.length} existing artifacts to museum...`);
 
   // Check which are already in the pending queue
   const pendingArtifactIds = new Set(
@@ -222,7 +223,7 @@ export async function migrateExistingArtifacts(): Promise<number> {
     enqueued++;
   }
 
-  console.log(`Enqueued ${enqueued} artifacts for museum upload`);
+  logger.log(`Enqueued ${enqueued} artifacts for museum upload`);
   return enqueued;
 }
 
@@ -242,7 +243,7 @@ async function retryFailedUploadsOnce(): Promise<void> {
   if (lastRetry) {
     const lastRetryTime = parseInt(lastRetry, 10);
     if (Date.now() - lastRetryTime < STARTUP_RETRY_INTERVAL_MS) {
-      console.log('[Museum Upload] Skipping startup retry - already retried within 24 hours');
+      logger.log('[Museum Upload] Skipping startup retry - already retried within 24 hours');
       return;
     }
   }
@@ -253,11 +254,11 @@ async function retryFailedUploadsOnce(): Promise<void> {
     .toArray();
 
   if (failedUploads.length === 0) {
-    console.log('[Museum Upload] No failed uploads to retry on startup');
+    logger.log('[Museum Upload] No failed uploads to retry on startup');
     return;
   }
 
-  console.log(`[Museum Upload] Retrying ${failedUploads.length} failed upload(s) on startup`);
+  logger.log(`[Museum Upload] Retrying ${failedUploads.length} failed upload(s) on startup`);
 
   // Mark that we're doing a startup retry
   localStorage.setItem(STARTUP_RETRY_KEY, Date.now().toString());
@@ -277,7 +278,7 @@ export function initUploadQueueProcessor(): void {
   if (isInitialized) return;
   isInitialized = true;
 
-  console.log('[Museum Upload] Initializing upload queue processor');
+  logger.log('[Museum Upload] Initializing upload queue processor');
 
   // Expose resync function to browser console for debugging
   if (typeof window !== 'undefined') {
@@ -288,16 +289,16 @@ export function initUploadQueueProcessor(): void {
   retryFailedUploadsOnce()
     .then(() => migrateExistingArtifacts())
     .then(() => {
-      console.log('[Museum Upload] Startup initialization complete, processing queue');
+      logger.log('[Museum Upload] Startup initialization complete, processing queue');
       processUploadQueue();
     })
     .catch((err) => {
-      console.error('[Museum Upload] Error during startup initialization:', err);
+      logger.error('[Museum Upload] Error during startup initialization:', err);
     });
 
   // Process queue when coming back online
   window.addEventListener('online', () => {
-    console.log('[Museum Upload] Back online, processing museum upload queue...');
+    logger.log('[Museum Upload] Back online, processing museum upload queue...');
     processUploadQueue();
   });
 

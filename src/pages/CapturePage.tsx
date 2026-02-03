@@ -7,6 +7,7 @@ import { CaptureSession, CapturePreview, FileUpload } from '@/components/camera'
 import { useCaptureStore } from '@/stores';
 import { db } from '@/lib/db';
 import { v4 as uuidv4 } from 'uuid';
+import { logger } from '@/lib/utils/logger';
 
 type CaptureMode = 'select' | 'camera' | 'upload' | 'preview';
 
@@ -95,7 +96,7 @@ export default function CapturePage() {
       // Navigate to the new artifact
       navigate(`/artifact/${artifactId}`);
     } catch (error) {
-      console.error('Failed to create artifact:', error);
+      logger.error('Failed to create artifact:', error);
       setIsCreating(false);
     }
   };

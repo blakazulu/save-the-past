@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import * as THREE from 'three';
+import { logger } from '@/lib/utils/logger';
 
 // Texture paths
 const TEXTURE_PATHS = {
@@ -213,7 +214,7 @@ export function useProgressiveTextures(isMobile: boolean): ProgressiveTexturesRe
             }
           }
         } catch (error) {
-          console.warn(`Failed to load texture: ${key}`, error);
+          logger.warn(`Failed to load texture: ${key}`, error);
           loadedCount++;
           setProgress(Math.round((loadedCount / totalTextures) * 100));
 
@@ -283,7 +284,7 @@ export function useArtworkTexture(artworkIndex: number, enabled: boolean = true)
         }
       })
       .catch((error) => {
-        console.warn(`Failed to load artwork: ${path}`, error);
+        logger.warn(`Failed to load artwork: ${path}`, error);
       });
 
     return () => {

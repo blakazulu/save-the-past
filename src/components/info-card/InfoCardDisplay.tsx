@@ -100,7 +100,7 @@ export function InfoCardDisplay({
         </div>
 
         {/* Action buttons */}
-        {(onEdit || onExport) && (
+        {(onEdit || onExport || onRegenerate) && (
           <div className="flex gap-2 mt-4 pt-4 border-t border-sepia/10">
             {onEdit && (
               <button

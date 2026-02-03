@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCaptureStore } from '@/stores';
+import { logger } from '@/lib/utils/logger';
 
 interface CameraViewProps {
   onCapture: (blob: Blob) => void;
@@ -41,7 +42,7 @@ export function CameraView({ onCapture, onError }: CameraViewProps) {
         setIsReady(true);
       }
     } catch (err) {
-      console.error('Camera error:', err);
+      logger.error('Camera error:', err);
       onError(t('capture.cameraError'));
     }
   }, [selectedCamera, onError, t]);

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useUploadStore } from '@/stores';
 import { retryFailedUploads } from '@/lib/firebase/uploadQueue';
 import { CollapseIcon, MuseumIcon, RefreshIcon } from '@/components/icons';
+import { logger } from '@/lib/utils/logger';
 
 export function UploadProgress() {
   const { t } = useTranslation();
@@ -40,7 +41,7 @@ export function UploadProgress() {
 
   const handleRetry = async () => {
     if (!navigator.onLine) {
-      console.warn('[Museum Upload] Cannot retry while offline');
+      logger.warn('[Museum Upload] Cannot retry while offline');
       return;
     }
     setIsRetrying(true);
@@ -49,7 +50,7 @@ export function UploadProgress() {
       // The queue processor will update UI state via store.updateUpload()
       await retryFailedUploads();
     } catch (err) {
-      console.error('Failed to retry uploads:', err);
+      logger.error('Failed to retry uploads:', err);
     } finally {
       setIsRetrying(false);
     }

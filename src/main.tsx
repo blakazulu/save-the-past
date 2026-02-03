@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './i18n';
 import './index.css';
+import { logger } from '@/lib/utils/logger';
 
 const VERSION_STORAGE_KEY = 'save-the-past-app-version';
 
@@ -15,34 +16,34 @@ async function checkVersionAndClearCacheIfNeeded(): Promise<boolean> {
     });
 
     if (!response.ok) {
-      console.warn('[Version Check] Could not fetch version.json');
+      logger.warn('[Version Check] Could not fetch version.json');
       return false;
     }
 
     const { version: serverVersion } = await response.json();
     const storedVersion = localStorage.getItem(VERSION_STORAGE_KEY);
 
-    console.log(`[Version Check] Server: ${serverVersion}, Local: ${storedVersion || 'none'}`);
+    logger.log(`[Version Check] Server: ${serverVersion}, Local: ${storedVersion || 'none'}`);
 
     // If versions match, no action needed
     if (storedVersion === serverVersion) {
       return false;
     }
 
-    console.log('[Version Check] Version mismatch - clearing caches and reloading...');
+    logger.log('[Version Check] Version mismatch - clearing caches and reloading...');
 
     // Clear all caches
     if ('caches' in window) {
       const cacheNames = await caches.keys();
       await Promise.all(cacheNames.map(name => caches.delete(name)));
-      console.log(`[Version Check] Cleared ${cacheNames.length} cache(s)`);
+      logger.log(`[Version Check] Cleared ${cacheNames.length} cache(s)`);
     }
 
     // Unregister service workers to ensure fresh fetch
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
       await Promise.all(registrations.map(reg => reg.unregister()));
-      console.log(`[Version Check] Unregistered ${registrations.length} service worker(s)`);
+      logger.log(`[Version Check] Unregistered ${registrations.length} service worker(s)`);
     }
 
     // Store new version
@@ -52,7 +53,7 @@ async function checkVersionAndClearCacheIfNeeded(): Promise<boolean> {
     window.location.reload();
     return true; // Indicates reload is happening
   } catch (err) {
-    console.error('[Version Check] Error:', err);
+    logger.error('[Version Check] Error:', err);
     return false;
   }
 }
@@ -63,10 +64,10 @@ function registerServiceWorker() {
     navigator.serviceWorker
       .register('/sw.js')
       .then((registration) => {
-        console.log('SW registered:', registration.scope);
+        logger.log('SW registered:', registration.scope);
       })
       .catch((error) => {
-        console.log('SW registration failed:', error);
+        logger.log('SW registration failed:', error);
       });
   }
 }

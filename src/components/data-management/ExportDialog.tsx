@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import JSZip from 'jszip';
 import { db } from '@/lib/db';
 import { DownloadIcon } from '@/components/icons';
+import { logger } from '@/lib/utils/logger';
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -102,7 +103,7 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
 
       onClose();
     } catch (error) {
-      console.error('Export failed:', error);
+      logger.error('Export failed:', error);
       alert(t('dataManagement.exportError', 'Export failed. Please try again.'));
     } finally {
       setIsExporting(false);
