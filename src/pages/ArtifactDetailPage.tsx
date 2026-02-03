@@ -268,7 +268,7 @@ export default function ArtifactDetailPage() {
             </div>
           )}
           {activeTab === 'info' && infoCard && (
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 pb-24">
               <InfoCardDisplay
                 infoCard={infoCard}
                 metadata={artifact.metadata}
@@ -321,7 +321,7 @@ export default function ArtifactDetailPage() {
       </div>
 
       {/* Step Content */}
-      <main className="flex-1 overflow-y-auto p-4">
+      <main className="flex-1 overflow-y-auto p-4 pb-32">
         <div className="max-w-md mx-auto">
           {/* Step 1: Metadata - only show when not processing */}
           {wizardStep === 'metadata' && !isProcessing && !isStartingJob && !hasError && (
@@ -482,13 +482,12 @@ interface StepIndicatorProps {
 function StepIndicator({ step, active, completed }: StepIndicatorProps) {
   return (
     <div
-      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
-        completed
+      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${completed
           ? 'bg-terracotta text-white'
           : active
-          ? 'bg-terracotta text-white'
-          : 'bg-sand text-text-secondary'
-      }`}
+            ? 'bg-terracotta text-white'
+            : 'bg-sand text-text-secondary'
+        }`}
     >
       {completed && !active ? '✓' : step}
     </div>
@@ -508,9 +507,8 @@ function ResultTab({ children, active, onClick, icon, badge }: ResultTabProps) {
   return (
     <button
       onClick={onClick}
-      className={`flex-1 py-3.5 text-base font-medium transition-all duration-200 flex items-center justify-center gap-2 relative ${
-        active ? 'text-terracotta' : 'text-text-muted hover:text-earth'
-      }`}
+      className={`flex-1 py-3.5 text-base font-medium transition-all duration-200 flex items-center justify-center gap-2 relative ${active ? 'text-terracotta' : 'text-text-muted hover:text-earth'
+        }`}
     >
       {active && (
         <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-terracotta rounded-t-full" />
@@ -523,9 +521,8 @@ function ResultTab({ children, active, onClick, icon, badge }: ResultTabProps) {
       <span className="hidden sm:inline font-display tracking-wide">{children}</span>
       {badge && (
         <span
-          className={`text-md px-1.5 py-0.5 rounded ${
-            active ? 'bg-terracotta/15 text-terracotta' : 'bg-sand text-text-muted'
-          }`}
+          className={`text-md px-1.5 py-0.5 rounded ${active ? 'bg-terracotta/15 text-terracotta' : 'bg-sand text-text-muted'
+            }`}
         >
           {badge}
         </span>
