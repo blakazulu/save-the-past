@@ -32,7 +32,7 @@ export const IntroScene: React.FC = () => {
     config: { damping: 12, stiffness: 80 },
   });
 
-  const logoOpacity = interpolate(frame, [15, 45], [0, 1], {
+  const logoOpacity = interpolate(frame, [15, 75], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
