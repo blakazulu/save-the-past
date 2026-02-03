@@ -201,8 +201,8 @@ export function TouchControls({ enabled = true, movementJoystickRef, rotationJoy
       if (x !== 0 || y !== 0) {
         // Apply rotation based on joystick input
         const rotationSpeed = 2.5; // Rotation speed multiplier
-        rotationState.current.yaw += x * rotationSpeed * delta;
-        rotationState.current.pitch += y * rotationSpeed * delta;
+        rotationState.current.yaw -= x * rotationSpeed * delta;
+        rotationState.current.pitch -= y * rotationSpeed * delta;
 
         // Clamp pitch to prevent looking too far up or down
         rotationState.current.pitch = Math.max(
