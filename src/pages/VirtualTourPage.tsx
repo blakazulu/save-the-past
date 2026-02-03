@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, Suspense, useMemo } from 'rea
 import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
+import { useGLTF, Billboard, Image as DreiImage, Text } from '@react-three/drei';
 import { useTranslation } from 'react-i18next';
 import {
   ProceduralGallery,
@@ -13,6 +13,7 @@ import {
   VirtualJoystick,
   SimpleLoader,
 } from '@/components/virtual-tour';
+import { blobToBase64 } from '@/lib/api/client';
 
 // Pedestal order from entrance to back of museum
 // Maps artifact index to pedestal index (artifact 0 goes to pedestal 15 = lobby, etc.)
@@ -47,10 +48,127 @@ interface DisplayInfoCard {
 interface DisplayArtifact {
   id: string;
   name: string;
-  modelUrl: string | null;
+  modelUrl?: string | null;  // For remote artifacts
+  model3DId?: string;        // For local artifacts
+  thumbnailUrl?: string | null;
   isPersonal: boolean;
   siteName?: string;
   infoCard?: DisplayInfoCard;
+}
+
+// Lazy loaded artifact component
+function LazyArtifact({ artifact }: { artifact: DisplayArtifact }) {
+  const { camera } = useThree();
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const [localModelUrl, setLocalModelUrl] = useState<string | null>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const [distance, setDistance] = useState(100);
+
+  // Check distance to camera
+  useFrame(() => {
+    if (groupRef.current) {
+      const dist = camera.position.distanceTo(groupRef.current.getWorldPosition(new THREE.Vector3()));
+      setDistance(dist);
+      // Load if closer than 8 units
+      if (dist < 8 && !shouldLoad) {
+        setShouldLoad(true);
+      }
+      // Optional: Unload if very far (e.g., > 20 units) to save memory, 
+      // but might cause stutter if revisiting. keeping simple for now.
+    }
+  });
+
+  // Load local blob if needed
+  useEffect(() => {
+    if (shouldLoad && artifact.isPersonal && artifact.model3DId && !localModelUrl) {
+      const loadBlob = async () => {
+        try {
+          const model = await db.models.get(artifact.model3DId!);
+          if (model?.blob) {
+            const url = URL.createObjectURL(model.blob);
+            setLocalModelUrl(url);
+          }
+        } catch (e) {
+          console.error("Failed to load local model blob", e);
+        }
+      };
+      loadBlob();
+    }
+
+    // Cleanup
+    return () => {
+      if (localModelUrl) URL.revokeObjectURL(localModelUrl);
+    };
+  }, [shouldLoad, artifact, localModelUrl]);
+
+  const url = artifact.isPersonal ? localModelUrl : artifact.modelUrl;
+
+  return (
+    <group ref={groupRef}>
+      {/* 3D Model - Only show if close and loaded */}
+      {shouldLoad && url ? (
+        <Suspense fallback={<LoadingWireframe />}>
+          <ArtifactModel url={url} />
+        </Suspense>
+      ) : (
+        /* Thumbnail Billboard when far or loading */
+        <ThumbnailBillboard url={artifact.thumbnailUrl} />
+      )}
+
+      {/* Label always visible but fades with distance */}
+      <Billboard position={[0, -0.8, 0]} follow={true}>
+        <Text
+          fontSize={0.15}
+          color="#3D2914"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.01}
+          outlineColor="#EAE0D5"
+          fillOpacity={Math.max(0, 1 - (distance / 10))} // Fade out label
+        >
+          {artifact.name.length > 20 ? artifact.name.substring(0, 20) + '...' : artifact.name}
+        </Text>
+      </Billboard>
+    </group>
+  );
+}
+
+function LoadingWireframe() {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame((_, delta) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x += delta * 0.5;
+      meshRef.current.rotation.y += delta;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={[0, 0.5, 0]}>
+      <boxGeometry args={[0.5, 0.5, 0.5, 2, 2, 2]} />
+      <meshStandardMaterial
+        color="#C17F59"
+        emissive="#C17F59"
+        emissiveIntensity={0.5}
+        wireframe
+      />
+    </mesh>
+  );
+}
+
+function ThumbnailBillboard({ url }: { url?: string | null }) {
+  return (
+    <Billboard position={[0, 0.5, 0]} follow={true}>
+      {url ? (
+        <DreiImage url={url} scale={[1, 1]} transparent />
+      ) : (
+        <mesh>
+          <planeGeometry args={[0.8, 0.8]} />
+          <meshBasicMaterial color="#EAE0D5" transparent opacity={0.5} />
+        </mesh>
+      )}
+    </Billboard>
+  );
 }
 
 // 3D artifact model component
@@ -185,7 +303,7 @@ function ProximityDetector({ artifacts, onNearArtifact }: ProximityDetectorProps
 
     // Update if pedestal changed OR facing direction changed
     const stateChanged = nearestPedestalIndex !== lastNearIndexRef.current ||
-                         isFacingPedestal !== lastFacingRef.current;
+      isFacingPedestal !== lastFacingRef.current;
 
     if (stateChanged) {
       lastNearIndexRef.current = nearestPedestalIndex;
@@ -273,7 +391,7 @@ function InfoCardOverlay({ artifact, onClose }: InfoCardOverlayProps) {
             <div className="flex items-center gap-2">
               <span className="text-text-primary">{getText(artifact.infoCard.estimatedAge.range)}</span>
               <span className={`w-2 h-2 rounded-full ${getConfidenceColor(artifact.infoCard.estimatedAge.confidence)}`}
-                    title={artifact.infoCard.estimatedAge.confidence} />
+                title={artifact.infoCard.estimatedAge.confidence} />
             </div>
           </div>
 
@@ -367,46 +485,49 @@ export default function VirtualTourPage() {
 
     async function loadArtifacts() {
       try {
-        // Load personal artifacts with 3D models
+        // Load personal artifacts metadata ONLY (no blobs yet)
         const personalArtifacts = await db.artifacts.toArray();
         const personalWithModels: DisplayArtifact[] = [];
 
         for (const artifact of personalArtifacts) {
           if (artifact.model3DId) {
-            const model = await db.models.get(artifact.model3DId);
-            if (model?.blob) {
-              // Create blob URL for the model
-              const modelUrl = URL.createObjectURL(model.blob);
-              blobUrlsRef.current.push(modelUrl);
-
-              // Load info card if available
-              let infoCard: DisplayInfoCard | undefined;
-              if (artifact.infoCardId) {
-                const card = await db.infoCards.get(artifact.infoCardId);
-                if (card) {
-                  infoCard = {
-                    material: card.material,
-                    estimatedAge: {
-                      range: card.estimatedAge.range,
-                      confidence: card.estimatedAge.confidence,
-                    },
-                    possibleUse: card.possibleUse,
-                    culturalContext: card.culturalContext,
-                    preservationNotes: card.preservationNotes,
-                    aiConfidence: card.aiConfidence,
-                  };
-                }
-              }
-
-              personalWithModels.push({
-                id: artifact.id,
-                name: artifact.metadata.name || 'Artifact',
-                modelUrl,
-                isPersonal: true,
-                siteName: artifact.metadata.siteName,
-                infoCard,
-              });
+            // Get thumbnail if exists
+            const images = await db.images.where('artifactId').equals(artifact.id).toArray();
+            let thumbnailUrl = null;
+            if (images.length > 0) {
+              // We create a blob URL for the thumbnail image (much smaller than 3D model)
+              thumbnailUrl = URL.createObjectURL(images[0].blob);
+              blobUrlsRef.current.push(thumbnailUrl);
             }
+
+            // Load info card if available
+            let infoCard: DisplayInfoCard | undefined;
+            if (artifact.infoCardId) {
+              const card = await db.infoCards.get(artifact.infoCardId);
+              if (card) {
+                infoCard = {
+                  material: card.material,
+                  estimatedAge: {
+                    range: card.estimatedAge.range,
+                    confidence: card.estimatedAge.confidence,
+                  },
+                  possibleUse: card.possibleUse,
+                  culturalContext: card.culturalContext,
+                  preservationNotes: card.preservationNotes,
+                  aiConfidence: card.aiConfidence,
+                };
+              }
+            }
+
+            personalWithModels.push({
+              id: artifact.id,
+              name: artifact.metadata.name || 'Artifact',
+              model3DId: artifact.model3DId,
+              thumbnailUrl,
+              isPersonal: true,
+              siteName: artifact.metadata.siteName,
+              infoCard,
+            });
           }
         }
 
@@ -418,6 +539,7 @@ export default function VirtualTourPage() {
             id: a.id,
             name: a.name,
             modelUrl: a.modelUrl,
+            thumbnailUrl: a.thumbnailUrl,
             isPersonal: false,
             siteName: a.siteName,
             infoCard: a.infoCard,
@@ -436,6 +558,8 @@ export default function VirtualTourPage() {
 
           setArtifacts(selected);
           setLoading(false);
+          // Set progress to 100 instantly as we aren't loading models yet
+          setTextureProgress(100);
         }
       } catch (error) {
         console.error('Failed to load artifacts:', error);
@@ -475,7 +599,7 @@ export default function VirtualTourPage() {
   // Handle exit
   const handleExit = useCallback(() => {
     if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
+      document.exitFullscreen().catch(() => { });
     }
     navigate('/museum');
   }, [navigate]);
@@ -584,10 +708,8 @@ export default function VirtualTourPage() {
             : undefined;
           return (
             <Pedestal key={`pedestal-${pedestalIndex}`} position={position}>
-              {artifact?.modelUrl && (
-                <Suspense fallback={<SimpleLoader />}>
-                  <ArtifactModel url={artifact.modelUrl} />
-                </Suspense>
+              {artifact && (
+                <LazyArtifact artifact={artifact} />
               )}
             </Pedestal>
           );

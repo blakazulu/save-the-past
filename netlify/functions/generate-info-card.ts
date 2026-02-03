@@ -179,24 +179,24 @@ function parseAnalysisResponse(responseText: string): InfoCardAnalysis {
     ),
     similarArtifacts: Array.isArray(parsed.similarArtifacts)
       ? parsed.similarArtifacts.map((item: unknown) => {
-          if (typeof item === 'string') {
-            return { en: item, he: item };
-          }
-          if (item && typeof item === 'object' && 'en' in item && 'he' in item) {
-            return {
-              en: String((item as Record<string, unknown>).en),
-              he: String((item as Record<string, unknown>).he),
-            };
-          }
-          return { en: 'Unknown artifact', he: 'ממצא לא ידוע' };
-        })
+        if (typeof item === 'string') {
+          return { en: item, he: item };
+        }
+        if (item && typeof item === 'object' && 'en' in item && 'he' in item) {
+          return {
+            en: String((item as Record<string, unknown>).en),
+            he: String((item as Record<string, unknown>).he),
+          };
+        }
+        return { en: 'Unknown artifact', he: 'ממצא לא ידוע' };
+      })
       : [],
     preservationNotes: ensureLocalized(
       parsed.preservationNotes,
       'No specific preservation notes',
       'אין הערות שימור ספציפיות'
     ),
-    aiModel: 'gemini-2.0-flash-exp',
+    aiModel: 'gemini-3.0-flash',
     aiConfidence: typeof parsed.aiConfidence === 'number'
       ? Math.max(0, Math.min(1, parsed.aiConfidence))
       : 0.5,
@@ -248,7 +248,7 @@ export default async function handler(
 
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.0-flash' });
 
     // Prepare the prompt with metadata context
     const metadataContext = formatMetadata(body.metadata);
