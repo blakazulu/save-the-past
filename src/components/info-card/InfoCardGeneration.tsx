@@ -5,6 +5,7 @@ interface InfoCardGenerationProps {
   isGenerating: boolean;
   progress?: number;
   hasInfoCard?: boolean;
+  error?: string | null;
   onRegenerate?: () => void;
 }
 
@@ -13,6 +14,7 @@ export function InfoCardGeneration({
   isGenerating,
   progress = 0,
   hasInfoCard = false,
+  error,
   onRegenerate,
 }: InfoCardGenerationProps) {
   const { t } = useTranslation();
@@ -111,8 +113,14 @@ export function InfoCardGeneration({
         onClick={onGenerate}
         className="w-full bg-terracotta text-white py-3 rounded-xl font-semibold hover:bg-clay transition-colors"
       >
-        {t('infoCard.generate')}
+        {error ? t('common.retry') : t('infoCard.generate')}
       </button>
+
+      {error && (
+        <p className="text-sm text-error text-center bg-error/10 p-2 rounded-lg">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ interface InfoCardDisplayProps {
   artifactName?: string;
   onEdit?: () => void;
   onExport?: () => void;
+  onRegenerate?: () => void;
 }
 
 export function InfoCardDisplay({
@@ -15,6 +16,7 @@ export function InfoCardDisplay({
   artifactName,
   onEdit,
   onExport,
+  onRegenerate,
 }: InfoCardDisplayProps) {
   const { t, i18n } = useTranslation();
 
@@ -114,6 +116,14 @@ export function InfoCardDisplay({
                 className="flex-1 px-4 py-2 text-sm bg-terracotta text-white rounded-lg hover:bg-clay transition-colors font-medium"
               >
                 {t('infoCard.export')}
+              </button>
+            )}
+            {onRegenerate && (
+              <button
+                onClick={onRegenerate}
+                className="flex-1 px-4 py-2 text-sm border border-sand text-earth rounded-lg hover:bg-sand/50 transition-colors font-medium"
+              >
+                {t('infoCard.regenerate')}
               </button>
             )}
           </div>

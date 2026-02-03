@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "netlify": "netlify dev"
   },
   "dependencies": {
     "@gltf-transform/core": "^4.3.0",

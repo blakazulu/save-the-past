@@ -10,7 +10,8 @@ import { MethodSelector } from '@/components/reconstruction/MethodSelector';
 import { TextureModeSelector } from '@/components/reconstruction/TextureModeSelector';
 import { ReconstructionProgress } from '@/components/reconstruction/ReconstructionProgress';
 import { ModelViewer } from '@/components/viewer/ModelViewer';
-import { InfoCardDisplay } from '@/components/info-card';
+import { InfoCardDisplay, InfoCardGeneration } from '@/components/info-card';
+import { useGenerateInfoCard } from '@/hooks/useGenerateInfoCard';
 import { useJobsStore, useJobsHydrated } from '@/stores/jobsStore';
 import { useRequestNotificationPermission } from '@/components/JobProcessor';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -19,7 +20,7 @@ import { CubeIcon, InfoIcon, TrashIcon } from '@/components/icons';
 import type { ArtifactMetadata } from '@/types';
 import type { ReconstructionMethod } from '@/components/reconstruction/MethodSelector';
 
-type WizardStep = 'metadata' | 'generate';
+type WizardStep = 'metadata' | 'ai-analysis' | 'generate';
 type TabId = 'model' | 'info';
 
 export default function ArtifactDetailPage() {
@@ -82,6 +83,25 @@ export default function ArtifactDetailPage() {
     setModelUrl(null);
   }, [model]);
 
+  // Info Card Generation
+  const {
+    generate: generateInfoCard,
+    status: infoCardStatus,
+    progress: infoCardProgress,
+    isGenerating: isGeneratingInfoCard,
+    error: infoCardError,
+  } = useGenerateInfoCard({
+    onComplete: () => {
+      // Info card will appear automatically via useLiveQuery
+    }
+  });
+
+  const handleGenerateInfoCard = () => {
+    if (images && images.length > 0 && artifact) {
+      generateInfoCard(artifact.id, images[0].blob, artifact.metadata);
+    }
+  };
+
   // Skip to processing state if there's an active job (wait for hydration)
   useEffect(() => {
     if (hasHydrated && isProcessing) {
@@ -129,7 +149,12 @@ export default function ArtifactDetailPage() {
       metadata,
       updatedAt: new Date(),
     });
-    setWizardStep('generate');
+    setWizardStep('ai-analysis');
+
+    // Auto-generate info card if not already exists
+    if (!infoCard) {
+      handleGenerateInfoCard();
+    }
   };
 
   const handleGenerate = async () => {
@@ -273,12 +298,21 @@ export default function ArtifactDetailPage() {
                 infoCard={infoCard}
                 metadata={artifact.metadata}
                 artifactName={artifactName}
+                onRegenerate={handleGenerateInfoCard}
               />
             </div>
           )}
           {activeTab === 'info' && !infoCard && (
-            <div className="flex-1 flex items-center justify-center p-4">
-              <p className="text-text-secondary">{t('common.loading')}</p>
+            <div className="flex-1 overflow-y-auto p-4 pb-24 h-full">
+              <div className="max-w-2xl mx-auto">
+                <InfoCardGeneration
+                  onGenerate={handleGenerateInfoCard}
+                  isGenerating={isGeneratingInfoCard}
+                  progress={infoCardProgress}
+                  hasInfoCard={!!infoCard}
+                  error={infoCardError}
+                />
+              </div>
             </div>
           )}
         </main>
@@ -309,11 +343,17 @@ export default function ArtifactDetailPage() {
           <StepIndicator
             step={1}
             active={wizardStep === 'metadata'}
-            completed={wizardStep === 'generate' || hasModel}
+            completed={wizardStep === 'ai-analysis' || wizardStep === 'generate' || hasModel}
           />
           <div className="flex-1 h-0.5 bg-sand" />
           <StepIndicator
             step={2}
+            active={wizardStep === 'ai-analysis'}
+            completed={wizardStep === 'generate' || hasModel}
+          />
+          <div className="flex-1 h-0.5 bg-sand" />
+          <StepIndicator
+            step={3}
             active={wizardStep === 'generate'}
             completed={hasModel}
           />
@@ -344,7 +384,71 @@ export default function ArtifactDetailPage() {
             </div>
           )}
 
-          {/* Step 2: Generate */}
+          {/* Step 2: AI Analysis */}
+          {wizardStep === 'ai-analysis' && !isProcessing && !isStartingJob && !hasError && (
+            <div className="space-y-6">
+              {!infoCard ? (
+                // Loading / Generating state
+                <div className="space-y-6">
+                  <div className="text-center mb-6">
+                    <h2 className="text-xl font-semibold text-earth">
+                      {t('infoCard.generating')}
+                    </h2>
+                    <p className="text-text-secondary text-base mt-1">
+                      {t('infoCard.generatingDescription')}
+                    </p>
+                  </div>
+                  <InfoCardGeneration
+                    onGenerate={handleGenerateInfoCard}
+                    isGenerating={isGeneratingInfoCard}
+                    progress={infoCardProgress}
+                    hasInfoCard={!!infoCard}
+                    error={infoCardError}
+                  />
+                  {/* Allow skipping if stuck */}
+                  <button
+                    onClick={() => setWizardStep('generate')}
+                    className="w-full py-2 text-text-secondary hover:text-earth transition-colors text-sm"
+                  >
+                    {t('capture.skip')}
+                  </button>
+                </div>
+              ) : (
+                // Success state - Show card + Actions
+                <div className="space-y-6">
+                  <div className="text-center mb-2">
+                    <h2 className="text-xl font-semibold text-earth">
+                      {t('infoCard.ready')}
+                    </h2>
+                  </div>
+
+                  <InfoCardDisplay
+                    infoCard={infoCard}
+                    metadata={artifact.metadata}
+                    artifactName={artifactName}
+                    onRegenerate={handleGenerateInfoCard}
+                  />
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={handleGenerateInfoCard}
+                      className="flex-1 py-3 border border-sand text-earth rounded-xl font-medium hover:bg-sand transition-colors"
+                    >
+                      {t('common.retry')}
+                    </button>
+                    <button
+                      onClick={() => setWizardStep('generate')}
+                      className="flex-1 py-3 bg-terracotta text-white rounded-xl font-semibold hover:bg-clay transition-colors"
+                    >
+                      {t('wizard.next')}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 3: Generate 3D */}
           {wizardStep === 'generate' && !isProcessing && !hasError && !isStartingJob && (
             <div className="space-y-6">
               <div className="text-center mb-6">
@@ -483,10 +587,10 @@ function StepIndicator({ step, active, completed }: StepIndicatorProps) {
   return (
     <div
       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${completed
+        ? 'bg-terracotta text-white'
+        : active
           ? 'bg-terracotta text-white'
-          : active
-            ? 'bg-terracotta text-white'
-            : 'bg-sand text-text-secondary'
+          : 'bg-sand text-text-secondary'
         }`}
     >
       {completed && !active ? '✓' : step}
