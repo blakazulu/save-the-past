@@ -11,9 +11,9 @@ import {
   FirstPersonControls,
   TouchControls,
   VirtualJoystick,
-  SimpleLoader,
+
 } from '@/components/virtual-tour';
-import { blobToBase64 } from '@/lib/api/client';
+
 
 // Pedestal order from entrance to back of museum
 // Maps artifact index to pedestal index (artifact 0 goes to pedestal 15 = lobby, etc.)
