@@ -196,7 +196,7 @@ function parseAnalysisResponse(responseText: string): InfoCardAnalysis {
       'No specific preservation notes',
       'אין הערות שימור ספציפיות'
     ),
-    aiModel: 'gemini-3.0-flash',
+    aiModel: 'gemini-2.5-flash',
     aiConfidence: typeof parsed.aiConfidence === 'number'
       ? Math.max(0, Math.min(1, parsed.aiConfidence))
       : 0.5,
@@ -248,7 +248,7 @@ export default async function handler(
 
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // Prepare the prompt with metadata context
     const metadataContext = formatMetadata(body.metadata);
