@@ -11,8 +11,8 @@ import {
   PEDESTAL_POSITIONS,
   FirstPersonControls,
   TouchControls,
-  VirtualJoystick,
-
+  MovementJoystick,
+  RotationJoystick,
 } from '@/components/virtual-tour';
 
 
@@ -474,7 +474,9 @@ export default function VirtualTourPage() {
   const [currentArtifactIndex, setCurrentArtifactIndex] = useState(0);
   const [teleportTarget, setTeleportTarget] = useState<number | null>(null);
 
-  const joystickRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  // Two separate joysticks for mobile
+  const movementJoystickRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const rotationJoystickRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Track blob URLs for cleanup
@@ -616,13 +618,22 @@ export default function VirtualTourPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleExit]);
 
-  // Joystick handlers
-  const handleJoystickMove = useCallback((x: number, y: number) => {
-    joystickRef.current = { x, y };
+  // Movement joystick handlers
+  const handleMovementJoystickMove = useCallback((x: number, y: number) => {
+    movementJoystickRef.current = { x, y };
   }, []);
 
-  const handleJoystickEnd = useCallback(() => {
-    joystickRef.current = { x: 0, y: 0 };
+  const handleMovementJoystickEnd = useCallback(() => {
+    movementJoystickRef.current = { x: 0, y: 0 };
+  }, []);
+
+  // Rotation joystick handlers
+  const handleRotationJoystickMove = useCallback((x: number, y: number) => {
+    rotationJoystickRef.current = { x, y };
+  }, []);
+
+  const handleRotationJoystickEnd = useCallback(() => {
+    rotationJoystickRef.current = { x: 0, y: 0 };
   }, []);
 
   // Hide instructions after first interaction
@@ -718,7 +729,11 @@ export default function VirtualTourPage() {
 
         {/* Controls */}
         {isMobile ? (
-          <TouchControls enabled={true} joystickRef={joystickRef} />
+          <TouchControls
+            enabled={true}
+            movementJoystickRef={movementJoystickRef}
+            rotationJoystickRef={rotationJoystickRef}
+          />
         ) : (
           <FirstPersonControls enabled={true} onLockChange={setIsLocked} />
         )}
@@ -781,9 +796,14 @@ export default function VirtualTourPage() {
         <InfoCardOverlay artifact={nearArtifact} onClose={handleCloseInfoCard} />
       )}
 
-      {/* Mobile joystick */}
+      {/* Mobile joysticks */}
       {isMobile && (
-        <VirtualJoystick onMove={handleJoystickMove} onEnd={handleJoystickEnd} />
+        <>
+          {/* Movement joystick - Bottom RIGHT */}
+          <MovementJoystick onMove={handleMovementJoystickMove} onEnd={handleMovementJoystickEnd} />
+          {/* Rotation joystick - Bottom LEFT */}
+          <RotationJoystick onRotate={handleRotationJoystickMove} onEnd={handleRotationJoystickEnd} />
+        </>
       )}
 
       {/* Instructions overlay */}
@@ -814,7 +834,7 @@ export default function VirtualTourPage() {
               {t('virtualTour.welcome', 'Welcome to the Museum')}
             </h2>
             <p className="text-text-secondary mb-4">
-              {t('virtualTour.mobileInstructions', 'Use the joystick on the left to move. Drag on the right side to look around.')}
+              {t('virtualTour.mobileInstructions', 'Use the left joystick to look around. Use the right joystick to move.')}
             </p>
             <button
               onClick={() => setShowInstructions(false)}
