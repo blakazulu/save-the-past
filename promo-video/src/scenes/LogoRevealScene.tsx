@@ -6,7 +6,68 @@ import {
   Easing,
   Img,
   staticFile,
+  spring,
 } from "remotion";
+import { loadFont } from "@remotion/google-fonts/Heebo";
+
+const { fontFamily: heeboFont } = loadFont();
+
+// Animated character for URL
+const AnimatedChar: React.FC<{
+  char: string;
+  index: number;
+  frame: number;
+  fps: number;
+  startFrame: number;
+}> = ({ char, index, frame, fps, startFrame }) => {
+  const charDelay = index * 3;
+  const animStart = startFrame + charDelay;
+
+  const charOpacity = interpolate(
+    frame,
+    [animStart, animStart + 15],
+    [0, 1],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+  );
+
+  const charY = interpolate(
+    frame,
+    [animStart, animStart + 20],
+    [30, 0],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.back(2)),
+    }
+  );
+
+  const charScale = interpolate(
+    frame,
+    [animStart, animStart + 10, animStart + 20],
+    [0.5, 1.2, 1],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+  );
+
+  const glowAmount = interpolate(
+    frame,
+    [animStart + 10, animStart + 25, animStart + 40],
+    [0, 15, 5],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+  );
+
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        opacity: charOpacity,
+        transform: `translateY(${charY}px) scale(${charScale})`,
+        textShadow: `0 0 ${glowAmount}px #C17F59, 0 0 ${glowAmount * 2}px rgba(193,127,89,0.5)`,
+      }}
+    >
+      {char}
+    </span>
+  );
+};
 
 // Fragment that flies inward
 const Fragment: React.FC<{
@@ -186,6 +247,64 @@ export const LogoRevealScene: React.FC = () => {
           }}
         />
       </AbsoluteFill>
+
+      {/* Website URL - animated reveal starting at frame 150 */}
+      {frame >= 150 && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 180,
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: heeboFont,
+              fontSize: 52,
+              fontWeight: 600,
+              color: "#E8DCC4",
+              letterSpacing: "0.05em",
+            }}
+          >
+            {"save-the-past.netlify.app".split("").map((char, i) => (
+              <AnimatedChar
+                key={i}
+                char={char}
+                index={i}
+                frame={frame}
+                fps={fps}
+                startFrame={150}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Decorative line under URL */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 150,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: interpolate(
+            frame,
+            [200, 230],
+            [0, 600],
+            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+          ),
+          height: 2,
+          background: "linear-gradient(90deg, transparent, #C17F59, transparent)",
+          opacity: interpolate(
+            frame,
+            [200, 220],
+            [0, 0.8],
+            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+          ),
+        }}
+      />
     </AbsoluteFill>
   );
 };
