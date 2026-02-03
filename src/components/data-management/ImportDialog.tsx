@@ -4,6 +4,7 @@ import JSZip from 'jszip';
 import { db } from '@/lib/db';
 import { UploadIcon } from '@/components/icons';
 import { logger } from '@/lib/utils/logger';
+import { useToast } from '@/hooks/useToast';
 import type { Artifact, ArtifactImage, Model3D, InfoCard } from '@/types';
 
 interface ImportDialogProps {
@@ -13,6 +14,7 @@ interface ImportDialogProps {
 
 export function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [isImporting, setIsImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -128,10 +130,11 @@ export function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
         setProgress((processedItems / totalItems) * 100);
       }
 
+      toast.success(t('dataManagement.importSuccess', 'Import completed successfully'));
       onClose();
     } catch (error) {
       logger.error('Import failed:', error);
-      alert(t('dataManagement.importError', 'Import failed. Please check the file and try again.'));
+      toast.error(t('dataManagement.importError', 'Import failed. Please check the file and try again.'));
     } finally {
       setIsImporting(false);
       setProgress(0);

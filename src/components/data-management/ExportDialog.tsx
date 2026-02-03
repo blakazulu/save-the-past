@@ -5,6 +5,7 @@ import JSZip from 'jszip';
 import { db } from '@/lib/db';
 import { DownloadIcon } from '@/components/icons';
 import { logger } from '@/lib/utils/logger';
+import { useToast } from '@/hooks/useToast';
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface ExportDialogProps {
 
 export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -101,10 +103,11 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
       a.click();
       URL.revokeObjectURL(url);
 
+      toast.success(t('dataManagement.exportSuccess', 'Export completed successfully'));
       onClose();
     } catch (error) {
       logger.error('Export failed:', error);
-      alert(t('dataManagement.exportError', 'Export failed. Please try again.'));
+      toast.error(t('dataManagement.exportError', 'Export failed. Please try again.'));
     } finally {
       setIsExporting(false);
       setProgress(0);

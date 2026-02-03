@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { db } from '@/lib/db';
 import { TrashIcon } from '@/components/icons';
 import { logger } from '@/lib/utils/logger';
+import { useToast } from '@/hooks/useToast';
 import type { Artifact } from '@/types';
 
 interface DeleteConfirmDialogProps {
@@ -19,6 +20,7 @@ export function DeleteConfirmDialog({
   onDeleted,
 }: DeleteConfirmDialogProps) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
 
   if (!isOpen || artifacts.length === 0) return null;
@@ -47,9 +49,10 @@ export function DeleteConfirmDialog({
 
       onDeleted();
       onClose();
+      toast.success(t('dataManagement.deleteSuccess', 'Deleted successfully'));
     } catch (error) {
       logger.error('Delete failed:', error);
-      alert(t('dataManagement.deleteError', 'Delete failed. Please try again.'));
+      toast.error(t('dataManagement.deleteError', 'Delete failed. Please try again.'));
     } finally {
       setIsDeleting(false);
     }

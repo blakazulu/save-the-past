@@ -212,3 +212,102 @@ export async function optimizeAllExistingModels(
 
   return stats;
 }
+
+/**
+ * Optimize a single model by ID
+ * @returns Object with success status, size info, and any error
+ */
+export async function optimizeSingleModel(modelId: string): Promise<{
+  success: boolean;
+  originalSize?: number;
+  newSize?: number;
+  saved?: number;
+  error?: string;
+  alreadyOptimized?: boolean;
+}> {
+  try {
+    const model = await db.models.get(modelId);
+
+    if (!model) {
+      return { success: false, error: 'Model not found' };
+    }
+
+    // Only optimize GLB models
+    if (model.format !== 'glb') {
+      return { success: false, error: 'Only GLB models can be optimized' };
+    }
+
+    // Check if already optimized recently (within last 7 days)
+    if (model.metadata?.optimizedAt) {
+      const daysSinceOptimization = (Date.now() - new Date(model.metadata.optimizedAt).getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSinceOptimization < 7) {
+        return {
+          success: true,
+          alreadyOptimized: true,
+          originalSize: model.metadata.originalSize || model.blob.size,
+          newSize: model.blob.size,
+          saved: 0,
+        };
+      }
+    }
+
+    const originalSize = model.blob.size;
+
+    // Optimize the model
+    let optimizedBlob: Blob;
+    try {
+      optimizedBlob = await optimizeModel(model.blob);
+    } catch (error) {
+      if (error instanceof ModelOptimizationError) {
+        return { success: false, error: `${error.phase}: ${error.message}` };
+      }
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return { success: false, error: errorMessage };
+    }
+
+    const newSize = optimizedBlob.size;
+
+    // Only update if optimization actually reduced size
+    if (newSize < originalSize) {
+      const saved = originalSize - newSize;
+
+      // Update the model in place (same ID)
+      await db.models.update(modelId, {
+        blob: optimizedBlob,
+        metadata: {
+          ...model.metadata,
+          fileSize: newSize,
+          optimizedAt: new Date(),
+          originalSize,
+        },
+      });
+
+      return {
+        success: true,
+        originalSize,
+        newSize,
+        saved,
+      };
+    } else {
+      // Optimization didn't help - mark as optimized but don't update blob
+      await db.models.update(modelId, {
+        metadata: {
+          ...model.metadata,
+          optimizedAt: new Date(),
+          originalSize,
+        },
+      });
+
+      return {
+        success: true,
+        alreadyOptimized: true,
+        originalSize,
+        newSize,
+        saved: 0,
+      };
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, error: errorMessage };
+  }
+}

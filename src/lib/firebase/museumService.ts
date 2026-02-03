@@ -1,4 +1,4 @@
-import { doc, setDoc, getDoc, collection, query, where, orderBy, limit, getDocs, deleteDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, query, where, orderBy, limit, getDocs, deleteDoc, writeBatch, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { getFirestoreDb, getFirebaseStorage } from './config';
 import { toMuseumInfoCard, type MuseumArtifact } from '@/types/museum';
@@ -116,6 +116,36 @@ export async function uploadToMuseum({
   await setDoc(doc(firestore, 'museum_artifacts', artifactId), museumDoc);
 
   return artifactId;
+}
+
+/**
+ * Update an optimized model for an existing museum artifact
+ */
+export async function updateMuseumModel(
+  artifactId: string,
+  optimizedModelBlob: Blob,
+  modelFormat: 'glb' | 'gltf' | 'obj' = 'glb'
+): Promise<void> {
+  const storage = getFirebaseStorage();
+  const firestore = getFirestoreDb();
+
+  // Upload optimized model (replaces existing)
+  const modelRef = ref(storage, `museum/models/${artifactId}.${modelFormat}`);
+  await uploadBytes(modelRef, optimizedModelBlob, {
+    contentType: modelFormat === 'glb' ? 'model/gltf-binary' : 'model/gltf+json',
+  });
+
+  const modelUrl = await getDownloadURL(modelRef);
+  const modelSize = optimizedModelBlob.size;
+
+  // Update Firestore document with new size and URL
+  await updateDoc(doc(firestore, 'museum_artifacts', artifactId), {
+    modelUrl,
+    modelSize,
+    modelFormat,
+  });
+
+  logger.log(`Updated museum model for ${artifactId}: ${(modelSize / 1024).toFixed(1)} KB`);
 }
 
 export async function fetchMuseumArtifacts(maxResults = 50): Promise<MuseumArtifact[]> {

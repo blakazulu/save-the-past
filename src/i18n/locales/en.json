@@ -265,11 +265,15 @@
     "loading": "Loading museum...",
     "welcome": "Welcome to the Museum",
     "desktopInstructions": "Click to start. Use WASD or arrow keys to move. Mouse to look around. Shift to sprint.",
-    "mobileInstructions": "Use the joystick on the left to move. Drag on the right side to look around.",
+    "mobileInstructions": "Use the left joystick to look around. Use the right joystick to move.",
     "start": "Start Exploring",
     "exit": "Exit tour",
     "artifactCount": "{{count}} artifacts",
-    "clickToLook": "Click to enable mouse look"
+    "clickToLook": "Click to enable mouse look",
+    "noInfoCard": "No detailed information available for this artifact.",
+    "yourArtifact": "Your Artifact",
+    "nextArtifact": "Go to next artifact",
+    "loadingTextures": "Loading museum textures..."
   },
   "museum": {
     "title": "Public Museum",

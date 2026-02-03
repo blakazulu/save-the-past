@@ -11,10 +11,13 @@ import {
 } from '@/components/gallery';
 import { MuseumGrid, MuseumEmpty } from '@/components/museum';
 import { DeleteConfirmDialog } from '@/components/data-management/DeleteConfirmDialog';
+import { ConfirmDialog } from '@/components/common';
 import { useGalleryFilters } from '@/hooks/useGalleryFilters';
+import { useToast } from '@/hooks/useToast';
 import { db, optimizeAllExistingModels } from '@/lib/db';
-import { fetchMuseumArtifacts, deleteMuseumArtifact, batchDeleteMuseumArtifacts } from '@/lib/firebase/museumService';
-import { confirmAdminAction, logAdminAction } from '@/lib/auth/adminCheck';
+import { fetchMuseumArtifacts, deleteMuseumArtifact, updateMuseumModel } from '@/lib/firebase/museumService';
+import { optimizeModel } from '@/lib/firebase/modelOptimizer';
+import { logAdminAction } from '@/lib/auth/adminCheck';
 import { logger } from '@/lib/utils/logger';
 import type { Artifact } from '@/types';
 import type { MuseumArtifact } from '@/types/museum';
@@ -23,6 +26,7 @@ type TabType = 'my' | 'public';
 
 export default function GalleryPage() {
   const { t } = useTranslation();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState<TabType>('my');
   const [showFilters, setShowFilters] = useState(false);
   const [artifactToDelete, setArtifactToDelete] = useState<Artifact | null>(null);
@@ -38,8 +42,9 @@ export default function GalleryPage() {
   const [localModelSizes, setLocalModelSizes] = useState<Map<string, number>>(new Map());
   const [isLoadingMyArtifacts, setIsLoadingMyArtifacts] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteProgress, setDeleteProgress] = useState({ current: 0, total: 0 });
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [optimizingModelId, setOptimizingModelId] = useState<string | null>(null);
+  const [museumArtifactToDelete, setMuseumArtifactToDelete] = useState<MuseumArtifact | null>(null);
   const [optimizationProgress, setOptimizationProgress] = useState({ current: 0, total: 0 });
   const [optimizationStats, setOptimizationStats] = useState<string | null>(null);
   const [optimizationLog, setOptimizationLog] = useState<Array<{
@@ -193,39 +198,41 @@ export default function GalleryPage() {
     }
   }, [showDebugModal, loadMyMuseumArtifacts]);
 
-  const handleDeleteArtifact = async (artifactId: string) => {
+  const handleDeleteArtifactClick = (artifactId: string) => {
     const artifact = myMuseumArtifacts.find(a => a.id === artifactId);
     if (!artifact) return;
+    setMuseumArtifactToDelete(artifact);
+  };
 
-    // Require strong confirmation for admin action
-    if (!confirmAdminAction(`Delete artifact "${artifact.name}"`, 1)) {
-      return;
-    }
+  const handleConfirmDeleteArtifact = async () => {
+    if (!museumArtifactToDelete) return;
 
     setIsDeleting(true);
     try {
-      await deleteMuseumArtifact(artifactId);
+      await deleteMuseumArtifact(museumArtifactToDelete.id);
 
       // Log admin action for audit trail
       logAdminAction('delete_museum_artifact', {
-        artifactId,
-        artifactName: artifact.name,
-        deviceId: artifact.deviceId,
+        artifactId: museumArtifactToDelete.id,
+        artifactName: museumArtifactToDelete.name,
+        deviceId: museumArtifactToDelete.deviceId,
       });
 
-      setMyMuseumArtifacts(prev => prev.filter(a => a.id !== artifactId));
+      setMyMuseumArtifacts(prev => prev.filter(a => a.id !== museumArtifactToDelete.id));
       // Also refresh the public artifacts list if we're on that tab
       if (activeTab === 'public') {
-        setMuseumArtifacts(prev => prev.filter(a => a.id !== artifactId));
+        setMuseumArtifacts(prev => prev.filter(a => a.id !== museumArtifactToDelete.id));
       }
+      setMuseumArtifactToDelete(null);
+      toast.success('Artifact deleted successfully');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert('Failed to delete artifact: ' + errorMessage);
+      toast.error('Failed to delete artifact: ' + errorMessage);
 
       // Log failed attempt
       logAdminAction('delete_museum_artifact_failed', {
-        artifactId,
-        artifactName: artifact.name,
+        artifactId: museumArtifactToDelete.id,
+        artifactName: museumArtifactToDelete.name,
         error: errorMessage,
       });
     } finally {
@@ -233,73 +240,116 @@ export default function GalleryPage() {
     }
   };
 
-  const handleDeleteAll = async () => {
-    const totalCount = myMuseumArtifacts.length;
-
-    // Require strong confirmation for mass deletion
-    if (!confirmAdminAction(`Delete ALL artifacts from the entire museum (${totalCount} artifacts from ALL users)`, totalCount)) {
+  const handleOptimizeSingleModel = async (artifactId: string) => {
+    const artifact = myMuseumArtifacts.find(a => a.id === artifactId);
+    if (!artifact || !artifact.modelUrl) {
+      toast.error('Model not found');
       return;
     }
 
-    setIsDeleting(true);
-    setDeleteProgress({ current: 0, total: totalCount });
-    let deletedCount = 0;
+    setOptimizingModelId(artifactId);
 
     try {
-      // Use batch delete for better performance
-      const artifactIds = myMuseumArtifacts.map(a => a.id);
-      const results = await batchDeleteMuseumArtifacts(artifactIds, (current, total) => {
-        setDeleteProgress({ current, total });
-      });
+      let modelBlob: Blob;
+      let originalSize: number;
 
-      deletedCount = results.deleted;
-      const failedDeletions = results.errors.map(e => {
-        const artifact = myMuseumArtifacts.find(a => a.id === e.id);
-        return {
-          id: e.id,
-          name: artifact?.name || 'Unknown',
-          error: e.error,
-        };
-      });
+      // Step 1: Get the model blob (from local or download from Firebase)
+      const localArtifact = await db.artifacts.where('id').equals(artifact.localArtifactId).first();
+
+      if (localArtifact?.model3DId) {
+        // Try to get from local database first
+        const localModel = await db.models.get(localArtifact.model3DId);
+        if (localModel) {
+          logger.log(`[Admin Optimize] Using local model for ${artifactId}`);
+          modelBlob = localModel.blob;
+          originalSize = modelBlob.size;
+        } else {
+          // Download from Firebase
+          logger.log(`[Admin Optimize] Downloading model from Firebase for ${artifactId}`);
+          toast.info('Downloading model from Firebase...', 3000);
+
+          const response = await fetch(artifact.modelUrl);
+          if (!response.ok) throw new Error('Failed to download model from Firebase');
+
+          modelBlob = await response.blob();
+          originalSize = modelBlob.size;
+        }
+      } else {
+        // Download from Firebase (artifact from another device)
+        logger.log(`[Admin Optimize] Downloading model from Firebase for ${artifactId} (other user)`);
+        toast.info('Downloading model from Firebase...', 3000);
+
+        const response = await fetch(artifact.modelUrl);
+        if (!response.ok) throw new Error('Failed to download model from Firebase');
+
+        modelBlob = await response.blob();
+        originalSize = modelBlob.size;
+      }
+
+      // Step 2: Optimize the model
+      logger.log(`[Admin Optimize] Optimizing model for ${artifactId} (${(originalSize / 1024).toFixed(1)} KB)`);
+      toast.info('Optimizing model...', 3000);
+
+      let optimizedBlob: Blob;
+      try {
+        optimizedBlob = await optimizeModel(modelBlob);
+      } catch (error) {
+        toast.error('Model optimization failed. It may already be optimized or corrupted.');
+        logger.error('[Admin Optimize] Optimization failed:', error);
+        return;
+      }
+
+      const newSize = optimizedBlob.size;
+
+      // Check if optimization actually helped
+      if (newSize >= originalSize) {
+        toast.info('Model is already optimized (no size reduction possible)');
+        logger.log(`[Admin Optimize] Model ${artifactId} already optimized (${(newSize / 1024).toFixed(1)} KB)`);
+        return;
+      }
+
+      const saved = originalSize - newSize;
+      const percentSaved = ((saved / originalSize) * 100).toFixed(1);
+
+      // Step 3: Upload optimized model to Firebase
+      logger.log(`[Admin Optimize] Uploading optimized model for ${artifactId}`);
+      toast.info('Uploading optimized model to museum...', 3000);
+
+      await updateMuseumModel(artifactId, optimizedBlob, artifact.modelFormat || 'glb');
+
+      // Step 4: Update local model sizes display
+      setLocalModelSizes(prev => new Map(prev).set(artifact.localArtifactId, newSize));
+
+      // Step 5: Refresh the artifact list to show new size from Firebase
+      await loadMyMuseumArtifacts();
+
+      toast.success(
+        `Model optimized and uploaded!\n${(originalSize / 1024).toFixed(1)} KB → ${(newSize / 1024).toFixed(1)} KB\nSaved ${percentSaved}%`,
+        6000
+      );
 
       // Log admin action
-      logAdminAction('delete_all_museum_artifacts', {
-        totalCount,
-        deletedCount,
-        failedCount: failedDeletions.length,
-        failures: failedDeletions,
+      logAdminAction('optimize_museum_model', {
+        artifactId,
+        artifactName: artifact.name,
+        originalSize,
+        newSize,
+        saved,
+        percentSaved,
       });
-
-      // Show results
-      if (failedDeletions.length === 0) {
-        alert(`✅ Successfully deleted all ${deletedCount} artifacts from the museum`);
-      } else {
-        alert(
-          `⚠️ Deleted ${deletedCount} of ${totalCount} artifacts\n\n` +
-          `Failed to delete ${failedDeletions.length} artifacts:\n` +
-          failedDeletions.map(f => `- ${f.name}: ${f.error}`).join('\n')
-        );
-      }
-
-      setMyMuseumArtifacts([]);
-      // Refresh the public artifacts list
-      if (activeTab === 'public') {
-        setMuseumArtifacts([]);
-      }
-      setShowDebugModal(false);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert('Failed to delete artifacts: ' + errorMessage);
+      toast.error(`Failed to optimize: ${errorMessage}`);
+      logger.error('[Admin Optimize] Error:', error);
 
       // Log failed attempt
-      logAdminAction('delete_all_museum_artifacts_failed', {
-        totalCount,
-        deletedCount,
+      logAdminAction('optimize_museum_model_failed', {
+        artifactId,
+        artifactName: artifact.name,
         error: errorMessage,
       });
     } finally {
-      setIsDeleting(false);
-      setDeleteProgress({ current: 0, total: 0 });
+      setOptimizingModelId(null);
     }
   };
 
@@ -346,17 +396,23 @@ export default function GalleryPage() {
         }
       }
 
-      const icon = stats.failed > 0 ? '⚠️' : stats.optimized === 0 ? 'ℹ️' : '✅';
       const title = stats.failed > 0 ? 'Optimization completed with errors' :
                     stats.optimized === 0 ? 'No optimization needed' :
                     'Optimization complete!';
 
-      setOptimizationStats(`${icon} ${title}\n\n${message}`);
-      alert(`${icon} ${title}\n\n${message}`);
+      setOptimizationStats(`${title}\n\n${message}`);
+
+      if (stats.failed > 0) {
+        toast.warning(`${title}\n${message}`, 8000);
+      } else if (stats.optimized === 0) {
+        toast.info(`${title}\n${message}`);
+      } else {
+        toast.success(`${title}\n${message}`, 8000);
+      }
     } catch (error) {
       const errorMsg = 'Failed to optimize models: ' + (error instanceof Error ? error.message : 'Unknown error');
-      setOptimizationStats(`❌ ${errorMsg}`);
-      alert(errorMsg);
+      setOptimizationStats(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsOptimizing(false);
       setOptimizationProgress({ current: 0, total: 0 });
@@ -478,6 +534,17 @@ export default function GalleryPage() {
         onDeleted={() => setArtifactToDelete(null)}
       />
 
+      {/* Museum artifact delete confirmation dialog */}
+      <ConfirmDialog
+        isOpen={!!museumArtifactToDelete}
+        onClose={() => setMuseumArtifactToDelete(null)}
+        onConfirm={handleConfirmDeleteArtifact}
+        title="Delete Artifact"
+        message={`Are you sure you want to delete "${museumArtifactToDelete?.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
+
       {/* Debug Modal */}
       {showDebugModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setShowDebugModal(false)}>
@@ -590,21 +657,9 @@ export default function GalleryPage() {
                       <h4 className="font-semibold text-earth">All Museum Artifacts</h4>
                       <span className="px-2 py-0.5 bg-error/20 text-error text-xs font-bold rounded">ADMIN MODE</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-text-secondary">
-                        {myMuseumArtifacts.length} artifact{myMuseumArtifacts.length !== 1 ? 's' : ''} in Firebase
-                      </p>
-                      <button
-                        onClick={handleDeleteAll}
-                        disabled={isDeleting}
-                        className="px-3 py-1.5 bg-error text-white rounded-lg text-sm font-medium hover:bg-error/90 transition-colors disabled:opacity-50"
-                      >
-                        {isDeleting
-                          ? `Deleting... ${deleteProgress.current}/${deleteProgress.total}`
-                          : 'Delete All'
-                        }
-                      </button>
-                    </div>
+                    <p className="text-sm text-text-secondary">
+                      {myMuseumArtifacts.length} artifact{myMuseumArtifacts.length !== 1 ? 's' : ''} in Firebase
+                    </p>
                   </div>
 
                   {myMuseumArtifacts.map((artifact) => {
@@ -657,9 +712,29 @@ export default function GalleryPage() {
                           </div>
                         </div>
 
+                        {/* Optimize button */}
+                        {artifact.modelUrl && (
+                          <button
+                            onClick={() => handleOptimizeSingleModel(artifact.id)}
+                            disabled={optimizingModelId === artifact.id}
+                            className="p-2 text-terracotta hover:bg-terracotta/10 rounded-lg transition-colors disabled:opacity-50 flex-shrink-0"
+                            title="Optimize model"
+                          >
+                            {optimizingModelId === artifact.id ? (
+                              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                            ) : (
+                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              </svg>
+                            )}
+                          </button>
+                        )}
+
                         {/* Delete button */}
                         <button
-                          onClick={() => handleDeleteArtifact(artifact.id)}
+                          onClick={() => handleDeleteArtifactClick(artifact.id)}
                           disabled={isDeleting}
                           className="p-2 text-error hover:bg-error/10 rounded-lg transition-colors disabled:opacity-50 flex-shrink-0"
                           title="Delete from museum"
