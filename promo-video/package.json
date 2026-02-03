@@ -1,0 +1,26 @@
+{
+  "name": "save-the-past-promo",
+  "version": "1.0.0",
+  "description": "Promotional video for Save The Past app",
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion render PromoVideo out/promo.mp4",
+    "render": "remotion render PromoVideo out/promo.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/google-fonts": "^4.0.0",
+    "@remotion/three": "^4.0.0",
+    "@remotion/transitions": "^4.0.0",
+    "@react-three/fiber": "^8.15.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "^4.0.0",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/three": "^0.160.0",
+    "typescript": "^5.3.0"
+  }
+}
