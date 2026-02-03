@@ -80,9 +80,9 @@ function NavTab({ to, icon, label, active }: NavTabProps) {
   return (
     <Link
       to={to}
-      className={`relative flex flex-col items-center justify-center gap-1 px-4 py-2 transition-all duration-200 ${active
-          ? 'text-terracotta'
-          : 'text-text-muted hover:text-earth'
+      className={`relative flex flex-col items-center justify-center gap-1 px-2 py-2 transition-all duration-200 min-w-[60px] ${active
+        ? 'text-terracotta'
+        : 'text-text-muted hover:text-earth'
         }`}
       aria-label={label}
       aria-current={active ? 'page' : undefined}
@@ -104,7 +104,7 @@ function NavTab({ to, icon, label, active }: NavTabProps) {
       </span>
 
       {/* Label */}
-      <span className={`text-md font-medium tracking-wide ${active ? 'font-semibold' : ''
+      <span className={`text-xs font-medium tracking-wide ${active ? 'font-semibold' : ''
         }`}>
         {label}
       </span>
@@ -122,7 +122,7 @@ function LanguageToggle({ icon, label, onClick }: LanguageToggleProps) {
   return (
     <button
       onClick={onClick}
-      className="relative flex flex-col items-center justify-center gap-1 px-4 py-2 transition-all duration-200 text-text-muted hover:text-earth"
+      className="relative flex flex-col items-center justify-center gap-1 px-2 py-2 transition-all duration-200 text-text-muted hover:text-earth min-w-[60px]"
       aria-label="Toggle language"
     >
       {/* Icon container */}
@@ -133,7 +133,7 @@ function LanguageToggle({ icon, label, onClick }: LanguageToggleProps) {
       </span>
 
       {/* Language code label */}
-      <span className="text-md font-semibold tracking-wide">
+      <span className="text-xs font-semibold tracking-wide">
         {label}
       </span>
     </button>
