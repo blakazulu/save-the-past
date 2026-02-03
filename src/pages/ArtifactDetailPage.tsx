@@ -86,7 +86,6 @@ export default function ArtifactDetailPage() {
   // Info Card Generation
   const {
     generate: generateInfoCard,
-    status: infoCardStatus,
     progress: infoCardProgress,
     isGenerating: isGeneratingInfoCard,
     error: infoCardError,
