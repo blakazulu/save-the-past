@@ -435,17 +435,22 @@ function InfoCardOverlay({ artifact, onClose }: InfoCardOverlayProps) {
   );
 }
 
-// Detect if device is mobile
+// Detect if device is mobile (phone/tablet without mouse)
+// Uses pointer/hover media queries to correctly handle touch-screen laptops
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const check = () => {
-      setIsMobile(
-        'ontouchstart' in window ||
-        navigator.maxTouchPoints > 0 ||
-        window.innerWidth < 768
-      );
+      const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+      const hasHover = window.matchMedia('(hover: hover)').matches;
+      // If the device has a fine pointer (mouse/trackpad) and hover support,
+      // treat it as desktop even if it also has a touchscreen
+      if (hasFinePointer && hasHover) {
+        setIsMobile(false);
+      } else {
+        setIsMobile(true);
+      }
     };
     check();
     window.addEventListener('resize', check);
