@@ -21,7 +21,7 @@ export function BottomNav() {
 
   return (
     <nav
-      data-site-bottom-nav className="fixed bottom-0 left-0 right-0 safe-area-bottom z-40 transform-gpu"
+      className="fixed bottom-0 left-0 right-0 safe-area-bottom z-40 transform-gpu"
       role="navigation"
       aria-label={t('nav.mainNavigation', 'Main navigation')}
     >
